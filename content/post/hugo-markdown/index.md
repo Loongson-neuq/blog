@@ -5,6 +5,9 @@ date: 2023-08-24 00:00:00+0000
 math: true
 # Uncomment the following line to enable image
 # image: cover.jpg
+categories:
+    - syntax
+    - tutorial
 ---
 
 ## Math Typesetting
