@@ -78,74 +78,76 @@ enabled = true
 ## Comments
 [comments]
 enabled = true
-provider = "disqus"
-
-[comments.disqusjs]
-shortname = ""
-apiUrl = ""
-apiKey = ""
-admin = ""
-adminLabel = ""
-
-[comments.utterances]
-repo = ""
-issueTerm = "pathname"
-label = ""
-
-[comments.remark42]
-host = ""
-site = ""
-locale = ""
-
-[comments.vssue]
-platform = ""
-owner = ""
-repo = ""
-clientId = ""
-clientSecret = ""
-autoCreateIssue = false
-
-[comments.waline]
-serverURL = ""
-lang = ""
-visitor = ""
-avatar = ""
-emoji = ["https://cdn.jsdelivr.net/gh/walinejs/emojis/weibo"]
-requiredMeta = ["name", "email", "url"]
-placeholder = ""
-
-[comments.waline.locale]
-admin = "Admin"
-
-[comments.twikoo]
-envId = ""
-region = ""
-path = ""
-lang = ""
-
-[comments.cactus]
-defaultHomeserverUrl = "https://matrix.cactus.chat:8448"
-serverName = "cactus.chat"
-siteName = ""
+provider = "giscus"
 
 [comments.giscus]
-repo = ""
-repoID = ""
-category = ""
-categoryID = ""
-mapping = ""
-lightTheme = ""
-darkTheme = ""
+repo = "Loongson-neuq/blog"
+repoID = "R_kgDOM20epQ"
+category = "Giscus"
+categoryID = "DIC_kwDOM20epc4CixXm"
+mapping = "pathname"
+lightTheme = "preferred_color_scheme"
+darkTheme = "preferred_color_scheme"
 reactionsEnabled = 1
 emitMetadata = 0
+dataInputPosition = "top"
 
-[comments.gitalk]
-owner = ""
-admin = ""
-repo = ""
-clientID = ""
-clientSecret = ""
-
-[comments.cusdis]
-host = ""
-id = ""
+# [comments.disqusjs]
+# shortname = ""
+# apiUrl = ""
+# apiKey = ""
+# admin = ""
+# adminLabel = ""
+# 
+# [comments.utterances]
+# repo = ""
+# issueTerm = "pathname"
+# label = ""
+# 
+# [comments.remark42]
+# host = ""
+# site = ""
+# locale = ""
+# 
+# [comments.vssue]
+# platform = ""
+# owner = ""
+# repo = ""
+# clientId = ""
+# clientSecret = ""
+# autoCreateIssue = false
+# 
+# [comments.waline]
+# serverURL = ""
+# lang = ""
+# visitor = ""
+# avatar = ""
+# emoji = ["https://cdn.jsdelivr.net/gh/walinejs/emojis/weibo"]
+# requiredMeta = ["name", "email", "url"]
+# placeholder = ""
+# 
+# [comments.waline.locale]
+# admin = "Admin"
+# 
+# [comments.twikoo]
+# envId = ""
+# region = ""
+# path = ""
+# lang = ""
+# 
+# [comments.cactus]
+# defaultHomeserverUrl = "https://matrix.cactus.chat:8448"
+# serverName = "cactus.chat"
+# siteName = ""
+# 
+# [comments.gitalk]
+# owner = ""
+# admin = ""
+# repo = ""
+# clientID = ""
+# clientSecret = ""
+# 
+# [comments.cusdis]
+# host = ""
+# id = ""
+# 
