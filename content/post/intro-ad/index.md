@@ -59,7 +59,7 @@ draft: false
 | ![ ](assets/graduate/陈虹胜.png) | 陈虹胜，2019级，毕业进入龙芯公司从事研发工作 |
 | ![ ](assets/graduate/宋雨.png) | 宋雨，2018级，毕业考入中科大先进研究院，现加入龙芯实验室从事研究工作 |
 | ![ ](assets/graduate/田宇.png) | 田宇，2018级，毕业考入中科大先进研究院，现加入龙芯实验室从事研究工作 |
-| ![ ](assets/graduate/震宇.png) | 震宇，2019级，保送到中科大 USTC |
+| ![ ](assets/graduate/付震宇.png) | 付震宇，2019级，保送到中科大 USTC |
 | ![ ](assets/graduate/解博元.png) | 解博元，2020级，因竞赛优异成绩被华为免试录取 |
 
 ## 取得成绩
