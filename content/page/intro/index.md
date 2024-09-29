@@ -1,5 +1,5 @@
 ---
-title: "实验室简介"
+title: "龙芯班介绍及招新宣传"
 slug: "intro"
 layout: "intro"
 outputs:
