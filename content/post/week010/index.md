@@ -325,10 +325,12 @@ sudo apt install git
 
 实体机用户请在 Linux 下安装 VSCode：
 
-这里使用了 snap，如果提示未找到命令请先安装 **snap**。
+1. 从 [VSCode 官网](https://code.visualstudio.com) 下载 deb 包。
+
+2. 使用 dpkg 安装。
 
 ```bash
-sudo snap install code --classic
+sudo dpkg -i code_xxx.deb
 ```
 
 - Rust
