@@ -323,7 +323,11 @@ sudo apt install git
 
 - VSCode
 
+以下内容来自 [manual](https://manual.caiyi1.me/get-started/vscode)
+
 实体机用户请在 Linux 下安装 VSCode：
+
+手动安装：
 
 1. 从 [VSCode 官网](https://code.visualstudio.com) 下载 deb 包。
 
@@ -331,6 +335,26 @@ sudo apt install git
 
 ```bash
 sudo dpkg -i code_xxx.deb
+```
+
+包管理器安装：
+
+1. 添加源。
+
+```bash
+sudo apt-get install wget gpg
+wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
+sudo install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg
+echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" |sudo tee /etc/apt/sources.list.d/vscode.list > /dev/null
+rm -f packages.microsoft.gpg
+```
+
+2. 安装。
+
+```bash
+sudo apt install apt-transport-https
+sudo apt update
+sudo apt install code # or code-insiders
 ```
 
 - Rust
