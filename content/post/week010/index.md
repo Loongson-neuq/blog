@@ -104,6 +104,34 @@ Linux 不只是一个工具，也可以是像 Windows 一样用于日常工作�
 
 KDE 桌面环境提供与 Windows 类似的体验，几乎没有任何学习成本。
 
+### Installations
+
+#### Choose a way to install Linux
+
+- Physical Machine
+    - Full performance
+    - Graphics interface
+    - Take up a lot of space
+    - May not be easy to install if you are not experienced
+    - Recommend for those who want immersive experience
+
+- WSL2
+    - Easy to install
+    - Extremely low performance cost
+    - Disk-friendly
+    - Battery-friendly
+    - Only Command Line Interface, but you still uses Windows' GUI
+    - Good integration with Host OS(Windows)
+    - Can run Linux GUI applications with X server (although not recommended for performance)
+
+- Virtual Machine -  Really not recommended
+    - Really low performance
+    - Memory unfriendly
+    - Battery unfriendly
+    - Graphics interface
+
+[Installation Guide](#additional-linux-installation-guide)
+
 ### Why Linux
 
 - Excellent Command Line Interface
@@ -415,3 +443,53 @@ ls
 执行 shell 脚本时，会新开一个 shell 进程执行脚本，因此脚本中的变量不会影响到当前 shell。
 
 脚本的工作目录与执行脚本的 shell 的工作目录相同。不是脚本文件的目录。
+
+### Additional: Linux Installation Guide
+
+#### WSL2
+
+Boot up your Windows, enter Microsoft Store, search for "WSL", select an distro and install it.
+
+Ubuntu is recommended for beginners as it has official support.
+
+After installation, you can open it from Start Menu or Windows Terminal.
+
+The first time you uses it, you have to set up a username and password, not asking for your windows's password.
+
+#### Physical Machine
+
+Partition your disk in Windows. You have to create at least two partitions, one for Boot volume, one for Root(Where the system files are stored).
+
+The Boot volume should be at least 1GB, and the Root volume should be at least 50GB.
+
+Download a distro's ISO file from its official website, and flash it to a USB drive to make a bootable drive.
+
+Reboot your computer to BIOS/UEFI, and boot from the USB drive.
+
+Choose manual partitioning if you don't want to lose your data and Windows.
+
+Assign the Boot volume to `/boot`, and the Root volume to `/`.
+
+Choose the boot volume to be formatted as FAT32, and the root volume to be formatted as ext4 or Btrfs.
+
+After installation, you can shutdown your computer and unplug the USB drive.
+
+##### ##MUST READ##
+
+You may lose the ability to boot into Windows, as the bootloader is replaced by the Linux bootloader.
+
+You can either select the system to boot in the BIOS/UEFI, or use a bootloader like GRUB/rEFInd.
+
+Note that GRUB can NOT detect bootable devices at runtime while rEFInd can.
+
+#### Virtual Machine
+
+Download a distro's ISO file from its official website, and create a new VM in your VM software. Assign at least 50GB of disk space and 4GB of RAM.
+
+Mount the ISO file to the VM, and boot from it.
+
+Install the system following the instructions along the way.
+
+You can choose "Clean Install" since we don't have any data to lose.
+
+After installation, you can shutdown the VM and unmount the ISO file. Then you can boot into the system.
