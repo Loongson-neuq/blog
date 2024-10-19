@@ -172,21 +172,207 @@ But I still recommend you to use Wayland as long as you don't have any problems 
 
 ### Unboxing
 
+以下内容以相对稳定且简单 Ubuntu 22 作为演示。
+
 #### Package Manager
 
-<!-- TODO -->
+##### Whats Package Manager
 
-##### Software Repository
+包管理器用于管理 GNU/Linux 发行版的包（应用），不同于 Windows 的手动下载并安装，在 Linux 下安装 Git 只用输入一条命令。
 
-<!-- TODO -->
+可以通过类比的方式理解包管理器和包：
+
+> 左右两项不等价
+
+| Windows | Linux |
+|:-:|:-:|
+| 应用商店 | 包管理器 |
+| App | 包 |
+
+大多数 Linux 发行版都有自己的包管理器：
+
+| Debian | RPM | Pacman |
+|:-:|:-:|:-:|
+| apt, dpkg | yum, rpm | pacman |
+
+Ubuntu 的包管理器是 `apt` 和 `dpkg`，其中 apt 用于安装云端软件源的包，dpkg 则用于安装本地包。
+
+```bash
+apt --version
+# output: apt 2.4.12 (amd64)
+```
+
+##### Usage
+
+如果遇到了网络问题，请跳转下方 Mirror。
+
+1. 更新软件包列表
+
+在安装包之前，一般会同步云端软件包信息，保证依赖关系的正确。
+
+```bash
+sudo apt update
+```
+
+2. 更新所有软件包
+
+```bash
+sudo apt upgrade
+```
+
+3. 安装软件源的包
+
+将 `<name>` 换成要安装的包名，多个则以空格分隔。
+
+```bash
+sudo apt install <name>
+```
+
+4. 安装本地 deb 包
+
+安装中可能会提示依赖缺失，应使用 apt 安装缺失的依赖。
+
+```bash
+sudo dpkg -i /path/to/xxx.deb
+```
+
+5. 卸载包
+
+将 `<name>` 换成要卸载的包名，多个则以空格分隔。
+
+```bash
+sudo apt remove <name>
+```
+
+6. 查找包
+
+```bash
+apt search xxx
+```
 
 ##### Mirror
 
-<!-- TODO -->
+在使用 apt 时提示网络错误时，可以通过换源解决。
 
-#### Install common software
+修改系统重要文件前记得备份：
 
-<!-- TODO -->
+```bash
+sudo cp /etc/apt/sources.list /etc/apt/sources.list.back
+sudo vim /etc/apt/sources.list
+```
+
+> 在 Ubuntu 24.04 之前，Ubuntu 的软件源配置文件使用传统的 One-Line-Style，路径为 /etc/apt/sources.list；从 Ubuntu 24.04 开始，Ubuntu 的软件源配置文件变更为 DEB822 格式，路径为 /etc/apt/sources.list.d/ubuntu.sources。
+> 参考 https://mirrors.tuna.tsinghua.edu.cn/help/ubuntu/
+
+在文件的顶部加入以下行：
+
+```
+# 默认注释了源码镜像以提高 apt update 速度，如有需要可自行取消注释
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ noble main restricted universe multiverse
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ noble main restricted universe multiverse
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ noble-updates main restricted universe multiverse
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ noble-updates main restricted universe multiverse
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ noble-backports main restricted universe multiverse
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ noble-backports main restricted universe multiverse
+```
+
+最后更新软件包列表
+
+```bash
+sudo apt update
+```
+
+#### Install Common Software
+
+##### Pakage for OS Development
+
+- Git
+
+```bash
+sudo apt update
+sudo apt install git
+```
+
+- VSCode
+
+实体机用户请在 Linux 下安装 VSCode：
+
+这里使用了 snap，如果提示未找到命令请先安装 **snap**。
+
+```bash
+sudo snap install code --classic
+```
+
+- Rust
+
+以下内容源自 [rCore-Tutorial-Guide-2024S 文档](https://learningos.cn/rCore-Tutorial-Guide-2024S/0setup-devel-env.html)
+
+0. 如果遇到网络问题
+
+配置环境变量：
+
+可以在当前终端执行（当前终端有效），或者写入 `~/.bashrc`（永久，打开新的终端后）。
+
+```bash
+export RUSTUP_DIST_SERVER=https://mirrors.ustc.edu.cn/rust-static
+export RUSTUP_UPDATE_ROOT=https://mirrors.ustc.edu.cn/rust-static/rustup
+```
+
+编辑 `~/.cargo/config`：
+
+添加以下行：
+
+```toml
+[source.crates-io]
+replace-with = 'ustc'
+
+[source.ustc]
+registry = "sparse+https://mirrors.ustc.edu.cn/crates.io-index/"
+```
+
+1. 安装 rustup
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+
+- QEMU
+
+```bash
+# 安装依赖
+sudo apt install autoconf automake autotools-dev curl libmpc-dev libmpfr-dev libgmp-dev \
+              gawk build-essential bison flex texinfo gperf libtool patchutils bc \
+              zlib1g-dev libexpat-dev pkg-config  libglib2.0-dev libpixman-1-dev git tmux python3
+
+# 下载 QEMU 源码
+wget https://download.qemu.org/qemu-7.0.0.tar.xz
+
+# 解压
+tar xvJf qemu-7.0.0.tar.xz
+
+# 进入子目录
+cd qemu-7.0.0
+
+# 编译安装并配置 RISC-V 支持
+./configure --target-list=riscv64-softmmu,riscv64-linux-user
+make -j$(nproc)
+```
+
+##### Awesome Tools
+
+为了提高开发效率，推荐部分小工具。
+
+1. CLI tools
+
+- ranger: 文件管理器
+
+- bat: 文件查看器，更好的 `less`
+
+- tmux: 终端复用器
+
+- lazygit: `git` TUI 管理工具
+
+- eza: 有色彩和图标的 `ls`
 
 ### Command Line
 
