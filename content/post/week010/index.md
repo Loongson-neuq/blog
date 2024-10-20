@@ -83,6 +83,11 @@ Login with
 gh auth login
 ```
 
+Setup git info
+```bash
+gh auth setup-git
+```
+
 Follow the instructions to login.
 
 ### Basic Usage
