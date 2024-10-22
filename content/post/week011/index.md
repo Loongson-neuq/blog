@@ -1,4 +1,13 @@
-# 第一次作业常见问题
+---
+title: "[OS Week1] 作业常见问题"
+date: 2024-10-22
+description: 第一周 OS 作业常见问题
+tags: 
+    - Linux
+categories:
+    - OS
+    - 课程作业
+---
 
 ## ls -d ../*/
 
