@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>CPU on NEUQ 龙芯实验室博客</title><link>https://loongson-neuq.pages.dev/categories/cpu/</link><description>Recent content in CPU on NEUQ 龙芯实验室博客</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Fri, 18 Oct 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://loongson-neuq.pages.dev/categories/cpu/index.xml" rel="self" type="application/rss+xml"/><item><title>vivado 2023.2安装</title><link>https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/</link><pubDate>Fri, 18 Oct 2024 00:00:00 +0000</pubDate><guid>https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/</guid><description>&lt;h1 id="下载安装包">下载安装包
+&lt;/h1>&lt;ol>
+&lt;li>
+&lt;p>百度搜索vivado，找到&amp;quot;下载 - Xilinx&amp;quot;，进入vivado下载页面&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>选择2023.2版本，&lt;a class="link" href="https://china.xilinx.com/support/download/index.html/content/xilinx/zh/downloadNav/vivado-design-tools/2023-2.html" target="_blank" rel="noopener"
+>下载链接&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>下载Windows环境下的在线安装器（Windows Self Extracting Web Installer）&lt;/p>
+&lt;p>&lt;img src="https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/download.jpg"
+width="1212"
+height="1052"
+srcset="https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/download_huc070f3988e1974e8483ead4db9239c07_79606_480x0_resize_q75_box.jpg 480w, https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/download_huc070f3988e1974e8483ead4db9239c07_79606_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+alt="download"
+class="gallery-image"
+data-flex-grow="115"
+data-flex-basis="276px"
+>&lt;/p>
+&lt;ul>
+&lt;li>下载需要登陆AMD。如果已有AMD账户直接填写用户名和密码登陆，如果没有账户则点“Create account”免费创建一个新账户。&lt;/li>
+&lt;li>点击链接后会要求输入个人信息，随便填即可。&lt;/li>
+&lt;li>&lt;a class="link" href="https://pan.baidu.com/s/1xt8L6RWmHROTX-C5JzIj3A?pwd=3a6p" target="_blank" rel="noopener"
+>&lt;em>如果在线安装器下载不下来&lt;/em>&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;h1 id="在线安装">在线安装
+&lt;/h1>&lt;ol>
+&lt;li>
+&lt;p>双击运行已下载的可执行文件FPGAs_AdaptiveSoCs_Unified_2023.2_1013_2256_Win64.exe。（使用管理员权限，允许网络访问）&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>如果弹出更新窗口，点击“continue”。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>点击“Next”。&lt;/p>
+&lt;p>&lt;img src="https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/continue.jpg"
+width="1090"
+height="834"
+srcset="https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/continue_hudc9ccf3a6061c88baeb0d8a4b427aec5_81974_480x0_resize_q75_box.jpg 480w, https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/continue_hudc9ccf3a6061c88baeb0d8a4b427aec5_81974_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+alt="continue"
+class="gallery-image"
+data-flex-grow="130"
+data-flex-basis="313px"
+>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>登录下载时注册的AMD账号，点击“Next”。&lt;/p>
+&lt;p>&lt;img src="https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/login.jpg"
+width="1090"
+height="834"
+srcset="https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/login_hu062b6f8317e133346cb0306f7d09837a_77070_480x0_resize_q75_box.jpg 480w, https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/login_hu062b6f8317e133346cb0306f7d09837a_77070_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+alt="login"
+class="gallery-image"
+data-flex-grow="130"
+data-flex-basis="313px"
+>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>选择“vivado”，点击“Next”。&lt;/p>
+&lt;p>&lt;img src="https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/product.jpg"
+width="1090"
+height="834"
+srcset="https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/product_hud59b6367412afaf51bc4cfdb1ee35fb2_107739_480x0_resize_q75_box.jpg 480w, https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/product_hud59b6367412afaf51bc4cfdb1ee35fb2_107739_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+alt="product"
+class="gallery-image"
+data-flex-grow="130"
+data-flex-basis="313px"
+>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>选择免费的标准版，点击“Next”。&lt;/p>
+&lt;p>&lt;img src="https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/edition.jpg"
+width="1090"
+height="834"
+srcset="https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/edition_hu0b939661dd1d6896e46b7423f3241c97_89519_480x0_resize_q75_box.jpg 480w, https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/edition_hu0b939661dd1d6896e46b7423f3241c97_89519_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+alt="edition"
+class="gallery-image"
+data-flex-grow="130"
+data-flex-basis="313px"
+>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>在“Device”中必勾选“Artix-7”，因为开发板搭载的FPGA是Artix-7，其他器件可以根据需要进行选择，“Design Tools”和“Installation Options”按照默认即可。&lt;/p>
+&lt;p>&lt;img src="https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/device.jpg"
+width="1090"
+height="834"
+srcset="https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/device_hua6caeee0c57d2606be5a552e175ea5e2_98399_480x0_resize_q75_box.jpg 480w, https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/device_hua6caeee0c57d2606be5a552e175ea5e2_98399_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+alt="device"
+class="gallery-image"
+data-flex-grow="130"
+data-flex-basis="313px"
+>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>全部“I agree”，点击“Next”。&lt;/p>
+&lt;p>&lt;img src="https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/agree.jpg"
+width="1090"
+height="834"
+srcset="https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/agree_hu60b5f28c2f4720c4f3471589533b45b8_121250_480x0_resize_q75_box.jpg 480w, https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/agree_hu60b5f28c2f4720c4f3471589533b45b8_121250_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+alt="agree"
+class="gallery-image"
+data-flex-grow="130"
+data-flex-basis="313px"
+>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>选择Vivado安装目录，默认安装在“C:\Xilinx”下，可以点击浏览或者直接更改路径，注意&lt;strong>安装路径中不能出现中文和空格&lt;/strong>。点击“Next”。&lt;/p>
+&lt;p>&lt;img src="https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/directory.jpg"
+width="1090"
+height="834"
+srcset="https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/directory_huf9d5ccff252c347ff37ad093e9005ce8_97580_480x0_resize_q75_box.jpg 480w, https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/directory_huf9d5ccff252c347ff37ad093e9005ce8_97580_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+alt="directory"
+class="gallery-image"
+data-flex-grow="130"
+data-flex-basis="313px"
+>&lt;/p>
+&lt;p>&lt;em>我由于安装过了，显示和大家不一样。&lt;/em>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>查看summary，点击“install”。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>等待安装完成。&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h1 id="问题">问题
+&lt;/h1>&lt;ul>
+&lt;li>不同版本间的编译逻辑可能有所不同，可能会导致不可预知的差异，我们建议使用比赛指定的23.2版本&lt;/li>
+&lt;li>注意安装路径&lt;strong>不要有中文和空格&lt;/strong>！包括后续项目文件路径中都&lt;strong>不能出现中文和空格！！！&lt;/strong>&lt;/li>
+&lt;li>&lt;em>如果你的用户名不幸的有中文的话，STFW改成英文的吧，不然会有更多奇奇怪怪的bug&lt;/em>&lt;/li>
+&lt;li>如果在线安装器有网络问题的话，尝试关闭魔法多试几次，实在不行使用完整的安装包选择本地安装（官网103GB的版本）。&lt;/li>
+&lt;/ul>
+&lt;h1 id="与代码编辑器的联动">与代码编辑器的联动
+&lt;/h1>&lt;ul>
+&lt;li>&lt;a class="link" href="https://blog.csdn.net/weixin_44425619/article/details/115479272" target="_blank" rel="noopener"
+>VIVADO使用vscode实现实时纠错与自动补全等功能_vivado代码自动对齐_fujiayu1997zz的博客-CSDN博客&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://zhuanlan.zhihu.com/p/341728027" target="_blank" rel="noopener"
+>Sublime与Verilog【一】：从安装到使用，提高FPGA开发效率！ - 知乎 (zhihu.com)&lt;/a>&lt;/li>
+&lt;/ul></description></item></channel></rss>

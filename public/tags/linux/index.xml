@@ -1,0 +1,783 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Linux on NEUQ 龙芯实验室博客</title><link>https://loongson-neuq.pages.dev/tags/linux/</link><description>Recent content in Linux on NEUQ 龙芯实验室博客</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Tue, 22 Oct 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://loongson-neuq.pages.dev/tags/linux/index.xml" rel="self" type="application/rss+xml"/><item><title>[OS Week1] 作业常见问题</title><link>https://loongson-neuq.pages.dev/p/os-week1-%E4%BD%9C%E4%B8%9A%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</link><pubDate>Tue, 22 Oct 2024 00:00:00 +0000</pubDate><guid>https://loongson-neuq.pages.dev/p/os-week1-%E4%BD%9C%E4%B8%9A%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</guid><description>&lt;h2 id="用-github-网页端编辑文件">用 GitHub 网页端编辑文件
+&lt;/h2>&lt;p>不要在 GitHub 网页端编辑文件！！！否则你会收到下面的警告:&lt;/p>
+&lt;p>&lt;img src="https://loongson-neuq.pages.dev/p/os-week1-%E4%BD%9C%E4%B8%9A%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/assets/warn_comment.png"
+width="1380"
+height="888"
+srcset="https://loongson-neuq.pages.dev/p/os-week1-%E4%BD%9C%E4%B8%9A%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/assets/warn_comment_hucbdea63992ab51ac3eebe1740afbda02_75580_480x0_resize_box_3.png 480w, https://loongson-neuq.pages.dev/p/os-week1-%E4%BD%9C%E4%B8%9A%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/assets/warn_comment_hucbdea63992ab51ac3eebe1740afbda02_75580_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="comment"
+class="gallery-image"
+data-flex-grow="155"
+data-flex-basis="372px"
+>&lt;/p>
+&lt;p>以及一封邮件：&lt;/p>
+&lt;p>&lt;img src="https://loongson-neuq.pages.dev/p/os-week1-%E4%BD%9C%E4%B8%9A%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/assets/warn_email.png"
+width="545"
+height="248"
+srcset="https://loongson-neuq.pages.dev/p/os-week1-%E4%BD%9C%E4%B8%9A%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/assets/warn_email_hud014e096562ecf4f8957494a934ac7d5_88278_480x0_resize_box_3.png 480w, https://loongson-neuq.pages.dev/p/os-week1-%E4%BD%9C%E4%B8%9A%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/assets/warn_email_hud014e096562ecf4f8957494a934ac7d5_88278_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="email"
+class="gallery-image"
+data-flex-grow="219"
+data-flex-basis="527px"
+>&lt;/p>
+&lt;p>我们在将来可能会强制删除你的提交如果你继续在网页端编辑文件。&lt;/p>
+&lt;h2 id="ls--d-">ls -d ../*/
+&lt;/h2>&lt;p>题目要求“列出父文件夹的文件夹项”。可能是翻译问题，Directory entry被我直接翻译成文件夹项可能导致大家（当然还有大家的好帮手 chatGPT）产生了误解，应当翻译为目录项更为准确。&lt;/p>
+&lt;p>Directory entry　是指一个文件夹内包含的如&lt;em>文件夹&lt;/em>，&lt;em>文件&lt;/em>，&lt;em>链接&lt;/em>等项，因此只需要&lt;code>ls ..&lt;/code>就可以列出父文件夹的目录项。&lt;/p>
+&lt;h3 id="补充信息">补充信息
+&lt;/h3>&lt;p>ls 通过&lt;code>getdents&lt;/code>系统调用获取目录项。&lt;code>getdents&lt;/code>就是 get directory entries 的缩写。&lt;/p>
+&lt;p>&lt;a class="link" href="https://www.man7.org/linux/man-pages/man2/getdents.2.html" target="_blank" rel="noopener"
+>getdents syscall&lt;/a>&lt;/p>
+&lt;h2 id="环境变量">环境变量？
+&lt;/h2>&lt;ul>
+&lt;li>误区 - Where is Environment Variables?&lt;/li>
+&lt;/ul>
+&lt;p>我看到有同学说在 “&lt;code>.bashrc&lt;/code> 里修改环境变量”，这种说法是不准确的。&lt;/p>
+&lt;p>环境变量是操作系统的一部分，不是某个文件里的内容。&lt;code>.bashrc&lt;/code> 是一个 shell 脚本，用于配置 shell 的行为，它会在　Shell 启动时执行。因此你事实上是在 &lt;code>.bashrc&lt;/code> 里添加了&lt;strong>修改&lt;/strong>环境变量的命令。&lt;/p>
+&lt;h3 id="那到底环境变量是储存在哪儿的呢">那到底环境变量是储存在哪儿的呢？
+&lt;/h3>&lt;p>环境变量是一个与&lt;strong>进程&lt;/strong>绑定的概念。在进程被创建时，操作系统会将环境变量传递给进程。&lt;/p>
+&lt;h4 id="操作系统传递环境">操作系统传递环境
+&lt;/h4>&lt;p>在 &lt;code>fork&lt;/code>，&lt;code>exec&lt;/code> 等系统调用中，操作系统会在进程的地址空间中创建一个环境变量表，然后将&lt;strong>父进程&lt;/strong>的环境变量表&lt;strong>复制&lt;/strong>到&lt;strong>子进程&lt;/strong>的环境变量表中。并在子进程的sp指针后面的某一个位置存放一个指向环境变量表的指针。&lt;/p>
+&lt;h4 id="进程接收环境变量">进程接收环境变量
+&lt;/h4>&lt;p>子进程刚开始运行时（在你们熟知的main函数前），会通过 sp 指针构造参数 &lt;code>int argc&lt;/code>, &lt;code>char *argv[]&lt;/code>, &lt;code>char *envp[]&lt;/code>。&lt;code>envp&lt;/code> 就是指向环境变量表的指针。这三个参数也是 C 语言的标准 main 函数签名的参数。&lt;/p>
+&lt;p>某些跨平台语言会对环境变量的接收方式进行封装，因为不同的操作系统可能有不同的实现。不过你仍然可以通过标准库的函数获取环境变量，例如　C# 的 &lt;code>System.Environment.GetEnvironmentVariable()&lt;/code> 和 Python 的 &lt;code>os.environ&lt;/code>。&lt;/p>
+&lt;h2 id="root-用户的命令提示符">root 用户的命令提示符
+&lt;/h2>&lt;p>普通用户的 shell 提示符通常是 &lt;code>$&lt;/code> 或 &lt;code>&amp;gt;&lt;/code>，而 root 用户的 shell 提示符通常是 &lt;code>#&lt;/code>。&lt;/p>
+&lt;h2 id="连续创建嵌套文件夹">连续创建嵌套文件夹
+&lt;/h2>&lt;p>记得添加 &lt;code>-p&lt;/code> 选项。如&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">mkdir -p top/middle/bottom
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h2 id="重命名-test-文件夹为-test1">重命名 &lt;code>test&lt;/code> 文件夹为 &lt;code>test1&lt;/code>？
+&lt;/h2>&lt;p>可能错误的做法：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">mv test/ test1/
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>正确的做法：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">mv &lt;span class="nb">test&lt;/span> test1
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>问题？&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">caiyi@LAPTOP-I80ETG8J /tmp &amp;gt; &lt;span class="nb">cd&lt;/span> &lt;span class="k">$(&lt;/span>mktemp -d&lt;span class="k">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">caiyi@LAPTOP-I80ETG8J /t/tmp.mABXKSHACy&amp;gt; mkdir &lt;span class="nb">test&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">caiyi@LAPTOP-I80ETG8J /t/tmp.mABXKSHACy&amp;gt; mv test/ test1/
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">caiyi@LAPTOP-I80ETG8J /t/tmp.mABXKSHACy&amp;gt; ls
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">test1/
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">caiyi@LAPTOP-I80ETG8J /t/tmp.mABXKSHACy&amp;gt; &lt;span class="c1"># test 被重命名&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">caiyi@LAPTOP-I80ETG8J /t/tmp.mABXKSHACy&amp;gt; mkdir &lt;span class="nb">test&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">caiyi@LAPTOP-I80ETG8J /t/tmp.mABXKSHACy&amp;gt; mv test/ test1/
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">caiyi@LAPTOP-I80ETG8J /t/tmp.mABXKSHACy&amp;gt; ls
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">test1/
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">caiyi@LAPTOP-I80ETG8J /t/tmp.mABXKSHACy&amp;gt; ls test1/
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">test/
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">caiyi@LAPTOP-I80ETG8J /t/tmp.mABXKSHACy&amp;gt; &lt;span class="c1"># test 被移动&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h2 id="fork-仓库再提交">Fork 仓库再提交？
+&lt;/h2>&lt;p>课上说&lt;/p>
+&lt;h2 id="工作目录问题">工作目录问题
+&lt;/h2>&lt;p>课上说&lt;/p>
+&lt;h2 id="最后">最后
+&lt;/h2>&lt;p>提醒大家不要过度相信 AI，AI 可能会给出错误的答案。即使 AI 给出了正确答案，你也要自己去理解才能更好地掌握知识。&lt;/p>
+&lt;p>有的同学的答案太离谱了，完全就是 AI 生成的答案。题目明明是一张图片，但是直接把 markdown 原文复制给 AI，AI 又看不到图片，就只能回答“这是一张图片”。&lt;/p>
+&lt;p>但是并不是反对大家使用 AI，只是要保存怀疑和求证的态度，以及自己的思考能力和学习能力。&lt;/p></description></item><item><title>[OS Week1] Git and Linux Basics</title><link>https://loongson-neuq.pages.dev/p/os-week1-git-and-linux-basics/</link><pubDate>Sat, 19 Oct 2024 00:00:00 +0000</pubDate><guid>https://loongson-neuq.pages.dev/p/os-week1-git-and-linux-basics/</guid><description>&lt;img src="https://loongson-neuq.pages.dev/p/os-week1-git-and-linux-basics/background.png" alt="Featured image of post [OS Week1] Git and Linux Basics" />&lt;h2 id="git">Git
+&lt;/h2>&lt;h3 id="installations">Installations
+&lt;/h3>&lt;h4 id="windows">Windows
+&lt;/h4>&lt;p>Download installer from &lt;a class="link" href="https://git-scm.com/downloads/win" target="_blank" rel="noopener"
+>Git For Windows&lt;/a>&lt;/p>
+&lt;p>or use winget&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">winget install Git.Git
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h4 id="linux">Linux
+&lt;/h4>&lt;p>Install with your package manager&lt;/p>
+&lt;h4 id="macos">MacOS
+&lt;/h4>&lt;p>Install with Homebrew&lt;/p>
+&lt;h3 id="configuration">Configuration
+&lt;/h3>&lt;h4 id="global-configuration">Global Configuration
+&lt;/h4>&lt;p>Detailed instructions: &lt;a class="link" href="https://manual.caiyi1.me/use-git/configure/" target="_blank" rel="noopener"
+>manual.caiyi1.me&lt;/a>&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">git config --global user.name &lt;span class="s2">&amp;#34;Your Name&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git config --global user.email &lt;span class="s2">&amp;#34;Your Email&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h4 id="authentication">Authentication
+&lt;/h4>&lt;p>For code hosting services like GitHub, GitLab, Gitee, etc, you have to proof the user pushing(or pull) the code HAS the permission to do so.&lt;/p>
+&lt;p>Traditional way is to use SSH key, which is a pair of keys, one is public, one is private. Public key is stored on the server, and private key is stored on your local machine.&lt;/p>
+&lt;p>国内平台如 Gitee 只能使用 SSH key 进行认证, 不能使用 credential helper。&lt;/p>
+&lt;p>Still widely used, but is outdated. As Git allows custom credential helper, you can use a more secure way(and easier) to authenticate.&lt;/p>
+&lt;h5 id="windows-1">Windows
+&lt;/h5>&lt;p>Uses &lt;code>git credential-manager&lt;/code>, which is a part of Git for Windows.&lt;/p>
+&lt;h6 id="auth-github">Auth Github
+&lt;/h6>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">git credential-manager github login
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Follow the GUI instructions to login.&lt;/p>
+&lt;h4 id="linux-1">Linux
+&lt;/h4>&lt;h5 id="auth-github-1">Auth Github
+&lt;/h5>&lt;p>uses GitHub CLI, which is provided by the distro&amp;rsquo;s package manager.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Debian/Ubuntu&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">sudo apt install gh
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Login with&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">gh auth login
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Follow the instructions to login.&lt;/p>
+&lt;h3 id="basic-usage">Basic Usage
+&lt;/h3>&lt;p>Detailed instructions: &lt;a class="link" href="https://manual.caiyi1.me/use-git/try-git/" target="_blank" rel="noopener"
+>manual.caiyi1.me&lt;/a>&lt;/p>
+&lt;h4 id="init">Init
+&lt;/h4>&lt;h4 id="clone">Clone
+&lt;/h4>&lt;h4 id="commit">Commit
+&lt;/h4>&lt;h4 id="push">Push
+&lt;/h4>&lt;h4 id="pull">Pull
+&lt;/h4>&lt;h4 id="fetch">Fetch
+&lt;/h4>&lt;h2 id="linux-basics">Linux Basics
+&lt;/h2>&lt;p>Linux 不只是一个工具，也可以是像 Windows 一样用于日常工作的操作系统。&lt;/p>
+&lt;p>KDE 桌面环境提供与 Windows 类似的体验，几乎没有任何学习成本。&lt;/p>
+&lt;h3 id="installations-1">Installations
+&lt;/h3>&lt;h4 id="choose-a-way-to-install-linux">Choose a way to install Linux
+&lt;/h4>&lt;ul>
+&lt;li>
+&lt;p>Physical Machine&lt;/p>
+&lt;ul>
+&lt;li>Full performance&lt;/li>
+&lt;li>Graphics interface&lt;/li>
+&lt;li>Take up a lot of space&lt;/li>
+&lt;li>May not be easy to install if you are not experienced&lt;/li>
+&lt;li>Recommend for those who want immersive experience&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>WSL2&lt;/p>
+&lt;ul>
+&lt;li>Easy to install&lt;/li>
+&lt;li>Extremely low performance cost&lt;/li>
+&lt;li>Disk-friendly&lt;/li>
+&lt;li>Battery-friendly&lt;/li>
+&lt;li>Only Command Line Interface, but you still uses Windows&amp;rsquo; GUI&lt;/li>
+&lt;li>Good integration with Host OS(Windows)&lt;/li>
+&lt;li>Can run Linux GUI applications with X server (although not recommended for performance)&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>Virtual Machine - Really not recommended&lt;/p>
+&lt;ul>
+&lt;li>Really low performance&lt;/li>
+&lt;li>Memory unfriendly&lt;/li>
+&lt;li>Battery unfriendly&lt;/li>
+&lt;li>Graphics interface&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;p>&lt;a class="link" href="#additional-linux-installation-guide" >Installation Guide&lt;/a>&lt;/p>
+&lt;h3 id="why-linux">Why Linux
+&lt;/h3>&lt;ul>
+&lt;li>
+&lt;p>Excellent Command Line Interface&lt;/p>
+&lt;ul>
+&lt;li>Shell&lt;/li>
+&lt;li>各种命令行工具&lt;/li>
+&lt;li>丰富的管道命令&lt;/li>
+&lt;li>丰富的脚本语言，易于自动化&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>Software Package Management&lt;/p>
+&lt;ul>
+&lt;li>无需手动下载安装&lt;/li>
+&lt;li>依赖自动解决&lt;/li>
+&lt;li>减少重复软件下载&lt;/li>
+&lt;li>便于卸载，没有毒瘤软件&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>Developer-friendly&lt;/p>
+&lt;ul>
+&lt;li>Editor
+&lt;ul>
+&lt;li>Vim/Nvim&lt;/li>
+&lt;li>VSCode&lt;/li>
+&lt;li>&amp;hellip;&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Compiler
+&lt;ul>
+&lt;li>GCC&lt;/li>
+&lt;li>Clang&lt;/li>
+&lt;li>&amp;hellip;&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>Cross-platform development&lt;/p>
+&lt;ul>
+&lt;li>CMake/Make&lt;/li>
+&lt;li>LLVM，GCC&lt;/li>
+&lt;li>OS 内核需要 cross-compile&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>Highly customizable&lt;/p>
+&lt;ul>
+&lt;li>Shell&lt;/li>
+&lt;li>Window Manager&lt;/li>
+&lt;li>Desktop Environment&lt;/li>
+&lt;li>&amp;hellip;&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>Open Source&lt;/p>
+&lt;ul>
+&lt;li>无需担心软件的安全性&lt;/li>
+&lt;li>无需担心软件的可用性&lt;/li>
+&lt;li>无需担心软件的可维护性&lt;/li>
+&lt;li>无需担心软件的隐私问题 (大多数情况，取决于你的使用方式)&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;h4 id="shortcomings">Shortcomings
+&lt;/h4>&lt;ul>
+&lt;li>Sucks when you need to use Windows-only software&lt;/li>
+&lt;li>Suck graphics driver support (Not for all hardware)&lt;/li>
+&lt;li>Suck graphics backend support
+&lt;ul>
+&lt;li>X.org
+&lt;ul>
+&lt;li>Old, and has not been updated for a long time
+&lt;ul>
+&lt;li>May have some security issues&lt;/li>
+&lt;li>May not support some new features&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>But still widely used&lt;/li>
+&lt;li>Good support for software&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Wayland
+&lt;ul>
+&lt;li>Lacks many features&lt;/li>
+&lt;li>Bad support for some software&lt;/li>
+&lt;li>Really HIGH rendering latency
+&lt;ul>
+&lt;li>You can feel it!&lt;/li>
+&lt;li>Not suitable for latency-sensitive games, like rhythm games&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Nvidia support sucks
+&lt;ul>
+&lt;li>Games may run with lower performance&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Higher power consumption than X.org&lt;/li>
+&lt;li>Modern, updated frequently
+&lt;ul>
+&lt;li>Trending&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;p>But I still recommend you to use Wayland as long as you don&amp;rsquo;t have any problems with it.&lt;/p>
+&lt;h3 id="unboxing">Unboxing
+&lt;/h3>&lt;p>以下内容以相对稳定且简单 Ubuntu 22 作为演示。&lt;/p>
+&lt;h4 id="package-manager">Package Manager
+&lt;/h4>&lt;h5 id="whats-package-manager">Whats Package Manager
+&lt;/h5>&lt;p>包管理器用于管理 GNU/Linux 发行版的包（应用），不同于 Windows 的手动下载并安装，在 Linux 下安装 Git 只用输入一条命令。&lt;/p>
+&lt;p>可以通过类比的方式理解包管理器和包：&lt;/p>
+&lt;blockquote>
+&lt;p>左右两项不等价&lt;/p>
+&lt;/blockquote>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th style="text-align:center">Windows&lt;/th>
+&lt;th style="text-align:center">Linux&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td style="text-align:center">应用商店&lt;/td>
+&lt;td style="text-align:center">包管理器&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:center">App&lt;/td>
+&lt;td style="text-align:center">包&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>大多数 Linux 发行版都有自己的包管理器：&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th style="text-align:center">Debian&lt;/th>
+&lt;th style="text-align:center">RPM&lt;/th>
+&lt;th style="text-align:center">Pacman&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td style="text-align:center">apt, dpkg&lt;/td>
+&lt;td style="text-align:center">yum, rpm&lt;/td>
+&lt;td style="text-align:center">pacman&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>Ubuntu 的包管理器是 &lt;code>apt&lt;/code> 和 &lt;code>dpkg&lt;/code>，其中 apt 用于安装云端软件源的包，dpkg 则用于安装本地包。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">apt --version
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># output: apt 2.4.12 (amd64)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h5 id="usage">Usage
+&lt;/h5>&lt;p>如果遇到了网络问题，请跳转下方 Mirror。&lt;/p>
+&lt;ol>
+&lt;li>更新软件包列表&lt;/li>
+&lt;/ol>
+&lt;p>在安装包之前，一般会同步云端软件包信息，保证依赖关系的正确。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo apt update
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ol start="2">
+&lt;li>更新所有软件包&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo apt upgrade
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ol start="3">
+&lt;li>安装软件源的包&lt;/li>
+&lt;/ol>
+&lt;p>将 &lt;code>&amp;lt;name&amp;gt;&lt;/code> 换成要安装的包名，多个则以空格分隔。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo apt install &amp;lt;name&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ol start="4">
+&lt;li>安装本地 deb 包&lt;/li>
+&lt;/ol>
+&lt;p>安装中可能会提示依赖缺失，应使用 apt 安装缺失的依赖。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo dpkg -i /path/to/xxx.deb
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ol start="5">
+&lt;li>卸载包&lt;/li>
+&lt;/ol>
+&lt;p>将 &lt;code>&amp;lt;name&amp;gt;&lt;/code> 换成要卸载的包名，多个则以空格分隔。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo apt remove &amp;lt;name&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ol start="6">
+&lt;li>查找包&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">apt search xxx
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h5 id="mirror">Mirror
+&lt;/h5>&lt;p>在使用 apt 时提示网络错误时，可以通过换源解决。&lt;/p>
+&lt;p>修改系统重要文件前记得备份：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo cp /etc/apt/sources.list /etc/apt/sources.list.back
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">sudo vim /etc/apt/sources.list
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;blockquote>
+&lt;p>在 Ubuntu 24.04 之前，Ubuntu 的软件源配置文件使用传统的 One-Line-Style，路径为 /etc/apt/sources.list；从 Ubuntu 24.04 开始，Ubuntu 的软件源配置文件变更为 DEB822 格式，路径为 /etc/apt/sources.list.d/ubuntu.sources。
+参考 &lt;a class="link" href="https://mirrors.tuna.tsinghua.edu.cn/help/ubuntu/" target="_blank" rel="noopener"
+>https://mirrors.tuna.tsinghua.edu.cn/help/ubuntu/&lt;/a>&lt;/p>
+&lt;/blockquote>
+&lt;p>在文件的顶部加入以下行：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl"># 默认注释了源码镜像以提高 apt update 速度，如有需要可自行取消注释
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ noble main restricted universe multiverse
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"># deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ noble main restricted universe multiverse
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ noble-updates main restricted universe multiverse
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"># deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ noble-updates main restricted universe multiverse
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ noble-backports main restricted universe multiverse
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"># deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ noble-backports main restricted universe multiverse
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>最后更新软件包列表&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo apt update
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h4 id="install-common-software">Install Common Software
+&lt;/h4>&lt;h5 id="pakage-for-os-development">Pakage for OS Development
+&lt;/h5>&lt;ul>
+&lt;li>Git&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo apt update
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">sudo apt install git
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ul>
+&lt;li>VSCode&lt;/li>
+&lt;/ul>
+&lt;p>以下内容来自 &lt;a class="link" href="https://manual.caiyi1.me/get-started/vscode" target="_blank" rel="noopener"
+>manual&lt;/a>&lt;/p>
+&lt;p>实体机用户请在 Linux 下安装 VSCode：&lt;/p>
+&lt;p>手动安装：&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>从 &lt;a class="link" href="https://code.visualstudio.com" target="_blank" rel="noopener"
+>VSCode 官网&lt;/a> 下载 deb 包。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>使用 dpkg 安装。&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo dpkg -i code_xxx.deb
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>包管理器安装：&lt;/p>
+&lt;ol>
+&lt;li>添加源。&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo apt-get install wget gpg
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">wget -qO- https://packages.microsoft.com/keys/microsoft.asc &lt;span class="p">|&lt;/span> gpg --dearmor &amp;gt; packages.microsoft.gpg
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">sudo install -D -o root -g root -m &lt;span class="m">644&lt;/span> packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">echo&lt;/span> &lt;span class="s2">&amp;#34;deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main&amp;#34;&lt;/span> &lt;span class="p">|&lt;/span>sudo tee /etc/apt/sources.list.d/vscode.list &amp;gt; /dev/null
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">rm -f packages.microsoft.gpg
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ol start="2">
+&lt;li>安装。&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo apt install apt-transport-https
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">sudo apt update
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">sudo apt install code &lt;span class="c1"># or code-insiders&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ul>
+&lt;li>Rust&lt;/li>
+&lt;/ul>
+&lt;p>以下内容源自 &lt;a class="link" href="https://learningos.cn/rCore-Tutorial-Guide-2024S/0setup-devel-env.html" target="_blank" rel="noopener"
+>rCore-Tutorial-Guide-2024S 文档&lt;/a>&lt;/p>
+&lt;ol start="0">
+&lt;li>如果遇到网络问题&lt;/li>
+&lt;/ol>
+&lt;p>配置环境变量：&lt;/p>
+&lt;p>可以在当前终端执行（当前终端有效），或者写入 &lt;code>~/.bashrc&lt;/code>（永久，打开新的终端后）。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">&lt;span class="nb">export&lt;/span> &lt;span class="nv">RUSTUP_DIST_SERVER&lt;/span>&lt;span class="o">=&lt;/span>https://mirrors.ustc.edu.cn/rust-static
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">export&lt;/span> &lt;span class="nv">RUSTUP_UPDATE_ROOT&lt;/span>&lt;span class="o">=&lt;/span>https://mirrors.ustc.edu.cn/rust-static/rustup
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>编辑 &lt;code>~/.cargo/config&lt;/code>：&lt;/p>
+&lt;p>添加以下行：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-toml" data-lang="toml">&lt;span class="line">&lt;span class="cl">&lt;span class="p">[&lt;/span>&lt;span class="nx">source&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">crates-io&lt;/span>&lt;span class="p">]&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nx">replace-with&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="s1">&amp;#39;ustc&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">[&lt;/span>&lt;span class="nx">source&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">ustc&lt;/span>&lt;span class="p">]&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nx">registry&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="s2">&amp;#34;sparse+https://mirrors.ustc.edu.cn/crates.io-index/&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ol>
+&lt;li>安装 rustup&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">curl --proto &lt;span class="s1">&amp;#39;=https&amp;#39;&lt;/span> --tlsv1.2 -sSf https://sh.rustup.rs &lt;span class="p">|&lt;/span> sh
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ul>
+&lt;li>QEMU&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 安装依赖&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">sudo apt install autoconf automake autotools-dev curl libmpc-dev libmpfr-dev libgmp-dev &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> gawk build-essential bison flex texinfo gperf libtool patchutils bc &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> zlib1g-dev libexpat-dev pkg-config libglib2.0-dev libpixman-1-dev git tmux python3
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 下载 QEMU 源码&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">wget https://download.qemu.org/qemu-7.0.0.tar.xz
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 解压&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">tar xvJf qemu-7.0.0.tar.xz
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 进入子目录&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">cd&lt;/span> qemu-7.0.0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 编译安装并配置 RISC-V 支持&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">./configure --target-list&lt;span class="o">=&lt;/span>riscv64-softmmu,riscv64-linux-user
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">make -j&lt;span class="k">$(&lt;/span>nproc&lt;span class="k">)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h5 id="awesome-tools">Awesome Tools
+&lt;/h5>&lt;p>为了提高开发效率，推荐部分小工具。&lt;/p>
+&lt;ol>
+&lt;li>CLI tools&lt;/li>
+&lt;/ol>
+&lt;ul>
+&lt;li>
+&lt;p>ranger: 文件管理器&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>bat: 文件查看器，更好的 &lt;code>less&lt;/code>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>tmux: 终端复用器&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>lazygit: &lt;code>git&lt;/code> TUI 管理工具&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>eza: 有色彩和图标的 &lt;code>ls&lt;/code>&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="command-line">Command Line
+&lt;/h3>&lt;h4 id="foreword">Foreword
+&lt;/h4>&lt;p>Shell 是一个解释器，它接受用户输入的命令，然后&lt;strong>调用相应的应用程序或内建命令函数&lt;/strong>。&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>Windows&lt;/p>
+&lt;ul>
+&lt;li>PowerShell - fairly good, but lack customization. Slow, for still using .NET Framework(capability reasons, but can be replaced by .NET)
+&lt;ul>
+&lt;li>Update to PowerShell 7, which is cross-platform&lt;/li>
+&lt;li>&lt;a class="link" href="https://aka.ms/PSWindows" target="_blank" rel="noopener"
+>https://aka.ms/PSWindows&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>CMD&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>Unix-like (inclue Linux, MacOS, FreeBSD&amp;hellip;)&lt;/p>
+&lt;ul>
+&lt;li>Bash - default, but MUCH better than Windows'&lt;/li>
+&lt;li>Zsh - most popular, maybe hard to configure&lt;/li>
+&lt;li>Fish - easy to use, but not recommended for scripting&lt;/li>
+&lt;li>&amp;hellip; like sh, dash&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;p>对于 Unix, 各种 Shell 的语法大致相同，内建命令大多数与 Bash 相同。甚至 Windows 的 PowerShell 也开始为某些 Bash 的内建命令通过 alias 提供支持。&lt;/p>
+&lt;p>Fish 是一个很好的 Shell，但是不适合用于编写脚本，因为它的语法和其他 Shell 不同。因此建议大家使用 Bash 或者 Zsh。如果你想配置一个好看并且功能强大的 Shell，可以尝试使用 Zsh。&lt;/p>
+&lt;p>Detailed instructions: &lt;a class="link" href="https://manual.caiyi1.me/use-git/hug-cli/" target="_blank" rel="noopener"
+>manual.caiyi1.me&lt;/a>&lt;/p>
+&lt;h4 id="shell-script">Shell script
+&lt;/h4>&lt;p>Shell 脚本是一种文本文件，其中包含了一系列的命令（和我们在 shell 前端中输入的一样）。Shell 会按照脚本中的命令顺序执行。&lt;/p>
+&lt;p>下面尝试把你输入过的命令写入一个脚本文件，然后执行这个脚本文件。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">&lt;span class="nb">pwd&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">echo&lt;/span> &lt;span class="s2">&amp;#34;----------------&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ls
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>执行时，如果使用&lt;code>./script.sh&lt;/code>执行，需要给予执行权限，使用&lt;code>chmod +x script.sh&lt;/code>。如果调用 shell 执行，例如&lt;code>bash script.sh&lt;/code>，则不需要给予执行权限。&lt;/p>
+&lt;p>执行 shell 脚本时，会新开一个 shell 进程执行脚本，因此脚本中的变量不会影响到当前 shell。&lt;/p>
+&lt;p>脚本的工作目录与执行脚本的 shell 的工作目录相同。不是脚本文件的目录。&lt;/p>
+&lt;h3 id="additional-linux-installation-guide">Additional: Linux Installation Guide
+&lt;/h3>&lt;h4 id="wsl2">WSL2
+&lt;/h4>&lt;p>Boot up your Windows, enter Microsoft Store, search for &amp;ldquo;WSL&amp;rdquo;, select an distro and install it.&lt;/p>
+&lt;p>Ubuntu is recommended for beginners as it has official support.&lt;/p>
+&lt;p>After installation, you can open it from Start Menu or Windows Terminal.&lt;/p>
+&lt;p>The first time you uses it, you have to set up a username and password, not asking for your windows&amp;rsquo;s password.&lt;/p>
+&lt;h4 id="physical-machine">Physical Machine
+&lt;/h4>&lt;p>Partition your disk in Windows. You have to create at least two partitions, one for Boot volume, one for Root(Where the system files are stored).&lt;/p>
+&lt;p>The Boot volume should be at least 1GB, and the Root volume should be at least 50GB.&lt;/p>
+&lt;p>Download a distro&amp;rsquo;s ISO file from its official website, and flash it to a USB drive to make a bootable drive.&lt;/p>
+&lt;p>Reboot your computer to BIOS/UEFI, and boot from the USB drive.&lt;/p>
+&lt;p>Choose manual partitioning if you don&amp;rsquo;t want to lose your data and Windows.&lt;/p>
+&lt;p>Assign the Boot volume to &lt;code>/boot&lt;/code>, and the Root volume to &lt;code>/&lt;/code>.&lt;/p>
+&lt;p>Choose the boot volume to be formatted as FAT32, and the root volume to be formatted as ext4 or Btrfs.&lt;/p>
+&lt;p>After installation, you can shutdown your computer and unplug the USB drive.&lt;/p>
+&lt;h5 id="must-read">##MUST READ##
+&lt;/h5>&lt;p>You may lose the ability to boot into Windows, as the bootloader is replaced by the Linux bootloader.&lt;/p>
+&lt;p>You can either select the system to boot in the BIOS/UEFI, or use a bootloader like GRUB/rEFInd.&lt;/p>
+&lt;p>Note that GRUB can NOT detect bootable devices at runtime while rEFInd can.&lt;/p>
+&lt;h4 id="virtual-machine">Virtual Machine
+&lt;/h4>&lt;p>Download a distro&amp;rsquo;s ISO file from its official website, and create a new VM in your VM software. Assign at least 50GB of disk space and 4GB of RAM.&lt;/p>
+&lt;p>Mount the ISO file to the VM, and boot from it.&lt;/p>
+&lt;p>Install the system following the instructions along the way.&lt;/p>
+&lt;p>You can choose &amp;ldquo;Clean Install&amp;rdquo; since we don&amp;rsquo;t have any data to lose.&lt;/p>
+&lt;p>After installation, you can shutdown the VM and unmount the ISO file. Then you can boot into the system.&lt;/p></description></item></channel></rss>
