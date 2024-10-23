@@ -13,11 +13,11 @@ categories:
 
 不要在 GitHub 网页端编辑文件！！！否则你会收到下面的警告:
 
-![comment](./assets/warn_comment.png)
+![comment](assets/warn_comment.png)
 
 以及一封邮件：
 
-![email](./assets/warn_email.png)
+![email](assets/warn_email.png)
 
 我们在将来可能会强制删除你的提交如果你继续在网页端编辑文件。
 
