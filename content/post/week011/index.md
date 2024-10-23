@@ -9,6 +9,18 @@ categories:
     - 课程作业
 ---
 
+## 用 GitHub 网页端编辑文件
+
+不要在 GitHub 网页端编辑文件！！！否则你会收到下面的警告:
+
+![comment](./assets/warn_comment.png)
+
+以及一封邮件：
+
+![email](./assets/warn_email.png)
+
+我们在将来可能会强制删除你的提交如果你继续在网页端编辑文件。
+
 ## ls -d ../*/
 
 题目要求“列出父文件夹的文件夹项”。可能是翻译问题，Directory entry被我直接翻译成文件夹项可能导致大家（当然还有大家的好帮手 chatGPT）产生了误解，应当翻译为目录项更为准确。
@@ -85,6 +97,14 @@ caiyi@LAPTOP-I80ETG8J /t/tmp.mABXKSHACy> ls test1/
 test/
 caiyi@LAPTOP-I80ETG8J /t/tmp.mABXKSHACy> # test 被移动
 ```
+
+## Fork 仓库再提交？
+
+课上说
+
+## 工作目录问题
+
+课上说
 
 ## 最后
 
