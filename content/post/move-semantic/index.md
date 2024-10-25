@@ -238,6 +238,9 @@ or Download and run yourself
 
 [https://github.com/Loongson-neuq/blog/tree/main/content/post/move-semantic/MuitlThreadDemo](https://github.com/Loongson-neuq/blog/tree/main/content/post/move-semantic/MuitlThreadDemo)
 
+Note: You need to have a .NET 8 runtime installed to run the demo. Install it from
+[dot.net](https://dot.net/download)
+
 #### Lock
 
 #### Read-write Lock
