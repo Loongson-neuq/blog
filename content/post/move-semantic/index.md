@@ -1,4 +1,14 @@
-# What the fuck is Move Semantic, Ownership and Borrowing rule
+---
+title: Advanced Rust
+date: 2024-10-25
+description: What the fuck is Move Semantic, Ownership and Borrowing rule
+tags: 
+    - Rust
+categories:
+    - OS
+    - 课程
+    - Rust
+---
 
 ## Prerequisite
 
