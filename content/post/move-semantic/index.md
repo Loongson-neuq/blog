@@ -351,6 +351,8 @@ Additinally, `push` and `pop` instructions are also used to store/access the sta
 
 From the assembly code, we can see that how much we push/pop the stack is determined at the compile time, hard coded in the assembly instructions. You should know why all value types must be fixed size now.
 
+Since we only care about current frame, which is at the top of the stack, we don't need to have store the size of every frame, the base of the whole stack, or the end of the stack. We only need to store the stack pointer, which is the top of the stack, or the base of the current frame.
+
 Then I'll talk about why do we never clean the stack.
 
 When we pop a frame, the depth of stack just got smaller, and there will be no chance of reading uninitialized data or overwriting the data.
