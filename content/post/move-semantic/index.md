@@ -28,7 +28,7 @@ void foo()
     int i = 0;
     int* p = &i;
     Object* obj = new Object();
-    String str = "Hello, world";
+    std::string str = "Hello, world";
     StructType value = StructType {1, 2, 3};
 }
 ```
@@ -234,7 +234,128 @@ Also, accessing instance on the heap may cause cache miss, which is the REAL rea
 
 ##### Micro views of the stack allocation
 
-<!-- TODO: with assembly code -->
+Having talked about the stack so much, you might wonder when do we push and pop.
+
+The name of call stack implied that the stack has strong connection with *Fuction Call*.
+
+You must have seen stack trace when the runtime throw an exception. The stack trace is actually the call stack.
+
+Stack trace when a exception is thrown in .NET:
+```ascii
+Unhandled exception. System.Exception: Exception from Buz
+   at Program.Buz() in /home/caiyi/loongson-blog/content/post/move-semantic/StackTraceDemo/Program.cs:line 24
+   at Program.Bar() in /home/caiyi/loongson-blog/content/post/move-semantic/StackTraceDemo/Program.cs:line 17
+   at Program.Foo() in /home/caiyi/loongson-blog/content/post/move-semantic/StackTraceDemo/Program.cs:line 11
+   at Program.Main(String[] args) in /home/caiyi/loongson-blog/content/post/move-semantic/StackTraceDemo/Program.cs:line 5
+```
+
+Remove some of the information, we get:
+```ascii
+   at Program.Buz() in Program.cs:line 24
+   at Program.Bar() in Program.cs:line 17
+   at Program.Foo() in Program.cs:line 11
+   at Program.Main(String[] args) in Program.cs:line 5
+```
+
+Code can be obtained from [https://github.com/Loongson-neuq/blog/tree/main/content/post/move-semantic/StackTraceDemo](https://github.com/Loongson-neuq/blog/tree/main/content/post/move-semantic/StackTraceDemo)
+
+Why do we have so many functions from the Stack trace? Because the functions are called nestedly.
+
+The top function is where the exception was actually thrown, and the lower function is where the top function was called. Since the main thread of our program begins with `Main()` function, the bottom function is always `Main()`.
+
+When a function is called, the runtime will push a new frame to the stack, and when the function returns, the runtime will pop the frame from the stack.
+
+**A frame stores everyting essential to restore the envrionment before the function was the frame call another function.**
+
+We know that CPU must read datas to its own *register* to do the calculation, and the register is limited. So we have to store the local variables and other things in somewhere else. That's the stack frame. A frame only stores datas of the function, and the frame is popped when the function returns.
+
+###### Let's look at some assembly code
+
+Having talked about how the stack so much, you might think it's rather complicated to push and pop the stack. But it's not. As I said before, we only have to minus the stack pointer and the minused size of memory is yours! To return the memory, we only have to add the size to the stack pointer. 
+
+**NO NEED TO CLEAR THE MEMORY when we push/pop the stack. CAN YOU THINK ABOUT WHY?**
+
+The same code as the one at the beginning of the article:
+
+```Cpp
+#include <string>
+
+class Object
+{
+    private:
+        int _value;
+};
+
+struct StructType
+{
+    int value1;
+    int value2;
+    int value3;
+};
+
+void foo()
+{
+    int i = 0;
+    int* p = &i;
+    Object* obj = new Object();
+    std::string str = "Hello, world";
+    StructType value = StructType {1, 2, 3};
+}
+```
+
+The assembly code of the function `foo` is like this:
+
+```assembly
+section .data
+str db "Hello, world", 0
+
+section .text
+global foo
+
+foo:
+    ; 函数开始，保存栈帧
+    push rbp                     ; 保存原始栈帧
+    mov rbp, rsp                 ; 设置新的栈帧
+
+    ; int i = 0;
+    mov dword ptr [rbp-4], 0     ; 将变量 i 初始化为 0，并保存在栈中偏移 -4
+
+    ; int* p = &i;
+    lea rax, [rbp-4]             ; 取得变量 i 的地址
+    mov qword ptr [rbp-8], rax   ; 将 p 指向 i 的地址并保存偏移 -8
+
+    ; Object* obj = new Object();
+    mov edi, 4                   ; Object 的大小为 4 字节
+    call _Znwm                   ; 调用 operator new
+    mov qword ptr [rbp-16], rax  ; 保存返回的对象地址到 obj 中（偏移 -16）
+
+    ; std::string str = "Hello, world";
+    lea rdi, [rel str]           ; 将字符串地址加载到 rdi
+    lea rsi, [rbp-32]            ; 准备 str 变量的栈位置（偏移 -32）
+    call _ZNSsC1EPKc             ; 调用 std::string 构造函数
+
+    ; StructType value = StructType {1, 2, 3};
+    mov dword ptr [rbp-48], 1    ; 将 1 存储到 value.value1（偏移 -48）
+    mov dword ptr [rbp-44], 2    ; 将 2 存储到 value.value2（偏移 -44）
+    mov dword ptr [rbp-40], 3    ; 将 3 存储到 value.value3（偏移 -40）
+
+    ; 函数结束，恢复栈帧并返回
+    mov rsp, rbp                 ; 恢复原始栈指针
+    pop rbp                      ; 弹出原始栈帧
+    ret                          ; 返回
+```
+
+We even do have to actually DO a allocation operation. We just know that where every variable should be and read/wirte the place directly. See instructions like `mov dword ptr [rbp...], ...`
+
+Additinally, `push` and `pop` instructions are also used to store/access the stack, but they are just pseduo instructions. The real instructions are `mov` and `add`.
+
+From the assembly code, we can see that how much we push/pop the stack is determined at the compile time, hard coded in the assembly instructions. You should know why all value types must be fixed size now.
+
+Then I'll talk about why do we never clean the stack.
+
+When we pop a frame, the depth of stack just got smaller, and there will be no chance of reading uninitialized data or overwriting the data.
+
+When we push a frame, we always write the data before we can access it. Remember that the Compiler always say `Uninitialized variable` when you try to access a variable before you write it. The compiler gurantee that you will never read uninitialized data at the compile time, so we don't have to clear the memory, which makes function call faster.
 
 ### Data inconsistency issue in Multi-threaded scenarios
 
