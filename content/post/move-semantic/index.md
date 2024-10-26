@@ -210,6 +210,8 @@ Since the class has a special feature: Polymorphism, the size of the object is n
 
 I've talked about where is the heap, but not the stack. Stack is also a contiguous memory block. For simplicity, I'll say that stack were managed by the OS, although it's not true in some cases.
 
+Stack of a program is Program Stack or Call Stack or Execution Stack. It's used to store the local variables, function parameters, and the return address of the function.
+
 When a process starts, the OS will allocate a memory block for the process. And make a certain register point to the end of the memory block(High address). This register is called the **Stack Pointer**, which is `rsp` in x86_64 and `sp` in RISC-V.
 
 When you try allocate an instance on the stack, like, a int, we simply minus the stack pointer.
@@ -217,6 +219,10 @@ When you try allocate an instance on the stack, like, a int, we simply minus the
 You might know stack is FILO or LIFO, but that doesn't mean we have to pop the stack if we want to access the inner object. The FILO or LIFO is only for the stack frame, which keeps everything essential to allow function calling/returning.
 
 Since all instance on the stack is fixed size, all of their position is fixed, we know where the object is at the compile time. We know that all local variables can be accessed by frame pointer plus a fixed offset.
+
+The stack is array-like, but not a real array. It's a memory block, a memory block means that you can access whatever you want with the memory block. Stack is just a convention which constraints the way we access the memory block - FILO or LIFO.
+
+An example is that, in Rust, we don't have a specific data structure for Stack. In C++, in python, in .NET you would have a Type like `Stack<T>`, but in Rust, we don't have that. We just use `Vec<T>`(`vector<T>` in Cpp). As long as you only call push and pop method.
 
 ###### Why the stack is faster than the heap?
 
