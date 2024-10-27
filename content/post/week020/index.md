@@ -142,6 +142,8 @@ RustRover 是 JetBrains 开发的 Rust 语言的 IDE，它是一个基于 Intell
 
 然后根据提示，一路回车即可。
 
+> 某些发行版可能会将 `rustup` 添加至软件源，当然上述方式也可以
+
 #### Verify installation
 
 打开终端，输入`cargo --version`，如果输出了版本号，说明安装成功。
