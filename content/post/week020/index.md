@@ -135,7 +135,7 @@ RustRover 是 JetBrains 开发的 Rust 语言的 IDE，它是一个基于 Intell
 
 #### Install Rust
 
-不管你用的什么操作系统，打开 `https://rustup.rs`。
+不管你用的什么操作系统，打开 [`https://rustup.rs`](https://rustup.rs)。
 
 如果你是 Windows 用户，点击最上面的`rustup-init.exe`下载并运行。
 如果你是 Linux 用户，复制网址下面的命令到终端运行。
