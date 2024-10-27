@@ -201,9 +201,15 @@ More usages:
 
 <!-- TODO 该干啥了？ -->
 
-[The Rust Programming Language](https://doc.rust-lang.org/stable/book/)
+~~[The Rust Programming Language](https://doc.rust-lang.org/stable/book/)~~
 
-[Unofficial Chinese Translation](https://kaisery.github.io/trpl-zh-cn/)
+~~[Unofficial Chinese Translation](https://kaisery.github.io/trpl-zh-cn/)~~
+
+**强烈建议使用 Brown University 的实验性交互版本**，尤其是对所有权和借用感到困惑的同学。
+
+**[rust-book.cs.brown.edu](https://rust-book.cs.brown.edu/)**
+
+如果感觉鸟语看着难受可以对照中文翻译看，但一定要以这个这个版本为主要材料。
 
 ### 下集预告
 
