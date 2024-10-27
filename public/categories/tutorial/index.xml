@@ -1,0 +1,2311 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Tutorial on NEUQ 龙芯实验室博客</title><link>https://loongson-neuq.pages.dev/categories/tutorial/</link><description>Recent content in Tutorial on NEUQ 龙芯实验室博客</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sun, 27 Oct 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://loongson-neuq.pages.dev/categories/tutorial/index.xml" rel="self" type="application/rss+xml"/><item><title>[OS Week2] Get started with Rust</title><link>https://loongson-neuq.pages.dev/p/os-week2-get-started-with-rust/</link><pubDate>Sun, 27 Oct 2024 00:00:00 +0000</pubDate><guid>https://loongson-neuq.pages.dev/p/os-week2-get-started-with-rust/</guid><description>&lt;p>本次课程的部分内容摘抄自 &lt;a class="link" href="https://learn.microsoft.com/learn" target="_blank" rel="noopener"
+>Microsoft Learn&lt;/a> 上的 &lt;a class="link" href="https://learn.microsoft.com/zh-cn/windows/dev-environment/rust/" target="_blank" rel="noopener"
+>Get started with Rust&lt;/a> 课程。&lt;/p>
+&lt;h2 id="overview">Overview
+&lt;/h2>&lt;p>Rust 是一种系统编程语言，因此可用于编写系统（如操作系统）。 但它也可用于编写性能和可信度很重要的应用程序。 Rust 语言语法可以与 C++ 语法相媲美，提供了与新式 C++ 相当的性能；&lt;/p>
+&lt;blockquote>
+&lt;p>❕INFO&lt;/p>
+&lt;p>  C++是什么垃圾也配&lt;/p>
+&lt;/blockquote>
+&lt;p>对于许多有经验的开发人员来说，Rust 在编译和运行时模型、类型系统和确定性终止化方面都是正确的。&lt;/p>
+&lt;blockquote>
+&lt;p>❕INFO&lt;/p>
+&lt;p>  在系统编程中，控制流可能被扰乱，某些优化并不完全正确，需要开发者具有丰富的经验对生成的汇编代码进行审查。不能完全依赖编译器。&lt;/p>
+&lt;/blockquote>
+&lt;p>此外，Rust 的设计保证了内存安全，而不需要进行垃圾回收。&lt;/p>
+&lt;p>那么，我们为什么要选择 Rust 作为 Windows 的最新语言投影呢？ 其中一个因素是，Stack Overflow 的年度开发人员调查显示，Rust 是目前为止年复一年最受欢迎的编程语言。 虽然你可能会发现此语言有陡峭的学习曲线，但一旦你越过了这个峰，就很难不爱上它了。&lt;/p>
+&lt;h2 id="rust-development-toolsetecosystem">Rust development toolset/ecosystem
+&lt;/h2>&lt;ul>
+&lt;li>
+&lt;p>&lt;code>crate&lt;/code> 是 Rust &lt;strong>编译&lt;/strong>和&lt;strong>链接&lt;/strong>单元。 crate 可以源代码形式存在，然后能够被处理成以二进制可执行文件（简称二进制文件）或二进制库（简称库）形式存在的 crate 。通常一个 crate 就是一个 &lt;strong>project&lt;/strong>。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Rust 项目称为&lt;code>包&lt;/code>。 一个包可以包含一个或多个 crate，以及描述如何生成这些 crate 的 &lt;code>Cargo.toml&lt;/code> 文件。更准确的说法是 &lt;strong>solution&lt;/strong>。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;code>rustup&lt;/code> 是 Rust 工具链的安装程序和更新程序。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;code>Cargo&lt;/code> 是 Rust 包管理工具的名称。也用于构建、测试和发布 Rust 项目。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;code>rustc&lt;/code> 是 Rust 编译器。 大多数情况下，你不会直接调用 rustc，而是通过 Cargo 间接调用它。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;code>crates.io&lt;/code> (&lt;a class="link" href="https://crates.io/" target="_blank" rel="noopener"
+>https://crates.io/&lt;/a>) 是 Rust 社区的 crate 注册表。crates.io 托管大量的 crate，可以通过 Cargo 下载，并自动解决依赖关系。&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="progarmming-language-concepts">Progarmming language Concepts
+&lt;/h2>&lt;h3 id="type-syetem">Type syetem
+&lt;/h3>&lt;h4 id="strong-typing-weak-typing">Strong typing? Weak typing?
+&lt;/h4>&lt;p>在编程语言的类型系统中，强类型（strong typing）和弱类型（weak typing）是两个核心概念，用于描述编程语言对数据类型的约束程度。&lt;/p>
+&lt;h3 id="强类型strong-typing">强类型（Strong Typing）
+&lt;/h3>&lt;p>强类型语言要求变量的数据类型在使用时要严格遵守，通常不允许不同类型之间的隐式转换。例如，Rust、.NET都属于强类型语言。以下是强类型的特征：&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>严格的类型检查&lt;/strong>：强类型语言在&lt;strong>编译期&lt;/strong>或运行期都会进行严格的类型检查，如果类型不匹配，代码就会报错。例如，在Rust中将整数赋值给一个字符串类型的变量会直接报错，而不会自动转换类型。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>安全性&lt;/strong>：强类型语言通常可以防止许多潜在的错误，因为它们在操作不兼容类型时会立即报错，帮助程序员更早地发现错误。例如在Rust中，试图将整型变量作为浮点型来处理，编译器会立即提醒，这避免了许多运行时错误。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>类型转换需要显式&lt;/strong>：在强类型语言中，类型转换一般需要显式声明，编译器不会进行隐式转换。例如在Rust中，&lt;code>let x: i32 = 10; let y: f64 = x as f64;&lt;/code>。&lt;code>as&lt;/code>关键字显式地将&lt;code>i32&lt;/code>类型转换成了&lt;code>f64&lt;/code>。&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;blockquote>
+&lt;p>⚠️ NOTE&lt;/p>
+&lt;p>  Rust 仅在安全的情况下允许隐式转换，例如&lt;code>let x: i32 = 10; let y: f64 = x;&lt;/code>是合法的，因为&lt;code>i32&lt;/code>可以隐式转换成&lt;code>f64&lt;/code>。并且 Rust 还有&lt;strong>自动解引用&lt;/strong>机制，实现了一定程度的隐式转换。&lt;/p>
+&lt;/blockquote>
+&lt;ol start="4">
+&lt;li>&lt;strong>内存安全&lt;/strong>：强类型语言更容易实现内存安全，因为严格的类型系统有助于防止无效的内存访问。例如，Rust的所有权系统和借用检查在类型系统中嵌入了内存管理的概念，确保了线程安全和内存安全。&lt;/li>
+&lt;/ol>
+&lt;h3 id="弱类型weak-typing">弱类型（Weak Typing）
+&lt;/h3>&lt;p>弱类型语言对类型的限制较少，通常允许不同类型之间的隐式转换，例如C和JavaScript都具有弱类型的特性。以下是弱类型的特征：&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>更宽松的类型转换&lt;/strong>：弱类型语言在不同类型之间可以自由转换。例如在JavaScript中，&lt;code>&amp;quot;5&amp;quot; + 10&lt;/code> 会自动将数字&lt;code>10&lt;/code>转换成字符串，然后得到字符串&lt;code>&amp;quot;510&amp;quot;&lt;/code>。这种隐式转换提供了便利，但也可能导致难以发现的错误。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>更高的灵活性&lt;/strong>：弱类型允许开发者快速编写代码，减少了类型检查的约束，代码在运行时的适应性更高。例如，JavaScript中的函数可以接受任何类型的参数，不必进行严格的类型定义。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>容易出错&lt;/strong>：由于类型不严格，弱类型语言更容易引发错误，尤其是在无意中发生隐式类型转换时。比如在C语言中，整数和指针之间可以自由转换，这会导致很多内存和安全问题。&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h3 id="rust-的强类型优势">Rust 的强类型优势
+&lt;/h3>&lt;p>Rust 是一种强类型系统的语言，其设计注重内存安全和性能，通过严格的类型检查和所有权模型来保证代码的可靠性。Rust 的强类型特性让开发者在编译时可以捕捉到许多潜在的错误，减少了运行时的崩溃风险，同时通过显式转换机制避免了隐式转换带来的隐患。&lt;/p>
+&lt;p>最后，类型是仅对于高级语言抽象层的概念，在底层的硬件层，一切都是二进制的。所有的类型实例不过是一段 memory block，在汇编中我们使用同样的指令来操作所有的类型。因此，在 C 这种仅对汇编进行薄封装的语言中，类型的概念并不是很重要。&lt;/p>
+&lt;h3 id="systems-programming-language">Systems programming language
+&lt;/h3>&lt;p>“系统编程语言”通常指的是适合底层开发、硬件交互和性能优化的语言，与更高层抽象的应用编程语言相比，它们有一些独特的特点：&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>直接硬件访问和内存控制&lt;/strong>(Most important to us)：
+系统编程语言通常支持对硬件和内存进行低层次的访问，例如手动管理内存（Rust、C/C++的&lt;code>malloc/free&lt;/code>或&lt;code>new/delete&lt;/code>）。这让开发者能精确控制程序的内存分配和释放，提高性能和资源利用率。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>高效的执行性能&lt;/strong>：
+系统编程语言（如Rust、C、C++）通常会编译成原生机器码（针对特定架构及操作系统的汇编指令），以确保代码在执行时的效率和速度。这在操作系统、嵌入式系统等需要实时响应和高效性能的场景中尤为重要。&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;blockquote>
+&lt;p>⚠️ NOTE&lt;/p>
+&lt;p>  不完全正确，事实上，JIT 和 GC 的组合更能够在保证极端性能的完全释放和最大延迟。只是 JIT 依赖运行时，并且 GC 不能保证确定性时延。这些缺陷在系统编程中是不可接受的。因为运行时依赖操作系统。而 GC 导致的不确定性时延会导致系统的不可预测性。&lt;/p>
+&lt;/blockquote>
+&lt;ol start="3">
+&lt;li>
+&lt;p>&lt;strong>细粒度的并发控制&lt;/strong>：
+系统编程语言支持低级并发控制（如Rust中的无锁数据结构、C++的线程库和原子操作）。Rust特别强调安全的并发，通过借用检查器和所有权系统来避免数据竞争，帮助在保持并发性能的同时防止线程安全问题。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>内存安全&lt;/strong>：
+像Rust这样的现代系统编程语言注重内存安全，避免空指针和悬空指针等问题。Rust的所有权系统在编译期防止了数据竞争、悬挂引用和双重释放等内存问题，大幅降低了由于内存管理引发的漏洞风险。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>零成本抽象&lt;/strong>：
+系统编程语言（特别是Rust和C++）支持高效的抽象机制，允许编写高性能、模块化的代码。&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;p>系统编程语言的这些特点使它们适合于操作系统、驱动程序、嵌入式系统、数据库引擎和游戏引擎等对性能和硬件直接交互有严格要求的场景。相比之下，高层次的编程语言（如Python、JavaScript）更适合于快速开发和构建应用程序接口（API）、数据处理或前端交互，因为它们提供了更丰富的标准库、内置内存管理和更高的抽象能力，但牺牲了一部分性能和对系统的直接控制。&lt;/p>
+&lt;h2 id="why-rust">Why Rust?
+&lt;/h2>&lt;p>我们要编写的是操作系统内核，不是一般的用户程序！&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>内存安全性&lt;/strong>：Rust独特的所有权系统和借用检查机制在编译阶段保证了内存安全，避免了常见的内存错误，如空指针引用、悬空指针和数据竞争问题。这对于编写操作系统内核尤为重要，因为内核中的错误通常会导致系统崩溃。Rust的安全检查帮助新手在不依赖垃圾回收的情况下实现更高的内存安全性，从而在早期阶段减少调试和崩溃问题。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>现代化语法，开发者友好&lt;/strong>：Rust的语法较为现代化且接近高级语言，易于理解。相比传统的系统编程语言（如C/C++），Rust能让新手更快上手，写出结构化、可读性高的代码，从而减少理解操作系统开发的语言门槛，使其更专注于系统逻辑和底层实现。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>高效的错误信息和强类型系统&lt;/strong>：Rust的编译器提供详细的错误提示，帮助开发者快速定位和解决问题。Rust的强类型系统在编译时检查代码中的潜在错误，特别是在内核开发中，这种类型检查可以大大减少运行时的错误和潜在的安全漏洞。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>低层次控制和高性能&lt;/strong>：Rust与C一样可以访问底层硬件和控制内存布局，但同时还能提供更高的性能和资源控制能力。这使得新手能够更灵活地操作RISC-V平台的硬件资源，同时获得接近C的性能，这是编写高效操作系统内核的重要特性。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>丰富的生态和社区支持&lt;/strong>：Rust社区对操作系统开发的支持日渐丰富，包括&lt;code>riscv&lt;/code> crate等对RISC-V架构的支持库、&lt;code>core&lt;/code>和&lt;code>alloc&lt;/code>等标准库，以及&lt;code>x86_64&lt;/code>和&lt;code>riscv&lt;/code>等架构支持工具。社区中有许多成熟的项目和开源代码可供参考，新手可以借鉴这些资源加速学习。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>无运行时、轻量编译选项&lt;/strong>：Rust允许在&lt;code>no_std&lt;/code>环境中开发，即不依赖标准库，从而更适合裸机（bare metal）开发。对于RISC-V平台操作系统内核，Rust可以使用&lt;code>#![no_std]&lt;/code>配置，这样就能完全剥离标准库，直接进行裸机编程，符合操作系统开发的需求。&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h3 id="我最看重什么">我最看重什么？
+&lt;/h3>&lt;ul>
+&lt;li>
+&lt;p>&lt;strong>大量第三方库&lt;/strong>：Rust 社区的生态系统非常丰富，有大量的第三方库可供使用，可以大大提高开发效率。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>项目质量&lt;/strong>: 不规范换行？不规范缩进？不规范命名？clippy 全部给你报错！代码全部塞一个类一个函数里？测试过不了你就老实了！&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="rust-is-good-enough">Rust is good enough?
+&lt;/h2>&lt;p>我不认为 Rust 够好，事实上它除了内存安全的一点保证之外远远能让我满意。上述的优点 Rust 也并没有做到最好。&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>SUCK virtual dispatch: Rust 的多态性主要基于泛型，倾向于静态分派，在编译期生成专用代码来替代泛型参数，因此很少使用动态分派（dyn Trait），这提高了性能，但也限制了动态多态的灵活性。相比之下，.NET 提供了灵活的接口和虚函数机制，适合需要基于对象或接口进行频繁动态分派的场景。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>SUCK async programming: 许多人认为 async/await 是 Rust 的一大优势，但实际上，Rust 的异步编程模型相对简陋。Rust 的异步编程主要基于&lt;code>Future&lt;/code>和&lt;code>async/await&lt;/code>语法，但缺乏像.NET Core中的&lt;code>Task&lt;/code>和&lt;code>async/await&lt;/code>那样完善的异步编程框架和库。Rust的异步编程需要依赖第三方库（如&lt;code>tokio&lt;/code>、&lt;code>async-std&lt;/code>）来实现，而且在使用过程中需要处理更多的错误和异常情况，不如.NET Core的异步编程模型简洁和易用。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Macro? Garbage!: 我最讨厌的东西！宏分为两种，一种是声明式宏，一种是过程式宏。声明式宏类似 C 里面的宏，通常只用于简单的文本替换，只是添加了一些语法约束。过程宏是用于编译期代码生成的工具，但是 Rust 的过程宏相当简陋，仅支持 syntax analysis，.NET 的增量代码生成器则强大得多，不需要宏就能实现更强大的代码生成功能。&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;p>Rust 还有许多缺点，但是我认为不太重要，因此不再叙述。例如饱受诟病的编译速度慢，命名空间管理毫无逻辑等等。当然，Rust 太难不是 Rust 的问题。&lt;/p>
+&lt;p>但是在我们的场景下，Rust 是最适合的语言。&lt;/p>
+&lt;h2 id="setup-your-own-rust-development-environment">Setup your own Rust development environment
+&lt;/h2>&lt;h3 id="prerequisites">Prerequisites
+&lt;/h3>&lt;h4 id="windows">Windows
+&lt;/h4>&lt;p>由于 Rust 依赖 C 编译套件用于编译的最终阶段，因此在 Windows 上安装 Rust 时，需要安装 C 编译套件。 Windows 上的 C 运行时主要是 MSVS，因此你需要安装 Microsoft Visual C++。你可以下载 &lt;a class="link" href="https://visualstudio.microsoft.com/visual-cpp-build-tools/" target="_blank" rel="noopener"
+>Microsoft C++ Build Tools&lt;/a>，也可以（推荐）首选直接安装 &lt;a class="link" href="https://visualstudio.microsoft.com/downloads/" target="_blank" rel="noopener"
+>Microsoft Visual Studio&lt;/a>。安装 Community 版本的 Visual Studio 即可。安装时仅勾选 &lt;strong>Desktop development with C++&lt;/strong> 选项即可。&lt;/p>
+&lt;p>&lt;a class="link" href="https://rust-lang.github.io/rustup/installation/windows-msvc.html" target="_blank" rel="noopener"
+>Detailed instructions&lt;/a>&lt;/p>
+&lt;h4 id="linux">Linux
+&lt;/h4>&lt;p>安装对应平台和与宿主主机相同的架构的 GCC 即可。&lt;/p>
+&lt;h3 id="development-environment">Development environment
+&lt;/h3>&lt;h4 id="rustrover">RustRover?
+&lt;/h4>&lt;p>RustRover 是 JetBrains 开发的 Rust 语言的 IDE，它是一个基于 IntelliJ 平台的 IDE，提供了 Rust 语言的代码编辑、调试、自动补全、代码重构等功能。RustRover 也支持 Cargo 包管理工具，可以帮助你更方便地管理 Rust 项目。类似于 Idea, PyCharm, Clion 等。并且 RustRover 社区版是免费的。&lt;/p>
+&lt;p>但是！&lt;/p>
+&lt;p>不要用！由于我们的最终目的是系统编程，RustRover 是面向用户级应用的 IDE，它的调试器和代码提示等功能对于系统编程并不友好。&lt;/p>
+&lt;p>因此我要求大家使用 Cargo 命令行　+　你自己喜欢的文本编辑器（VSCode, Vim, Emacs, Sublime Text, Notepad++）进行开发。&lt;/p>
+&lt;h4 id="install-rust">Install Rust
+&lt;/h4>&lt;p>不管你用的什么操作系统，打开 &lt;a class="link" href="https://rustup.rs" target="_blank" rel="noopener"
+>&lt;code>https://rustup.rs&lt;/code>&lt;/a>。&lt;/p>
+&lt;p>如果你是 Windows 用户，点击最上面的&lt;code>rustup-init.exe&lt;/code>下载并运行。
+如果你是 Linux 用户，复制网址下面的命令到终端运行。&lt;/p>
+&lt;p>然后根据提示，一路回车即可。&lt;/p>
+&lt;blockquote>
+&lt;p>某些发行版可能会将 &lt;code>rustup&lt;/code> 添加至软件源，当然上述方式也可以&lt;/p>
+&lt;/blockquote>
+&lt;h4 id="verify-installation">Verify installation
+&lt;/h4>&lt;p>打开终端，输入&lt;code>cargo --version&lt;/code>，如果输出了版本号，说明安装成功。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-powershell" data-lang="powershell">&lt;span class="line">&lt;span class="cl">&lt;span class="nb">PS &lt;/span>&lt;span class="n">C:&lt;/span>&lt;span class="p">\&lt;/span>&lt;span class="n">Users&lt;/span>&lt;span class="p">\&lt;/span>&lt;span class="n">Caiyi&lt;/span> &lt;span class="n">Hsu&lt;/span>&lt;span class="p">&amp;gt;&lt;/span> &lt;span class="n">cargo&lt;/span> &lt;span class="p">-&lt;/span>&lt;span class="n">-version&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">cargo&lt;/span> &lt;span class="mf">1.80&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="py">0&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="mf">376290515&lt;/span> &lt;span class="mf">2024&lt;/span>&lt;span class="p">-&lt;/span>&lt;span class="mf">07&lt;/span>&lt;span class="p">-&lt;/span>&lt;span class="mf">16&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="rust-with-visual-studio-code">Rust with Visual Studio Code
+&lt;/h3>&lt;p>确保你已经安装了 Visual Studio Code 和 Cargo。打开 Visual Studio Code，安装 &lt;code>rust-analyzer&lt;/code> 插件。&lt;/p>
+&lt;p>More usages:&lt;/p>
+&lt;p>&lt;a class="link" href="https://code.visualstudio.com/docs/languages/rust" target="_blank" rel="noopener"
+>Rust with Visual Studio Code&lt;/a>&lt;/p>
+&lt;h3 id="rust-basic-syntax">Rust basic syntax
+&lt;/h3>&lt;!-- TODO 该干啥了？ -->
+&lt;p>&lt;a class="link" href="https://doc.rust-lang.org/stable/book/" target="_blank" rel="noopener"
+>The Rust Programming Language&lt;/a>&lt;/p>
+&lt;p>&lt;a class="link" href="https://kaisery.github.io/trpl-zh-cn/" target="_blank" rel="noopener"
+>Unofficial Chinese Translation&lt;/a>&lt;/p>
+&lt;h3 id="下集预告">下集预告
+&lt;/h3>&lt;p>有重量级内容，敬请期待！&lt;/p>
+&lt;p>&lt;a class="link" href="https://loongson-neuq.pages.dev/p/advanced-rust/" target="_blank" rel="noopener"
+>Understanding Rust via Memory management&lt;/a>&lt;/p>
+&lt;p>做了 Rustlings 的同学可以提前看一下。&lt;/p></description></item><item><title>[OS Week1] Git and Linux Basics</title><link>https://loongson-neuq.pages.dev/p/os-week1-git-and-linux-basics/</link><pubDate>Sat, 19 Oct 2024 00:00:00 +0000</pubDate><guid>https://loongson-neuq.pages.dev/p/os-week1-git-and-linux-basics/</guid><description>&lt;img src="https://loongson-neuq.pages.dev/p/os-week1-git-and-linux-basics/background.png" alt="Featured image of post [OS Week1] Git and Linux Basics" />&lt;h2 id="git">Git
+&lt;/h2>&lt;h3 id="installations">Installations
+&lt;/h3>&lt;h4 id="windows">Windows
+&lt;/h4>&lt;p>Download installer from &lt;a class="link" href="https://git-scm.com/downloads/win" target="_blank" rel="noopener"
+>Git For Windows&lt;/a>&lt;/p>
+&lt;p>or use winget&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">winget install Git.Git
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h4 id="linux">Linux
+&lt;/h4>&lt;p>Install with your package manager&lt;/p>
+&lt;h4 id="macos">MacOS
+&lt;/h4>&lt;p>Install with Homebrew&lt;/p>
+&lt;h3 id="configuration">Configuration
+&lt;/h3>&lt;h4 id="global-configuration">Global Configuration
+&lt;/h4>&lt;p>Detailed instructions: &lt;a class="link" href="https://manual.caiyi1.me/use-git/configure/" target="_blank" rel="noopener"
+>manual.caiyi1.me&lt;/a>&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">git config --global user.name &lt;span class="s2">&amp;#34;Your Name&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git config --global user.email &lt;span class="s2">&amp;#34;Your Email&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h4 id="authentication">Authentication
+&lt;/h4>&lt;p>For code hosting services like GitHub, GitLab, Gitee, etc, you have to proof the user pushing(or pull) the code HAS the permission to do so.&lt;/p>
+&lt;p>Traditional way is to use SSH key, which is a pair of keys, one is public, one is private. Public key is stored on the server, and private key is stored on your local machine.&lt;/p>
+&lt;p>国内平台如 Gitee 只能使用 SSH key 进行认证, 不能使用 credential helper。&lt;/p>
+&lt;p>Still widely used, but is outdated. As Git allows custom credential helper, you can use a more secure way(and easier) to authenticate.&lt;/p>
+&lt;h5 id="windows-1">Windows
+&lt;/h5>&lt;p>Uses &lt;code>git credential-manager&lt;/code>, which is a part of Git for Windows.&lt;/p>
+&lt;h6 id="auth-github">Auth Github
+&lt;/h6>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">git credential-manager github login
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Follow the GUI instructions to login.&lt;/p>
+&lt;h4 id="linux-1">Linux
+&lt;/h4>&lt;h5 id="auth-github-1">Auth Github
+&lt;/h5>&lt;p>uses GitHub CLI, which is provided by the distro&amp;rsquo;s package manager.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Debian/Ubuntu&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">sudo apt install gh
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Login with&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">gh auth login
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Setup git info&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">gh auth setup-git
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Follow the instructions to login.&lt;/p>
+&lt;h3 id="basic-usage">Basic Usage
+&lt;/h3>&lt;p>Detailed instructions: &lt;a class="link" href="https://manual.caiyi1.me/use-git/try-git/" target="_blank" rel="noopener"
+>manual.caiyi1.me&lt;/a>&lt;/p>
+&lt;h4 id="init">Init
+&lt;/h4>&lt;h4 id="clone">Clone
+&lt;/h4>&lt;h4 id="commit">Commit
+&lt;/h4>&lt;h4 id="push">Push
+&lt;/h4>&lt;h4 id="pull">Pull
+&lt;/h4>&lt;h4 id="fetch">Fetch
+&lt;/h4>&lt;h2 id="linux-basics">Linux Basics
+&lt;/h2>&lt;p>Linux 不只是一个工具，也可以是像 Windows 一样用于日常工作的操作系统。&lt;/p>
+&lt;p>KDE 桌面环境提供与 Windows 类似的体验，几乎没有任何学习成本。&lt;/p>
+&lt;h3 id="installations-1">Installations
+&lt;/h3>&lt;h4 id="choose-a-way-to-install-linux">Choose a way to install Linux
+&lt;/h4>&lt;ul>
+&lt;li>
+&lt;p>Physical Machine&lt;/p>
+&lt;ul>
+&lt;li>Full performance&lt;/li>
+&lt;li>Graphics interface&lt;/li>
+&lt;li>Take up a lot of space&lt;/li>
+&lt;li>May not be easy to install if you are not experienced&lt;/li>
+&lt;li>Recommend for those who want immersive experience&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>WSL2&lt;/p>
+&lt;ul>
+&lt;li>Easy to install&lt;/li>
+&lt;li>Extremely low performance cost&lt;/li>
+&lt;li>Disk-friendly&lt;/li>
+&lt;li>Battery-friendly&lt;/li>
+&lt;li>Only Command Line Interface, but you still uses Windows&amp;rsquo; GUI&lt;/li>
+&lt;li>Good integration with Host OS(Windows)&lt;/li>
+&lt;li>Can run Linux GUI applications with X server (although not recommended for performance)&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>Virtual Machine - Really not recommended&lt;/p>
+&lt;ul>
+&lt;li>Really low performance&lt;/li>
+&lt;li>Memory unfriendly&lt;/li>
+&lt;li>Battery unfriendly&lt;/li>
+&lt;li>Graphics interface&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;p>&lt;a class="link" href="#additional-linux-installation-guide" >Installation Guide&lt;/a>&lt;/p>
+&lt;h3 id="why-linux">Why Linux
+&lt;/h3>&lt;ul>
+&lt;li>
+&lt;p>Excellent Command Line Interface&lt;/p>
+&lt;ul>
+&lt;li>Shell&lt;/li>
+&lt;li>各种命令行工具&lt;/li>
+&lt;li>丰富的管道命令&lt;/li>
+&lt;li>丰富的脚本语言，易于自动化&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>Software Package Management&lt;/p>
+&lt;ul>
+&lt;li>无需手动下载安装&lt;/li>
+&lt;li>依赖自动解决&lt;/li>
+&lt;li>减少重复软件下载&lt;/li>
+&lt;li>便于卸载，没有毒瘤软件&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>Developer-friendly&lt;/p>
+&lt;ul>
+&lt;li>Editor
+&lt;ul>
+&lt;li>Vim/Nvim&lt;/li>
+&lt;li>VSCode&lt;/li>
+&lt;li>&amp;hellip;&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Compiler
+&lt;ul>
+&lt;li>GCC&lt;/li>
+&lt;li>Clang&lt;/li>
+&lt;li>&amp;hellip;&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>Cross-platform development&lt;/p>
+&lt;ul>
+&lt;li>CMake/Make&lt;/li>
+&lt;li>LLVM，GCC&lt;/li>
+&lt;li>OS 内核需要 cross-compile&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>Highly customizable&lt;/p>
+&lt;ul>
+&lt;li>Shell&lt;/li>
+&lt;li>Window Manager&lt;/li>
+&lt;li>Desktop Environment&lt;/li>
+&lt;li>&amp;hellip;&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>Open Source&lt;/p>
+&lt;ul>
+&lt;li>无需担心软件的安全性&lt;/li>
+&lt;li>无需担心软件的可用性&lt;/li>
+&lt;li>无需担心软件的可维护性&lt;/li>
+&lt;li>无需担心软件的隐私问题 (大多数情况，取决于你的使用方式)&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;h4 id="shortcomings">Shortcomings
+&lt;/h4>&lt;ul>
+&lt;li>Sucks when you need to use Windows-only software&lt;/li>
+&lt;li>Suck graphics driver support (Not for all hardware)&lt;/li>
+&lt;li>Suck graphics backend support
+&lt;ul>
+&lt;li>X.org
+&lt;ul>
+&lt;li>Old, and has not been updated for a long time
+&lt;ul>
+&lt;li>May have some security issues&lt;/li>
+&lt;li>May not support some new features&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>But still widely used&lt;/li>
+&lt;li>Good support for software&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Wayland
+&lt;ul>
+&lt;li>Lacks many features&lt;/li>
+&lt;li>Bad support for some software&lt;/li>
+&lt;li>Really HIGH rendering latency
+&lt;ul>
+&lt;li>You can feel it!&lt;/li>
+&lt;li>Not suitable for latency-sensitive games, like rhythm games&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Nvidia support sucks
+&lt;ul>
+&lt;li>Games may run with lower performance&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Higher power consumption than X.org&lt;/li>
+&lt;li>Modern, updated frequently
+&lt;ul>
+&lt;li>Trending&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;p>But I still recommend you to use Wayland as long as you don&amp;rsquo;t have any problems with it.&lt;/p>
+&lt;h3 id="unboxing">Unboxing
+&lt;/h3>&lt;p>以下内容以相对稳定且简单 Ubuntu 22 作为演示。&lt;/p>
+&lt;h4 id="package-manager">Package Manager
+&lt;/h4>&lt;h5 id="whats-package-manager">Whats Package Manager
+&lt;/h5>&lt;p>包管理器用于管理 GNU/Linux 发行版的包（应用），不同于 Windows 的手动下载并安装，在 Linux 下安装 Git 只用输入一条命令。&lt;/p>
+&lt;p>可以通过类比的方式理解包管理器和包：&lt;/p>
+&lt;blockquote>
+&lt;p>左右两项不等价&lt;/p>
+&lt;/blockquote>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th style="text-align:center">Windows&lt;/th>
+&lt;th style="text-align:center">Linux&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td style="text-align:center">应用商店&lt;/td>
+&lt;td style="text-align:center">包管理器&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:center">App&lt;/td>
+&lt;td style="text-align:center">包&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>大多数 Linux 发行版都有自己的包管理器：&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th style="text-align:center">Debian&lt;/th>
+&lt;th style="text-align:center">RPM&lt;/th>
+&lt;th style="text-align:center">Pacman&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td style="text-align:center">apt, dpkg&lt;/td>
+&lt;td style="text-align:center">yum, rpm&lt;/td>
+&lt;td style="text-align:center">pacman&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>Ubuntu 的包管理器是 &lt;code>apt&lt;/code> 和 &lt;code>dpkg&lt;/code>，其中 apt 用于安装云端软件源的包，dpkg 则用于安装本地包。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">apt --version
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># output: apt 2.4.12 (amd64)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h5 id="usage">Usage
+&lt;/h5>&lt;p>如果遇到了网络问题，请跳转下方 Mirror。&lt;/p>
+&lt;ol>
+&lt;li>更新软件包列表&lt;/li>
+&lt;/ol>
+&lt;p>在安装包之前，一般会同步云端软件包信息，保证依赖关系的正确。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo apt update
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ol start="2">
+&lt;li>更新所有软件包&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo apt upgrade
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ol start="3">
+&lt;li>安装软件源的包&lt;/li>
+&lt;/ol>
+&lt;p>将 &lt;code>&amp;lt;name&amp;gt;&lt;/code> 换成要安装的包名，多个则以空格分隔。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo apt install &amp;lt;name&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ol start="4">
+&lt;li>安装本地 deb 包&lt;/li>
+&lt;/ol>
+&lt;p>安装中可能会提示依赖缺失，应使用 apt 安装缺失的依赖。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo dpkg -i /path/to/xxx.deb
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ol start="5">
+&lt;li>卸载包&lt;/li>
+&lt;/ol>
+&lt;p>将 &lt;code>&amp;lt;name&amp;gt;&lt;/code> 换成要卸载的包名，多个则以空格分隔。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo apt remove &amp;lt;name&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ol start="6">
+&lt;li>查找包&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">apt search xxx
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h5 id="mirror">Mirror
+&lt;/h5>&lt;p>在使用 apt 时提示网络错误时，可以通过换源解决。&lt;/p>
+&lt;p>修改系统重要文件前记得备份：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo cp /etc/apt/sources.list /etc/apt/sources.list.back
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">sudo vim /etc/apt/sources.list
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;blockquote>
+&lt;p>在 Ubuntu 24.04 之前，Ubuntu 的软件源配置文件使用传统的 One-Line-Style，路径为 /etc/apt/sources.list；从 Ubuntu 24.04 开始，Ubuntu 的软件源配置文件变更为 DEB822 格式，路径为 /etc/apt/sources.list.d/ubuntu.sources。
+参考 &lt;a class="link" href="https://mirrors.tuna.tsinghua.edu.cn/help/ubuntu/" target="_blank" rel="noopener"
+>https://mirrors.tuna.tsinghua.edu.cn/help/ubuntu/&lt;/a>&lt;/p>
+&lt;/blockquote>
+&lt;p>在文件的顶部加入以下行：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl"># 默认注释了源码镜像以提高 apt update 速度，如有需要可自行取消注释
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ noble main restricted universe multiverse
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"># deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ noble main restricted universe multiverse
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ noble-updates main restricted universe multiverse
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"># deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ noble-updates main restricted universe multiverse
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ noble-backports main restricted universe multiverse
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"># deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ noble-backports main restricted universe multiverse
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>最后更新软件包列表&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo apt update
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h4 id="install-common-software">Install Common Software
+&lt;/h4>&lt;h5 id="pakage-for-os-development">Pakage for OS Development
+&lt;/h5>&lt;ul>
+&lt;li>Git&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo apt update
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">sudo apt install git
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ul>
+&lt;li>VSCode&lt;/li>
+&lt;/ul>
+&lt;p>以下内容来自 &lt;a class="link" href="https://manual.caiyi1.me/get-started/vscode" target="_blank" rel="noopener"
+>manual&lt;/a>&lt;/p>
+&lt;p>实体机用户请在 Linux 下安装 VSCode：&lt;/p>
+&lt;p>手动安装：&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>从 &lt;a class="link" href="https://code.visualstudio.com" target="_blank" rel="noopener"
+>VSCode 官网&lt;/a> 下载 deb 包。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>使用 dpkg 安装。&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo dpkg -i code_xxx.deb
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>包管理器安装：&lt;/p>
+&lt;ol>
+&lt;li>添加源。&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo apt-get install wget gpg
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">wget -qO- https://packages.microsoft.com/keys/microsoft.asc &lt;span class="p">|&lt;/span> gpg --dearmor &amp;gt; packages.microsoft.gpg
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">sudo install -D -o root -g root -m &lt;span class="m">644&lt;/span> packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">echo&lt;/span> &lt;span class="s2">&amp;#34;deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main&amp;#34;&lt;/span> &lt;span class="p">|&lt;/span>sudo tee /etc/apt/sources.list.d/vscode.list &amp;gt; /dev/null
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">rm -f packages.microsoft.gpg
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ol start="2">
+&lt;li>安装。&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo apt install apt-transport-https
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">sudo apt update
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">sudo apt install code &lt;span class="c1"># or code-insiders&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ul>
+&lt;li>Rust&lt;/li>
+&lt;/ul>
+&lt;p>以下内容源自 &lt;a class="link" href="https://learningos.cn/rCore-Tutorial-Guide-2024S/0setup-devel-env.html" target="_blank" rel="noopener"
+>rCore-Tutorial-Guide-2024S 文档&lt;/a>&lt;/p>
+&lt;ol start="0">
+&lt;li>如果遇到网络问题&lt;/li>
+&lt;/ol>
+&lt;p>配置环境变量：&lt;/p>
+&lt;p>可以在当前终端执行（当前终端有效），或者写入 &lt;code>~/.bashrc&lt;/code>（永久，打开新的终端后）。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">&lt;span class="nb">export&lt;/span> &lt;span class="nv">RUSTUP_DIST_SERVER&lt;/span>&lt;span class="o">=&lt;/span>https://mirrors.ustc.edu.cn/rust-static
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">export&lt;/span> &lt;span class="nv">RUSTUP_UPDATE_ROOT&lt;/span>&lt;span class="o">=&lt;/span>https://mirrors.ustc.edu.cn/rust-static/rustup
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>编辑 &lt;code>~/.cargo/config&lt;/code>：&lt;/p>
+&lt;p>添加以下行：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-toml" data-lang="toml">&lt;span class="line">&lt;span class="cl">&lt;span class="p">[&lt;/span>&lt;span class="nx">source&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">crates-io&lt;/span>&lt;span class="p">]&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nx">replace-with&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="s1">&amp;#39;ustc&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">[&lt;/span>&lt;span class="nx">source&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">ustc&lt;/span>&lt;span class="p">]&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nx">registry&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="s2">&amp;#34;sparse+https://mirrors.ustc.edu.cn/crates.io-index/&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ol>
+&lt;li>安装 rustup&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">curl --proto &lt;span class="s1">&amp;#39;=https&amp;#39;&lt;/span> --tlsv1.2 -sSf https://sh.rustup.rs &lt;span class="p">|&lt;/span> sh
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ul>
+&lt;li>QEMU&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 安装依赖&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">sudo apt install autoconf automake autotools-dev curl libmpc-dev libmpfr-dev libgmp-dev &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> gawk build-essential bison flex texinfo gperf libtool patchutils bc &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> zlib1g-dev libexpat-dev pkg-config libglib2.0-dev libpixman-1-dev git tmux python3
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 下载 QEMU 源码&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">wget https://download.qemu.org/qemu-7.0.0.tar.xz
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 解压&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">tar xvJf qemu-7.0.0.tar.xz
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 进入子目录&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">cd&lt;/span> qemu-7.0.0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 编译安装并配置 RISC-V 支持&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">./configure --target-list&lt;span class="o">=&lt;/span>riscv64-softmmu,riscv64-linux-user
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">make -j&lt;span class="k">$(&lt;/span>nproc&lt;span class="k">)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h5 id="awesome-tools">Awesome Tools
+&lt;/h5>&lt;p>为了提高开发效率，推荐部分小工具。&lt;/p>
+&lt;ol>
+&lt;li>CLI tools&lt;/li>
+&lt;/ol>
+&lt;ul>
+&lt;li>
+&lt;p>ranger: 文件管理器&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>bat: 文件查看器，更好的 &lt;code>less&lt;/code>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>tmux: 终端复用器&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>lazygit: &lt;code>git&lt;/code> TUI 管理工具&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>eza: 有色彩和图标的 &lt;code>ls&lt;/code>&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="command-line">Command Line
+&lt;/h3>&lt;h4 id="foreword">Foreword
+&lt;/h4>&lt;p>Shell 是一个解释器，它接受用户输入的命令，然后&lt;strong>调用相应的应用程序或内建命令函数&lt;/strong>。&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>Windows&lt;/p>
+&lt;ul>
+&lt;li>PowerShell - fairly good, but lack customization. Slow, for still using .NET Framework(capability reasons, but can be replaced by .NET)
+&lt;ul>
+&lt;li>Update to PowerShell 7, which is cross-platform&lt;/li>
+&lt;li>&lt;a class="link" href="https://aka.ms/PSWindows" target="_blank" rel="noopener"
+>https://aka.ms/PSWindows&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>CMD&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>Unix-like (inclue Linux, MacOS, FreeBSD&amp;hellip;)&lt;/p>
+&lt;ul>
+&lt;li>Bash - default, but MUCH better than Windows'&lt;/li>
+&lt;li>Zsh - most popular, maybe hard to configure&lt;/li>
+&lt;li>Fish - easy to use, but not recommended for scripting&lt;/li>
+&lt;li>&amp;hellip; like sh, dash&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;p>对于 Unix, 各种 Shell 的语法大致相同，内建命令大多数与 Bash 相同。甚至 Windows 的 PowerShell 也开始为某些 Bash 的内建命令通过 alias 提供支持。&lt;/p>
+&lt;p>Fish 是一个很好的 Shell，但是不适合用于编写脚本，因为它的语法和其他 Shell 不同。因此建议大家使用 Bash 或者 Zsh。如果你想配置一个好看并且功能强大的 Shell，可以尝试使用 Zsh。&lt;/p>
+&lt;p>Detailed instructions: &lt;a class="link" href="https://manual.caiyi1.me/use-git/hug-cli/" target="_blank" rel="noopener"
+>manual.caiyi1.me&lt;/a>&lt;/p>
+&lt;h4 id="shell-script">Shell script
+&lt;/h4>&lt;p>Shell 脚本是一种文本文件，其中包含了一系列的命令（和我们在 shell 前端中输入的一样）。Shell 会按照脚本中的命令顺序执行。&lt;/p>
+&lt;p>下面尝试把你输入过的命令写入一个脚本文件，然后执行这个脚本文件。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">&lt;span class="nb">pwd&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">echo&lt;/span> &lt;span class="s2">&amp;#34;----------------&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ls
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>执行时，如果使用&lt;code>./script.sh&lt;/code>执行，需要给予执行权限，使用&lt;code>chmod +x script.sh&lt;/code>。如果调用 shell 执行，例如&lt;code>bash script.sh&lt;/code>，则不需要给予执行权限。&lt;/p>
+&lt;p>执行 shell 脚本时，会新开一个 shell 进程执行脚本，因此脚本中的变量不会影响到当前 shell。&lt;/p>
+&lt;p>脚本的工作目录与执行脚本的 shell 的工作目录相同。不是脚本文件的目录。&lt;/p>
+&lt;h3 id="additional-linux-installation-guide">Additional: Linux Installation Guide
+&lt;/h3>&lt;h4 id="wsl2">WSL2
+&lt;/h4>&lt;p>Boot up your Windows, enter Microsoft Store, search for &amp;ldquo;WSL&amp;rdquo;, select an distro and install it.&lt;/p>
+&lt;p>Ubuntu is recommended for beginners as it has official support.&lt;/p>
+&lt;p>After installation, you can open it from Start Menu or Windows Terminal.&lt;/p>
+&lt;p>The first time you uses it, you have to set up a username and password, not asking for your windows&amp;rsquo;s password.&lt;/p>
+&lt;h4 id="physical-machine">Physical Machine
+&lt;/h4>&lt;p>Partition your disk in Windows. You have to create at least two partitions, one for Boot volume, one for Root(Where the system files are stored).&lt;/p>
+&lt;p>The Boot volume should be at least 1GB, and the Root volume should be at least 50GB.&lt;/p>
+&lt;p>Download a distro&amp;rsquo;s ISO file from its official website, and flash it to a USB drive to make a bootable drive.&lt;/p>
+&lt;p>Reboot your computer to BIOS/UEFI, and boot from the USB drive.&lt;/p>
+&lt;p>Choose manual partitioning if you don&amp;rsquo;t want to lose your data and Windows.&lt;/p>
+&lt;p>Assign the Boot volume to &lt;code>/boot&lt;/code>, and the Root volume to &lt;code>/&lt;/code>.&lt;/p>
+&lt;p>Choose the boot volume to be formatted as FAT32, and the root volume to be formatted as ext4 or Btrfs.&lt;/p>
+&lt;p>After installation, you can shutdown your computer and unplug the USB drive.&lt;/p>
+&lt;h5 id="must-read">##MUST READ##
+&lt;/h5>&lt;p>You may lose the ability to boot into Windows, as the bootloader is replaced by the Linux bootloader.&lt;/p>
+&lt;p>You can either select the system to boot in the BIOS/UEFI, or use a bootloader like GRUB/rEFInd.&lt;/p>
+&lt;p>Note that GRUB can NOT detect bootable devices at runtime while rEFInd can.&lt;/p>
+&lt;h4 id="virtual-machine">Virtual Machine
+&lt;/h4>&lt;p>Download a distro&amp;rsquo;s ISO file from its official website, and create a new VM in your VM software. Assign at least 50GB of disk space and 4GB of RAM.&lt;/p>
+&lt;p>Mount the ISO file to the VM, and boot from it.&lt;/p>
+&lt;p>Install the system following the instructions along the way.&lt;/p>
+&lt;p>You can choose &amp;ldquo;Clean Install&amp;rdquo; since we don&amp;rsquo;t have any data to lose.&lt;/p>
+&lt;p>After installation, you can shutdown the VM and unmount the ISO file. Then you can boot into the system.&lt;/p></description></item><item><title>Verilog 基础知识</title><link>https://loongson-neuq.pages.dev/p/verilog-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/</link><pubDate>Sat, 19 Oct 2024 00:00:00 +0000</pubDate><guid>https://loongson-neuq.pages.dev/p/verilog-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/</guid><description>&lt;h2 id="基础知识">基础知识
+&lt;/h2>&lt;p>&lt;strong>1 模块(Module)&lt;/strong>&lt;/p>
+&lt;p>​Verilog中的module可以看成一个具有输入输出端口的黑盒子，该黑盒子有输入和输出接口(信号)，通过把输入在盒子中执行某些操作来实现某项功能。(类似于C语言中的函数)&lt;/p>
+&lt;p>&lt;img src="https://loongson-neuq.pages.dev/p/verilog-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/assets/module.png"
+width="996"
+height="468"
+srcset="https://loongson-neuq.pages.dev/p/verilog-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/assets/module_huf162340d60312438ca10b5bb1786ae94_83604_480x0_resize_box_3.png 480w, https://loongson-neuq.pages.dev/p/verilog-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/assets/module_huf162340d60312438ca10b5bb1786ae94_83604_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="img"
+class="gallery-image"
+data-flex-grow="212"
+data-flex-basis="510px"
+>&lt;/p>
+&lt;p>&lt;strong>1.1 模块描述&lt;/strong>&lt;/p>
+&lt;p>顶层模块(top_module)结构用Verilog语言可描述为：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;span class="lnt">8
+&lt;/span>&lt;span class="lnt">9
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-verilog" data-lang="verilog">&lt;span class="line">&lt;span class="cl">&lt;span class="k">module&lt;/span> &lt;span class="n">top_module&lt;/span>&lt;span class="p">(&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">input&lt;/span> &lt;span class="n">a&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">input&lt;/span> &lt;span class="n">b&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">output&lt;/span> &lt;span class="n">out&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">......&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">endmodule&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ul>
+&lt;li>模块以module 开始，endmodule结束&lt;/li>
+&lt;li>top_module 为模块名&lt;/li>
+&lt;li>input : 为输入端口&lt;/li>
+&lt;li>output:  为输出端口&lt;/li>
+&lt;li>&lt;strong>所有代码必须处于module模块中！&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;p>同理，次级模块(mod_a)结构用Verilog语言可描述为：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;span class="lnt">8
+&lt;/span>&lt;span class="lnt">9
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-verilog" data-lang="verilog">&lt;span class="line">&lt;span class="cl">&lt;span class="k">module&lt;/span> &lt;span class="n">mod_a&lt;/span>&lt;span class="p">(&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">input&lt;/span> &lt;span class="n">in1&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">input&lt;/span> &lt;span class="n">in2&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">output&lt;/span> &lt;span class="n">out&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">......&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">endmodule&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;strong>注意事项：每个模应单独块处于一个.v文件中，模块名即为文件名(规范代码！)&lt;/strong>&lt;/p>
+&lt;p>&lt;strong>1.2  模块输入输出信号&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>输出：output&lt;/li>
+&lt;li>输入：input&lt;/li>
+&lt;/ul>
+&lt;p>模块的输入输出端口都可看出模块的信号，若不写信号类型则默认为wire类型信号！&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-verilog" data-lang="verilog">&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 以下两个语句本质是一致的
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="k">input&lt;/span> &lt;span class="n">a&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">input&lt;/span> &lt;span class="kt">wire&lt;/span> &lt;span class="n">a&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>除了wire型信号，还有reg型信号，具体详见1.4节！&lt;/p>
+&lt;p>&lt;strong>1.3 模块实例化&lt;/strong>&lt;/p>
+&lt;p>如图1所示，top_module的两个输入端口连接到次级模块(mod_a)的输入端口，那如何在top_module模块模块中使用mod_a模块的功能呢？这就需要通过模块实例化，可以把top_module看成C语言中的主函数，次级模块mod_a看成普通函数，这样就可以在主函数中调用其他函数来完成相应的功能！&lt;/p>
+&lt;p>在top_module中实例化mod_a的方式为：&lt;/p>
+&lt;p>&lt;strong>模块实例化语法：模块名 实例名(定义连接port的信号);&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;span class="lnt">8
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-verilog" data-lang="verilog">&lt;span class="line">&lt;span class="cl">&lt;span class="k">module&lt;/span> &lt;span class="n">top_module&lt;/span>&lt;span class="p">(&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">input&lt;/span> &lt;span class="n">a&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">input&lt;/span> &lt;span class="n">b&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">output&lt;/span> &lt;span class="n">out&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">mod_a&lt;/span> &lt;span class="n">instance1&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">a&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">b&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">out&lt;/span>&lt;span class="p">);&lt;/span> &lt;span class="c1">// 按mod_a定义的端口顺序实例化
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="n">mod_a&lt;/span> &lt;span class="n">instance2&lt;/span> &lt;span class="p">(.&lt;/span>&lt;span class="n">in1&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">a&lt;/span>&lt;span class="p">),&lt;/span> &lt;span class="p">.&lt;/span>&lt;span class="n">in2&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">b&lt;/span>&lt;span class="p">),&lt;/span> &lt;span class="p">.&lt;/span>&lt;span class="n">out&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">out&lt;/span>&lt;span class="p">));&lt;/span> &lt;span class="c1">// 按mod_a端口名实例化(推荐此种写法)
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;strong>2  逻辑块(always、generate)&lt;/strong>&lt;/p>
+&lt;p>&lt;strong>2.1 always逻辑块&lt;/strong>&lt;/p>
+&lt;p>always块可构建 &lt;em>组合逻辑块&lt;/em> 和 &lt;em>时序逻辑块&lt;/em>，复杂的逻辑操作都需要处于该逻辑块中，如if、case、for等&lt;/p>
+&lt;p>(1) 组合逻辑块&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-verilog" data-lang="verilog">&lt;span class="line">&lt;span class="cl">&lt;span class="k">module&lt;/span> &lt;span class="n">top_module&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">always&lt;/span> &lt;span class="p">@(&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="k">begin&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">......&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">endmodule&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ul>
+&lt;li>always逻辑块中任意信号变化时立即触发，执行begin - end之间的语句&lt;/li>
+&lt;li>begin - end用于将多条语句组成一个代码块，只有一条语句时可省略&lt;/li>
+&lt;/ul>
+&lt;p>(2) 时序逻辑电路&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-verilog" data-lang="verilog">&lt;span class="line">&lt;span class="cl">&lt;span class="k">module&lt;/span> &lt;span class="n">top_module&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">always&lt;/span> &lt;span class="p">@(&lt;/span>&lt;span class="k">posedge&lt;/span> &lt;span class="n">clk&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="k">begin&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">......&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">endmodule&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ul>
+&lt;li>clk 信号的上升沿触发&lt;/li>
+&lt;li>posedge: 上升沿&lt;/li>
+&lt;li>negedge: 下降沿&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>2.2 generate逻辑块&lt;/strong>&lt;/p>
+&lt;p>generate主要结合for循环使用，主要用途有：&lt;/p>
+&lt;ul>
+&lt;li>对向量中的多个位进行重复操作&lt;/li>
+&lt;li>对同一个模块进行多次重复实例化(主要用途)&lt;/li>
+&lt;/ul>
+&lt;p>(1) 操作向量&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;span class="lnt">8
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-verilog" data-lang="verilog">&lt;span class="line">&lt;span class="cl">&lt;span class="k">module&lt;/span> &lt;span class="n">top_module&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="k">input&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="mh">7&lt;/span>&lt;span class="o">:&lt;/span>&lt;span class="mh">0&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="n">in&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="k">output&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="mh">7&lt;/span>&lt;span class="o">:&lt;/span>&lt;span class="mh">0&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="n">out&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">genvar&lt;/span> &lt;span class="n">i&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="c1">// genvar i;也可以定义在generate内部
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="k">generate&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">i&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mh">0&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="o">&amp;lt;&lt;/span> &lt;span class="mh">8&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="mh">1&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="k">begin&lt;/span> &lt;span class="c1">// verilog中for循环不支持i++
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="k">assign&lt;/span> &lt;span class="n">out&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="o">^&lt;/span>&lt;span class="n">in&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mh">7&lt;/span>&lt;span class="o">:&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="p">];&lt;/span> &lt;span class="c1">// ^:异或运算符
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="k">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">endgenerate&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">endmodule&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>(2) 模块重复多次实例化&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-verilog" data-lang="verilog">&lt;span class="line">&lt;span class="cl">&lt;span class="k">module&lt;/span> &lt;span class="n">top_module&lt;/span>&lt;span class="p">(&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">input&lt;/span> &lt;span class="n">a&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">input&lt;/span> &lt;span class="n">b&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">output&lt;/span> &lt;span class="n">out&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">genvar&lt;/span> &lt;span class="n">i&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">generate&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">i&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mh">0&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="o">&amp;lt;&lt;/span> &lt;span class="mh">8&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="mh">1&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="k">begin&lt;/span> &lt;span class="o">:&lt;/span> &lt;span class="n">gen_mod_a&lt;/span> &lt;span class="c1">// gen_mod_a为每个begin_end结构的名称
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="n">mod_a&lt;/span> &lt;span class="n">instance2&lt;/span> &lt;span class="p">(.&lt;/span>&lt;span class="n">in1&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">a&lt;/span>&lt;span class="p">),&lt;/span> &lt;span class="p">.&lt;/span>&lt;span class="n">in2&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">b&lt;/span>&lt;span class="p">),&lt;/span> &lt;span class="p">.&lt;/span>&lt;span class="n">out&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">out&lt;/span>&lt;span class="p">));&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">endgenerate&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">endmodule&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ul>
+&lt;li>注意：模块多次实例化时必须写每个begin_end结构的名称(gen_mod_a)&lt;/li>
+&lt;li>仿真器会通过gen_mod_a来标识生成结构: gen_mod_a[0],gen_mod_a[1]&amp;hellip;.&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>2.3 initial块&lt;/strong> &lt;/p>
+&lt;p>initial块可以理解为一个初始化块，在initial的起始位置的语句在0时刻即开始执行，之后如果遇到延时，则延时之后执行接下来的语句。&lt;/p>
+&lt;p>初始块是&lt;strong>不可综合&lt;/strong>的，因此不能将其转化为带有数字元素的硬件原理图。因此初始块除了在仿真中使用外，并没有太大的作用。&lt;/p>
+&lt;p>如:在仿真文件中初始化各种参数：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-verilog" data-lang="verilog">&lt;span class="line">&lt;span class="cl">&lt;span class="k">initial&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">begin&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">sys_clk&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mh">1&lt;/span>&lt;span class="mb">&amp;#39;b1&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">sys_rst_n&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mh">1&lt;/span>&lt;span class="mb">&amp;#39;b0&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">#&lt;/span>&lt;span class="mh">50&lt;/span> &lt;span class="c1">// #n 代表延时n个时间单位
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="n">sys_rst_n&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mh">1&lt;/span>&lt;span class="mb">&amp;#39;b1&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">end&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>注意：&lt;/p>
+&lt;ul>
+&lt;li>initial 块在电路中不可综合，故一般不出现在RTL代码中&lt;/li>
+&lt;li>initial 一般只在仿真文件中使用&lt;/li>
+&lt;/ul>
+&lt;p>若需要在RTL代码中初始化参数，需要用always块，用initial块会导致错误！&lt;/p>
+&lt;p>如下所示，在RTL代码中初始化存储器的方式为：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-verilog" data-lang="verilog">&lt;span class="line">&lt;span class="cl">&lt;span class="kt">reg&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="mh">255&lt;/span>&lt;span class="o">:&lt;/span>&lt;span class="mh">0&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="n">char_data&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mh">4&lt;/span>&lt;span class="o">:&lt;/span>&lt;span class="mh">0&lt;/span>&lt;span class="p">];&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">always&lt;/span> &lt;span class="p">@&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="k">posedge&lt;/span> &lt;span class="n">clk&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">begin&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">char_data&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mh">0&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="o">&amp;lt;=&lt;/span> &lt;span class="mh">256&amp;#39;h0000000000000000000000000000000000000000000000000000000000000000&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">char_data&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mh">1&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="o">&amp;lt;=&lt;/span> &lt;span class="mh">256&amp;#39;h0000000000000000000000000000000000000000000000000000000000000000&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">char_data&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mh">2&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="o">&amp;lt;=&lt;/span> &lt;span class="mh">256&amp;#39;h0000000000000000000000000000000000000000000000000000000000000000&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">char_data&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mh">3&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="o">&amp;lt;=&lt;/span> &lt;span class="mh">256&amp;#39;h0000000000000000000000000000000000000000000000000000000000000000&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">char_data&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mh">4&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="o">&amp;lt;=&lt;/span> &lt;span class="mh">256&amp;#39;h0000000000000000000000000000000000000000000000000000000000000000&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">end&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;strong>3  赋值方式&lt;/strong>&lt;/p>
+&lt;p>Verilog 中赋值方式有三种：连续赋值、阻塞赋值、非阻塞赋值&lt;/p>
+&lt;p>&lt;strong>3.1 连续赋值(assign)&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-verilog" data-lang="verilog">&lt;span class="line">&lt;span class="cl">&lt;span class="k">assign&lt;/span> &lt;span class="n">x&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">y&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ul>
+&lt;li>该语句表示把x和y两个信号进行连接，真实的物理连接！&lt;/li>
+&lt;li>&lt;strong>不能在always块中使用&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>3.2 阻塞赋值(=)&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-verilog" data-lang="verilog">&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 组合块
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="k">always&lt;/span> &lt;span class="p">@(&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="k">begin&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">out1&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">a&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">a&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">b&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">out2&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">b&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">end&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ul>
+&lt;li>&lt;strong>组合always块中用阻塞式赋值&lt;/strong>&lt;/li>
+&lt;li>执行顺序：按照begin_end语句块中的&lt;strong>顺序依次执行&lt;/strong>，上述输出结果为：out1 = a ，out2 = b&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>3.3 非阻塞赋值(&amp;lt;=)&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-verilog" data-lang="verilog">&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 时序块
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="k">always&lt;/span> &lt;span class="p">@(&lt;/span>&lt;span class="k">posedge&lt;/span> &lt;span class="n">clk&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="k">begin&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">out1&lt;/span> &lt;span class="o">&amp;lt;=&lt;/span> &lt;span class="n">a&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">a&lt;/span> &lt;span class="o">&amp;lt;=&lt;/span> &lt;span class="n">b&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">out2&lt;/span> &lt;span class="o">&amp;lt;=&lt;/span> &lt;span class="n">b&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">end&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ul>
+&lt;li>&lt;strong>时序always块中用非阻塞赋值&lt;/strong>&lt;/li>
+&lt;li>执行顺序：begin_end中所有语句&lt;strong>并行执行&lt;/strong>，上述输出结果为：out1 = a ，out2 = a&lt;/li>
+&lt;/ul>
+&lt;h2 id="基础语法">基础语法
+&lt;/h2>&lt;p>&lt;strong>1.1 标识符&lt;/strong>&lt;/p>
+&lt;p>(1) 用途：标识符用于定义常数、变量、信号、端口、参数名、模块名等。
+(2) 组成：字母、数字、$、下划线任意组合而成
+(3) 注意事项：
+- 区分大小写(Verilog 和 verilog是不同的)
+- 第一个字符只能是字母或下划线(123demo 是非法标识符)&lt;/p>
+&lt;p>&lt;strong>1.2 逻辑值与逻辑运算&lt;/strong>        &lt;/p>
+&lt;p>&lt;strong>1.2.1 逻辑值&lt;/strong>&lt;/p>
+&lt;p>Verilog中有4中逻辑值：0、1、x、z&lt;/p>
+&lt;ul>
+&lt;li>0: 低电平&lt;/li>
+&lt;li>1: 高电平&lt;/li>
+&lt;li>x: 表示状态未知&lt;/li>
+&lt;li>z: 表示高阻状态&lt;/li>
+&lt;/ul>
+&lt;p>注意：这里的z、x是不区分大小写的(X、Z也可)&lt;/p>
+&lt;p>&lt;strong>1.2.2 逻辑运算&lt;/strong>&lt;/p>
+&lt;p>(1) 逻辑运算符：&amp;amp;&amp;amp;(与)、==（相等）、||（或）、!=（不等）&lt;/p>
+&lt;ul>
+&lt;li>如 m&amp;amp;&amp;amp;n  : 判断m和n是否全为真(非0即为真)，真则输出1&amp;rsquo;b1，否则输出1&amp;rsquo;b0 (4’b1010&amp;amp;4’b0101 = 1’b1)&lt;/li>
+&lt;li>最后输出结果只有1bit&lt;/li>
+&lt;/ul>
+&lt;p>(2) 按位运算符：&amp;amp;、|、~、^、~&amp;amp;、~^、~| &lt;/p>
+&lt;ul>
+&lt;li>如 m&amp;amp;n  : 是把m的每一位与n的每一位按位做与运算 (4’b1010&amp;amp;4’b0101 = 4’b0000)&lt;/li>
+&lt;li>输出结果与m/n的bit数相同&lt;/li>
+&lt;/ul>
+&lt;p>(3) 归约运算符：  &amp;amp;、|、~、^、&amp;amp;、~^、~| &lt;/p>
+&lt;ul>
+&lt;li>只有一个参量参与运算时( &amp;amp;为一元运算符),表示规约与，即向量内部进行与运算&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-verilog" data-lang="verilog">&lt;span class="line">&lt;span class="cl">&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">a&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="mh">3&lt;/span>&lt;span class="o">:&lt;/span>&lt;span class="mh">0&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="c1">// 表示a[3]&amp;amp;a[2]&amp;amp;a[1]&amp;amp;a[0] 相当于(a[3:0]==4&amp;#39;b1111)
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="o">|&lt;/span>&lt;span class="n">b&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="mh">3&lt;/span>&lt;span class="o">:&lt;/span>&lt;span class="mh">0&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="c1">// 表示b[3]|b[2]|b[1]|b[0] 相当于(b[3:0]!=4&amp;#39;b0000)
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="o">^&lt;/span>&lt;span class="n">c&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="mh">3&lt;/span>&lt;span class="o">:&lt;/span>&lt;span class="mh">0&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="c1">// 表示c[3]^c[2]^c[1]^c[0]
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ul>
+&lt;li>即(&amp;amp;4’b0101 = 0&amp;amp;1&amp;amp;0&amp;amp;1 = 1&amp;rsquo;b0 )&lt;/li>
+&lt;li>最后输出结果只有1bit&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>1.3 常量的表示方法&lt;/strong>&lt;/p>
+&lt;p>与C语言类似，常量主要有：整数型、实数型和字符串型三种&lt;/p>
+&lt;p>&lt;strong>1.3.1 用十进制整数表示整型常量&lt;/strong>&lt;/p>
+&lt;p>(1) 正数：直接写 10 表示位宽为32bit的十进制整数(系统默认)
+(2) 负数：-10需要用二进制补码表示，多了一位符号位(1 1010)
+(3) 用科学计数法表示：12.345e3   表示 12345&lt;/p>
+&lt;p>&lt;strong>1.3.2 用基数法表示整数型常量&lt;/strong>&lt;/p>
+&lt;p>[换算成二进制数后的位宽]&amp;rsquo;&lt;em>[数制符号][与数制对应的值]&lt;/em>&lt;/p>
+&lt;p>(1)  二进制(b):     8&amp;rsquo;b1000_1100      
+(2)  十六进制(h):  8&amp;rsquo;h8c
+(3)  八进制(o):     8&amp;rsquo;o214
+(4)  十进制(d):     8&amp;rsquo;d140&lt;/p>
+&lt;p>注意事项：&lt;/p>
+&lt;ul>
+&lt;li>当表示二进制时，最好每4位写一个下划线以增强可读性：如8&amp;rsquo;b1000_1100   与8&amp;rsquo;b10001100 是一样的&lt;/li>
+&lt;li>基数表示法中遇到x时：十六进制表示4个x，八进制中表示3个x  &lt;/li>
+&lt;li>&lt;strong>当位宽大于二进制位数时左边自动补0，小于二进制数时2从左边截断！&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>1.3.3 字符串(用双引号)&lt;/strong>&lt;/p>
+&lt;p>(1) 每个字符由1个8位的ASCII码值表示，即需要1byte存储空间
+(2) 如：“Hello world”字符串由11个ASCII符号构成，需要11byte存储空间&lt;/p>
+&lt;p>&lt;strong>1.4  注释方式&lt;/strong>&lt;/p>
+&lt;p>Verilog中注释主要有行注释(//)和块注释(/*  &amp;hellip;.     */)两种，表示方法与C语言一致！&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-verilog" data-lang="verilog">&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 行注释
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm">/*
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm"> 块注释
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;strong>1.5 变量(wire、reg)&lt;/strong>&lt;/p>
+&lt;p>Verilog中的变量主要有两种：wire和reg&lt;/p>
+&lt;p>&lt;strong>1.5.1 wire&lt;/strong>&lt;/p>
+&lt;p>(1) 线网型(wire): 表示电路间的物理连接，wire定义的变量也可看成信号端口
+(2) 当两个wire信号被连续赋值时，在逻辑块中会被映射成真实的物理连线，此时这两个信号端口的变化是同步的！&lt;/p>
+&lt;p>&lt;strong>1.5.2 reg&lt;/strong>&lt;/p>
+&lt;p>(1) 寄存器型(reg): 表示一个抽象的数据存储单元
+(2) reg 具有对某一时间点状态进行保持的功能&lt;/p>
+&lt;p>&lt;strong>1.5.3 用法与注意事项&lt;/strong>&lt;/p>
+&lt;p>(1) 在always、initial语句中被赋值的变量(赋值号左边的变量)都是reg型变量
+(2) 在assign语句中被赋值的变量，为wire型变量&lt;/p>
+&lt;p>&lt;strong>1.6 向量(vector)与 参数(常量)&lt;/strong>&lt;/p>
+&lt;p>&lt;strong>1.6.1 parameter 参数(常量)&lt;/strong>&lt;/p>
+&lt;p>(1) 参数是一种常量，通常出现在module内部，常被用于定义状态、数据位宽等&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-verilog" data-lang="verilog">&lt;span class="line">&lt;span class="cl">&lt;span class="k">parameter&lt;/span> &lt;span class="n">STATE&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mh">1&lt;/span>&lt;span class="mb">&amp;#39;b0&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>(2) &lt;strong>只作用于声明的那个文件&lt;/strong>，且可以被灵活改变！
+(3) 局部参数localparam，只在本模块中使用&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-verilog" data-lang="verilog">&lt;span class="line">&lt;span class="cl">&lt;span class="k">localparam&lt;/span> &lt;span class="n">WIDTH&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mh">8&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>(4) 参数的名称一般为大写，以区分其他变量 &lt;/p>
+&lt;p>&lt;strong>1.6.2 向量(vector)&lt;/strong>&lt;/p>
+&lt;p>vector(向量)，是一组信号的集合,可视为位宽超过1bit 的 wire 信号。&lt;/p>
+&lt;p>(1) 定义方式：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-verilog" data-lang="verilog">&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 输入输出型
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="k">input&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="mh">7&lt;/span>&lt;span class="o">:&lt;/span>&lt;span class="mh">0&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="n">a&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="n">b&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">output&lt;/span> &lt;span class="kt">reg&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="mh">7&lt;/span>&lt;span class="o">:&lt;/span>&lt;span class="mh">0&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="n">out&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 模块中间向量
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="kt">wire&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="mh">7&lt;/span>&lt;span class="o">:&lt;/span>&lt;span class="mh">0&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="n">c&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="n">d&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kt">reg&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="mh">7&lt;/span>&lt;span class="o">:&lt;/span>&lt;span class="mh">0&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="n">d&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>(2) 向量的位宽定义：&lt;/p>
+&lt;ul>
+&lt;li>[upper:lower] 定义位宽，如 [7:0] 表示位宽为8 bit ，即upper=7，lower=0&lt;/li>
+&lt;li>vector_name可以一次写多个向量&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>1.6.3 向量片选&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>a[3:0]    取向量a的0~4位数据&lt;/li>
+&lt;li>b[n]      取向量b的第n位数据&lt;/li>
+&lt;li>c[-1:-2]  取向量c的最低2位数据&lt;/li>
+&lt;li>c[0:3]    取向量c的最高4位数据&lt;/li>
+&lt;/ul>
+&lt;p>多路选择器应用：实现一个 256 选 1 选择器，sel 信号作为选择信号，当 sel = 0 时选择 in[3:0]，sel = 1 时选择 in[7:4],以此类推。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-verilog" data-lang="verilog">&lt;span class="line">&lt;span class="cl">&lt;span class="k">module&lt;/span> &lt;span class="n">top_module&lt;/span> &lt;span class="p">(&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">input&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="mh">255&lt;/span>&lt;span class="o">:&lt;/span>&lt;span class="mh">0&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="n">in&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">input&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="mh">7&lt;/span>&lt;span class="o">:&lt;/span>&lt;span class="mh">0&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="n">sel&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">output&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="mh">3&lt;/span>&lt;span class="o">:&lt;/span>&lt;span class="mh">0&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="n">out&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">assign&lt;/span> &lt;span class="n">out&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="p">{&lt;/span>&lt;span class="n">in&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">sel&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="mh">4&lt;/span>&lt;span class="o">+&lt;/span>&lt;span class="mh">3&lt;/span>&lt;span class="p">],&lt;/span> &lt;span class="n">in&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">sel&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="mh">4&lt;/span>&lt;span class="o">+&lt;/span>&lt;span class="mh">2&lt;/span>&lt;span class="p">],&lt;/span> &lt;span class="n">in&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">sel&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="mh">4&lt;/span>&lt;span class="o">+&lt;/span>&lt;span class="mh">1&lt;/span>&lt;span class="p">],&lt;/span> &lt;span class="n">in&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">sel&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="mh">4&lt;/span>&lt;span class="o">+&lt;/span>&lt;span class="mh">0&lt;/span>&lt;span class="p">]};&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">// assign out = {in[sel*4 +: 4]};
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="c1">// assign out = {in[sel*4+3 -: 4]};
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="k">endmodule&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ul>
+&lt;li>片选信号sel输入为n位二进制数，当参与运算、充当索引时会自动转换成十进制数&lt;/li>
+&lt;li>该题所选取的信号片段为: in[sel*4+3: sel*4] ,但这不符合Verilog的片选语法规则故应写成：&lt;/li>
+&lt;/ul>
+&lt;p>in[sel*4 +: 4]   表示索引从sel*4开始的高4bit信号&lt;/p>
+&lt;p>in[sel*4+3 -: 4] 表示索引从sel*4+3开始的低4bit信号&lt;/p>
+&lt;ul>
+&lt;li>或是直接选出需要的每一位，再用{ }拼接成新向量：&lt;/li>
+&lt;/ul>
+&lt;p>{in[sel*4+3], in[sel*4+2], in[sel*4+1], in[sel*4+0]}&lt;/p>
+&lt;p>&lt;strong>1.7 三元表达式&lt;/strong>&lt;/p>
+&lt;p>(1) 与C语言相同，Verilog也有三元表达式：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-verilog" data-lang="verilog">&lt;span class="line">&lt;span class="cl">&lt;span class="n">condition&lt;/span> &lt;span class="o">?&lt;/span> &lt;span class="n">if_true&lt;/span> &lt;span class="o">:&lt;/span> &lt;span class="n">if_false&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>当条件为真，表达式值为if_true ，否则表达式值为if_false。&lt;/p>
+&lt;p>(2) 应用&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-verilog" data-lang="verilog">&lt;span class="line">&lt;span class="cl">&lt;span class="p">(&lt;/span>&lt;span class="n">sel&lt;/span> &lt;span class="o">?&lt;/span> &lt;span class="n">b&lt;/span> &lt;span class="o">:&lt;/span> &lt;span class="n">a&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="c1">// 一个二选一MUX，通过sel的值选择a或b
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">always&lt;/span> &lt;span class="p">@(&lt;/span>&lt;span class="k">posedge&lt;/span> &lt;span class="n">clk&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="c1">// 一个T触发器
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="n">q&lt;/span> &lt;span class="o">&amp;lt;=&lt;/span> &lt;span class="n">toggle&lt;/span> &lt;span class="o">?&lt;/span> &lt;span class="o">~&lt;/span>&lt;span class="n">q&lt;/span> &lt;span class="o">:&lt;/span> &lt;span class="n">q&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">assign&lt;/span> &lt;span class="n">out&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">ena&lt;/span> &lt;span class="o">?&lt;/span> &lt;span class="n">q&lt;/span> &lt;span class="o">:&lt;/span> &lt;span class="mh">1&lt;/span>&lt;span class="p">&amp;#39;&lt;/span>&lt;span class="n">bz&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="c1">// 三态缓冲器
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;strong>1.8 分支语句(if-else、case)&lt;/strong>&lt;/p>
+&lt;p>&lt;strong>1.8.1 if-else语句&lt;/strong>&lt;/p>
+&lt;p>(1) 最常用的形式：(优势：&lt;strong>输出的所有可能都写到，不存在未知电平输出！&lt;/strong>)&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;span class="lnt">8
+&lt;/span>&lt;span class="lnt">9
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-verilog" data-lang="verilog">&lt;span class="line">&lt;span class="cl">&lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">condition1&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="k">begin&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">......&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">else&lt;/span> &lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">condition2&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="k">begin&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">......&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">else&lt;/span> &lt;span class="k">begin&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">......&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">end&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>(2) 不建议使用if-else嵌套，会存在优先级问题，导致逻辑混乱，
+(3) 所有if-else语句都应写成(1)的形式！
+(4) 根据条件表达式依次比较，*&lt;em>存在优先级！&lt;/em> *&lt;/p>
+&lt;p>&lt;strong>1.8.2 case 语句&lt;/strong>&lt;/p>
+&lt;p>(1) 书写形式：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-verilog" data-lang="verilog">&lt;span class="line">&lt;span class="cl">&lt;span class="k">case&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="err">控制表达式&lt;/span>&lt;span class="o">&amp;gt;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">&amp;lt;&lt;/span>&lt;span class="err">分支语句&lt;/span>&lt;span class="mh">1&lt;/span>&lt;span class="o">&amp;gt;:&lt;/span> &lt;span class="k">begin&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">......&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">&amp;lt;&lt;/span>&lt;span class="err">分支语句&lt;/span>&lt;span class="mh">2&lt;/span>&lt;span class="o">&amp;gt;:&lt;/span> &lt;span class="k">begin&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">......&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">......&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">default&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="k">begin&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">......&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">endcase&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>比较&amp;lt;控制表达式&amp;gt;与&amp;lt;分支语句n&amp;gt;的取值相等则执行对应语句，否则执行default后语句！&lt;/p>
+&lt;p>(2) &lt;em>执行完某一分支语句后立即跳出case语句结构，终止case语句执行。&lt;/em>
+(3) &lt;strong>&amp;lt;分支语句n&amp;gt;的取值必须互不相同！&lt;/strong>
+(4) 以encase结束case语句块
+(5) 各分支语句间&lt;strong>不存在优先级！&lt;/strong>
+(6) 具体应用: 用case语句搭建多路选择器，（以9选1多路选择器为例）&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-verilog" data-lang="verilog">&lt;span class="line">&lt;span class="cl">&lt;span class="k">module&lt;/span> &lt;span class="n">top_module&lt;/span> &lt;span class="p">(&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">input&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="mh">15&lt;/span>&lt;span class="o">:&lt;/span>&lt;span class="mh">0&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="n">a&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="n">b&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="n">c&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="n">d&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="n">e&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="n">f&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="n">g&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="n">h&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">input&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="mh">3&lt;/span>&lt;span class="o">:&lt;/span>&lt;span class="mh">0&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="n">sel&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">output&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="mh">15&lt;/span>&lt;span class="o">:&lt;/span>&lt;span class="mh">0&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="n">out&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">always&lt;/span> &lt;span class="p">@(&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="k">begin&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">case&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">sel&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="mh">4&lt;/span>&lt;span class="mb">&amp;#39;b0000&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="n">out&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">a&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="mh">4&lt;/span>&lt;span class="mb">&amp;#39;b0001&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="n">out&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">b&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="mh">4&lt;/span>&lt;span class="mb">&amp;#39;b0010&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="n">out&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">c&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="mh">4&lt;/span>&lt;span class="mb">&amp;#39;b0011&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="n">out&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">d&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="mh">4&lt;/span>&lt;span class="mb">&amp;#39;b0100&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="n">out&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">e&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="mh">4&lt;/span>&lt;span class="mb">&amp;#39;b0101&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="n">out&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">f&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="mh">4&lt;/span>&lt;span class="mb">&amp;#39;b0110&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="n">out&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">g&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="mh">4&lt;/span>&lt;span class="mb">&amp;#39;b0111&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="n">out&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">h&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">default&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="n">out&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mh">16&amp;#39;hffff&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">endcase&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">endmodule&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;strong>1.9 for循环语句&lt;/strong>&lt;/p>
+&lt;p>(1) 书写形式：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-verilog" data-lang="verilog">&lt;span class="line">&lt;span class="cl">&lt;span class="k">integer&lt;/span> &lt;span class="n">i&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">always&lt;/span> &lt;span class="p">@(&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="k">begin&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">i&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mh">0&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="o">&amp;lt;&lt;/span> &lt;span class="mh">8&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="mh">1&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="k">begin&lt;/span> &lt;span class="o">:&lt;/span> &lt;span class="n">for_name&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">......&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">end&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ul>
+&lt;li>执行&amp;lt;循环语句&amp;gt;n次&lt;/li>
+&lt;li>for_name为每一次循环的名称&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>2   关系运算符(&amp;gt;、&amp;lt;、&amp;gt;=、&amp;lt;=)&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>运算结果为真返回 1&lt;/li>
+&lt;li>运算结果为假返回 0&lt;/li>
+&lt;li>若某个操作数值不定(x)，则返回值为 x&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>2.1  拼接运算符({ , })&lt;/strong>&lt;/p>
+&lt;p>&lt;strong>2.1.1 拼接&lt;/strong>&lt;/p>
+&lt;p>用一对花括号加逗号组成“{ , }”拼接运算符，逗号隔开的数据&lt;strong>按顺序拼接成新数据！&lt;/strong>&lt;/p>
+&lt;p>&lt;strong>2.1.2 通过拼接实现移位&lt;/strong>&lt;/p>
+&lt;p>在左边拼接实现右移，右边拼接实现左移！&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-verilog" data-lang="verilog">&lt;span class="line">&lt;span class="cl">&lt;span class="p">{&lt;/span>&lt;span class="n">a&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mh">3&lt;/span>&lt;span class="o">:&lt;/span>&lt;span class="mh">0&lt;/span>&lt;span class="p">],&lt;/span> &lt;span class="mh">4&lt;/span>&lt;span class="mb">&amp;#39;b0000&lt;/span>&lt;span class="p">}&lt;/span> &lt;span class="c1">// a[3:0]左移4位
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="p">{&lt;/span>&lt;span class="mh">4&lt;/span>&lt;span class="mb">&amp;#39;b0000&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">a&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mh">3&lt;/span>&lt;span class="o">:&lt;/span>&lt;span class="mh">0&lt;/span>&lt;span class="p">]}&lt;/span> &lt;span class="c1">// a[3:0]右移4位
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;strong>2.1.3 连接符中重复多次的操作&lt;/strong>&lt;/p>
+&lt;p>语法： {重复次数{vector}}&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-verilog" data-lang="verilog">&lt;span class="line">&lt;span class="cl">&lt;span class="p">{&lt;/span>&lt;span class="mh">4&lt;/span>&lt;span class="p">{&lt;/span>&lt;span class="n">a&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mh">3&lt;/span>&lt;span class="o">:&lt;/span>&lt;span class="mh">0&lt;/span>&lt;span class="p">]}}&lt;/span> &lt;span class="c1">// 重复4次a[3:0]
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="p">{&lt;/span>&lt;span class="mh">3&lt;/span>&lt;span class="mi">&amp;#39;d5&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mh">4&lt;/span>&lt;span class="p">{&lt;/span>&lt;span class="n">a&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mh">3&lt;/span>&lt;span class="o">:&lt;/span>&lt;span class="mh">0&lt;/span>&lt;span class="p">]}}&lt;/span> &lt;span class="c1">// 3&amp;#39;d5与a[3:0]重复4次拼接
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;strong>2.2  移位运算符&lt;/strong>&lt;/p>
+&lt;p>移位运算符用于将左边操作数左移或右移指定的位数！移位后空闲位用0填充。&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>左移运算符：&amp;laquo;
+如：4‘b1101 &amp;laquo; 3 结果为：4‘b1000&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>右移算法符: &amp;raquo;
+如：4‘b1101 &amp;raquo; 3 结果为：4‘b0001&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>移位运算符其他用途：左移一位可以看成是乘以 2，右移一位可以看成是除以 2。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>移位运算符代替乘除法可以节省资源！&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>3   二进制全加器&lt;/strong>&lt;/p>
+&lt;p>&lt;img src="https://loongson-neuq.pages.dev/p/verilog-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/assets/adder.png"
+width="307"
+height="212"
+srcset="https://loongson-neuq.pages.dev/p/verilog-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/assets/adder_hu89533cf0424ba3323edd0db86c96d53c_11547_480x0_resize_box_3.png 480w, https://loongson-neuq.pages.dev/p/verilog-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/assets/adder_hu89533cf0424ba3323edd0db86c96d53c_11547_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="img"
+class="gallery-image"
+data-flex-grow="144"
+data-flex-basis="347px"
+>&lt;/p>
+&lt;ul>
+&lt;li>a、b为输入 1bit 数据&lt;/li>
+&lt;li>cin为上一个加法器进位输入&lt;/li>
+&lt;li>cout为本加法器的进位输出&lt;/li>
+&lt;li>sum = a+b&lt;/li>
+&lt;/ul>
+$$
+\begin{array}{c}
+sum=a \wedge b \wedge cin \\
+cout=(a \&amp; b) | (a \&amp; cin) | (b \&amp; cin)
+\end{array}
+$$
+&lt;p>代码实现：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-verilog" data-lang="verilog">&lt;span class="line">&lt;span class="cl">&lt;span class="k">module&lt;/span> &lt;span class="n">full_adder&lt;/span>&lt;span class="p">(&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">input&lt;/span> &lt;span class="n">a&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">input&lt;/span> &lt;span class="n">b&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">input&lt;/span> &lt;span class="n">cin&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">output&lt;/span> &lt;span class="n">sum&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">output&lt;/span> &lt;span class="n">cout&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">assign&lt;/span> &lt;span class="n">sum&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">a&lt;/span> &lt;span class="o">^&lt;/span> &lt;span class="n">b&lt;/span> &lt;span class="o">^&lt;/span> &lt;span class="n">cin&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">assign&lt;/span> &lt;span class="n">cout&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">a&lt;/span> &lt;span class="o">&amp;amp;&lt;/span> &lt;span class="n">b&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">|&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">a&lt;/span> &lt;span class="o">&amp;amp;&lt;/span> &lt;span class="n">cin&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">|&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">b&lt;/span> &lt;span class="o">&amp;amp;&lt;/span> &lt;span class="n">cin&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">endmodule&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;strong>4  16进制全加器&lt;/strong>&lt;/p>
+&lt;p>&lt;img src="https://loongson-neuq.pages.dev/p/verilog-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/assets/adder16bit.png"
+width="562"
+height="727"
+srcset="https://loongson-neuq.pages.dev/p/verilog-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/assets/adder16bit_hu18c208ace072546113281d8f502ec621_55264_480x0_resize_box_3.png 480w, https://loongson-neuq.pages.dev/p/verilog-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/assets/adder16bit_hu18c208ace072546113281d8f502ec621_55264_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="img"
+class="gallery-image"
+data-flex-grow="77"
+data-flex-basis="185px"
+>&lt;/p>
+&lt;p>16进制全加器如上图所示，它可由上节中16个二进制全加器组合而成。&lt;/p>
+&lt;p>用Verilog实现16进制全加器代码为：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-verilog" data-lang="verilog">&lt;span class="line">&lt;span class="cl">&lt;span class="k">module&lt;/span> &lt;span class="n">adder16&lt;/span>&lt;span class="p">(&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">input&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="mh">15&lt;/span>&lt;span class="o">:&lt;/span>&lt;span class="mh">0&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="n">a&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">input&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="mh">15&lt;/span>&lt;span class="o">:&lt;/span>&lt;span class="mh">0&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="n">b&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">input&lt;/span> &lt;span class="n">cin&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">output&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="mh">15&lt;/span>&lt;span class="o">:&lt;/span>&lt;span class="mh">0&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="n">sum&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">output&lt;/span> &lt;span class="n">cout&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kt">wire&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="mh">16&lt;/span>&lt;span class="o">:&lt;/span>&lt;span class="mh">0&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="n">c&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">assign&lt;/span> &lt;span class="n">c&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mh">0&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">cin&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">genvar&lt;/span> &lt;span class="n">i&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">generate&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">i&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mh">0&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="o">&amp;lt;&lt;/span> &lt;span class="mh">16&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="mh">1&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="k">begin&lt;/span> &lt;span class="o">:&lt;/span> &lt;span class="n">gen_full_adder&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">full_adder&lt;/span> &lt;span class="n">instance1&lt;/span> &lt;span class="p">(.&lt;/span>&lt;span class="n">a&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">a&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="p">]),&lt;/span> &lt;span class="p">.&lt;/span>&lt;span class="n">b&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">b&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="p">]),&lt;/span> &lt;span class="p">.&lt;/span>&lt;span class="n">cin&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">c&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="p">]),&lt;/span> &lt;span class="p">.&lt;/span>&lt;span class="n">sum&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">sum&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="p">]),&lt;/span> &lt;span class="p">.&lt;/span>&lt;span class="n">cout&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">c&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="o">+&lt;/span>&lt;span class="mh">1&lt;/span>&lt;span class="p">]));&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">assign&lt;/span> &lt;span class="n">cout&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">c&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mh">16&lt;/span>&lt;span class="p">];&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">endmodule&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;strong>5  模块中的参数传递&lt;/strong>&lt;/p>
+&lt;p>&lt;strong>5.1 定义可传递参数的模块&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-verilog" data-lang="verilog">&lt;span class="line">&lt;span class="cl">&lt;span class="k">module&lt;/span> &lt;span class="n">counter&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 参数
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="p">#(&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">parameter&lt;/span> &lt;span class="n">COUNT_MAX&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mh">25&lt;/span>&lt;span class="mi">&amp;#39;d24&lt;/span>&lt;span class="n">_999_999&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">parameter&lt;/span> &lt;span class="n">STATE&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mh">1&lt;/span>&lt;span class="mb">&amp;#39;b0&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">(&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">input&lt;/span> &lt;span class="kt">wire&lt;/span> &lt;span class="n">sys_clk&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">output&lt;/span> &lt;span class="kt">reg&lt;/span> &lt;span class="n">led_out&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">......&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">endmodule&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;strong>5.2 带参数模块的实例化&lt;/strong>&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-verilog" data-lang="verilog">&lt;span class="line">&lt;span class="cl">&lt;span class="n">counter&lt;/span> &lt;span class="p">#(&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">.&lt;/span>&lt;span class="n">COUNT_MAX&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mh">25&lt;/span>&lt;span class="mi">&amp;#39;d24&lt;/span>&lt;span class="n">_999_999&lt;/span>&lt;span class="p">),&lt;/span> &lt;span class="c1">// 参数赋值
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="p">.&lt;/span>&lt;span class="n">STATE&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mh">1&lt;/span>&lt;span class="mb">&amp;#39;b0&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">)&lt;/span> &lt;span class="n">counter_instance&lt;/span> &lt;span class="p">(&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">.&lt;/span>&lt;span class="n">sys_clk&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">sys_clk&lt;/span>&lt;span class="p">),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">.&lt;/span>&lt;span class="n">led_out&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">led_out&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div></description></item><item><title>vivado 2023.2安装</title><link>https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/</link><pubDate>Fri, 18 Oct 2024 00:00:00 +0000</pubDate><guid>https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/</guid><description>&lt;h1 id="下载安装包">下载安装包
+&lt;/h1>&lt;ol>
+&lt;li>
+&lt;p>百度搜索vivado，找到&amp;quot;下载 - Xilinx&amp;quot;，进入vivado下载页面&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>选择2023.2版本，&lt;a class="link" href="https://china.xilinx.com/support/download/index.html/content/xilinx/zh/downloadNav/vivado-design-tools/2023-2.html" target="_blank" rel="noopener"
+>下载链接&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>下载Windows环境下的在线安装器（Windows Self Extracting Web Installer）&lt;/p>
+&lt;p>&lt;img src="https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/download.jpg"
+width="1212"
+height="1052"
+srcset="https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/download_huc070f3988e1974e8483ead4db9239c07_79606_480x0_resize_q75_box.jpg 480w, https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/download_huc070f3988e1974e8483ead4db9239c07_79606_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+alt="download"
+class="gallery-image"
+data-flex-grow="115"
+data-flex-basis="276px"
+>&lt;/p>
+&lt;ul>
+&lt;li>下载需要登陆AMD。如果已有AMD账户直接填写用户名和密码登陆，如果没有账户则点“Create account”免费创建一个新账户。&lt;/li>
+&lt;li>点击链接后会要求输入个人信息，随便填即可。&lt;/li>
+&lt;li>&lt;a class="link" href="https://pan.baidu.com/s/1xt8L6RWmHROTX-C5JzIj3A?pwd=3a6p" target="_blank" rel="noopener"
+>&lt;em>如果在线安装器下载不下来&lt;/em>&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;h1 id="在线安装">在线安装
+&lt;/h1>&lt;ol>
+&lt;li>
+&lt;p>双击运行已下载的可执行文件FPGAs_AdaptiveSoCs_Unified_2023.2_1013_2256_Win64.exe。（使用管理员权限，允许网络访问）&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>如果弹出更新窗口，点击“continue”。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>点击“Next”。&lt;/p>
+&lt;p>&lt;img src="https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/continue.jpg"
+width="1090"
+height="834"
+srcset="https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/continue_hudc9ccf3a6061c88baeb0d8a4b427aec5_81974_480x0_resize_q75_box.jpg 480w, https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/continue_hudc9ccf3a6061c88baeb0d8a4b427aec5_81974_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+alt="continue"
+class="gallery-image"
+data-flex-grow="130"
+data-flex-basis="313px"
+>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>登录下载时注册的AMD账号，点击“Next”。&lt;/p>
+&lt;p>&lt;img src="https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/login.jpg"
+width="1090"
+height="834"
+srcset="https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/login_hu062b6f8317e133346cb0306f7d09837a_77070_480x0_resize_q75_box.jpg 480w, https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/login_hu062b6f8317e133346cb0306f7d09837a_77070_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+alt="login"
+class="gallery-image"
+data-flex-grow="130"
+data-flex-basis="313px"
+>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>选择“vivado”，点击“Next”。&lt;/p>
+&lt;p>&lt;img src="https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/product.jpg"
+width="1090"
+height="834"
+srcset="https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/product_hud59b6367412afaf51bc4cfdb1ee35fb2_107739_480x0_resize_q75_box.jpg 480w, https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/product_hud59b6367412afaf51bc4cfdb1ee35fb2_107739_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+alt="product"
+class="gallery-image"
+data-flex-grow="130"
+data-flex-basis="313px"
+>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>选择免费的标准版，点击“Next”。&lt;/p>
+&lt;p>&lt;img src="https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/edition.jpg"
+width="1090"
+height="834"
+srcset="https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/edition_hu0b939661dd1d6896e46b7423f3241c97_89519_480x0_resize_q75_box.jpg 480w, https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/edition_hu0b939661dd1d6896e46b7423f3241c97_89519_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+alt="edition"
+class="gallery-image"
+data-flex-grow="130"
+data-flex-basis="313px"
+>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>在“Device”中必勾选“Artix-7”，因为开发板搭载的FPGA是Artix-7，其他器件可以根据需要进行选择，“Design Tools”和“Installation Options”按照默认即可。&lt;/p>
+&lt;p>&lt;img src="https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/device.jpg"
+width="1090"
+height="834"
+srcset="https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/device_hua6caeee0c57d2606be5a552e175ea5e2_98399_480x0_resize_q75_box.jpg 480w, https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/device_hua6caeee0c57d2606be5a552e175ea5e2_98399_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+alt="device"
+class="gallery-image"
+data-flex-grow="130"
+data-flex-basis="313px"
+>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>全部“I agree”，点击“Next”。&lt;/p>
+&lt;p>&lt;img src="https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/agree.jpg"
+width="1090"
+height="834"
+srcset="https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/agree_hu60b5f28c2f4720c4f3471589533b45b8_121250_480x0_resize_q75_box.jpg 480w, https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/agree_hu60b5f28c2f4720c4f3471589533b45b8_121250_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+alt="agree"
+class="gallery-image"
+data-flex-grow="130"
+data-flex-basis="313px"
+>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>选择Vivado安装目录，默认安装在“C:\Xilinx”下，可以点击浏览或者直接更改路径，注意&lt;strong>安装路径中不能出现中文和空格&lt;/strong>。点击“Next”。&lt;/p>
+&lt;p>&lt;img src="https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/directory.jpg"
+width="1090"
+height="834"
+srcset="https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/directory_huf9d5ccff252c347ff37ad093e9005ce8_97580_480x0_resize_q75_box.jpg 480w, https://loongson-neuq.pages.dev/p/vivado-2023.2%E5%AE%89%E8%A3%85/assets/directory_huf9d5ccff252c347ff37ad093e9005ce8_97580_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+alt="directory"
+class="gallery-image"
+data-flex-grow="130"
+data-flex-basis="313px"
+>&lt;/p>
+&lt;p>&lt;em>我由于安装过了，显示和大家不一样。&lt;/em>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>查看summary，点击“install”。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>等待安装完成。&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h1 id="问题">问题
+&lt;/h1>&lt;ul>
+&lt;li>不同版本间的编译逻辑可能有所不同，可能会导致不可预知的差异，我们建议使用比赛指定的23.2版本&lt;/li>
+&lt;li>注意安装路径&lt;strong>不要有中文和空格&lt;/strong>！包括后续项目文件路径中都&lt;strong>不能出现中文和空格！！！&lt;/strong>&lt;/li>
+&lt;li>&lt;em>如果你的用户名不幸的有中文的话，STFW改成英文的吧，不然会有更多奇奇怪怪的bug&lt;/em>&lt;/li>
+&lt;li>如果在线安装器有网络问题的话，尝试关闭魔法多试几次，实在不行使用完整的安装包选择本地安装（官网103GB的版本）。&lt;/li>
+&lt;/ul>
+&lt;h1 id="与代码编辑器的联动">与代码编辑器的联动
+&lt;/h1>&lt;ul>
+&lt;li>&lt;a class="link" href="https://blog.csdn.net/weixin_44425619/article/details/115479272" target="_blank" rel="noopener"
+>VIVADO使用vscode实现实时纠错与自动补全等功能_vivado代码自动对齐_fujiayu1997zz的博客-CSDN博客&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://zhuanlan.zhihu.com/p/341728027" target="_blank" rel="noopener"
+>Sublime与Verilog【一】：从安装到使用，提高FPGA开发效率！ - 知乎 (zhihu.com)&lt;/a>&lt;/li>
+&lt;/ul></description></item><item><title>Markdown Syntax Guide</title><link>https://loongson-neuq.pages.dev/p/markdown-syntax-guide/</link><pubDate>Thu, 07 Sep 2023 00:00:00 +0000</pubDate><guid>https://loongson-neuq.pages.dev/p/markdown-syntax-guide/</guid><description>&lt;p>This article offers a sample of basic Markdown syntax that can be used in Hugo content files, also it shows whether basic HTML elements are decorated with CSS in a Hugo theme.&lt;/p>
+&lt;h2 id="headings">Headings
+&lt;/h2>&lt;p>The following HTML &lt;code>&amp;lt;h1&amp;gt;&lt;/code>—&lt;code>&amp;lt;h6&amp;gt;&lt;/code> elements represent six levels of section headings. &lt;code>&amp;lt;h1&amp;gt;&lt;/code> is the highest section level while &lt;code>&amp;lt;h6&amp;gt;&lt;/code> is the lowest.&lt;/p>
+&lt;h1 id="h1">H1
+&lt;/h1>&lt;h2 id="h2">H2
+&lt;/h2>&lt;h3 id="h3">H3
+&lt;/h3>&lt;h4 id="h4">H4
+&lt;/h4>&lt;h5 id="h5">H5
+&lt;/h5>&lt;h6 id="h6">H6
+&lt;/h6>&lt;h2 id="paragraph">Paragraph
+&lt;/h2>&lt;p>Xerum, quo qui aut unt expliquam qui dolut labo. Aque venitatiusda cum, voluptionse latur sitiae dolessi aut parist aut dollo enim qui voluptate ma dolestendit peritin re plis aut quas inctum laceat est volestemque commosa as cus endigna tectur, offic to cor sequas etum rerum idem sintibus eiur? Quianimin porecus evelectur, cum que nis nust voloribus ratem aut omnimi, sitatur? Quiatem. Nam, omnis sum am facea corem alique molestrunt et eos evelece arcillit ut aut eos eos nus, sin conecerem erum fuga. Ri oditatquam, ad quibus unda veliamenimin cusam et facea ipsamus es exerum sitate dolores editium rerore eost, temped molorro ratiae volorro te reribus dolorer sperchicium faceata tiustia prat.&lt;/p>
+&lt;p>Itatur? Quiatae cullecum rem ent aut odis in re eossequodi nonsequ idebis ne sapicia is sinveli squiatum, core et que aut hariosam ex eat.&lt;/p>
+&lt;h2 id="blockquotes">Blockquotes
+&lt;/h2>&lt;p>The blockquote element represents content that is quoted from another source, optionally with a citation which must be within a &lt;code>footer&lt;/code> or &lt;code>cite&lt;/code> element, and optionally with in-line changes such as annotations and abbreviations.&lt;/p>
+&lt;h3 id="blockquote-without-attribution">Blockquote without attribution
+&lt;/h3>&lt;blockquote>
+&lt;p>Tiam, ad mint andaepu dandae nostion secatur sequo quae.
+&lt;strong>Note&lt;/strong> that you can use &lt;em>Markdown syntax&lt;/em> within a blockquote.&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="blockquote-with-attribution">Blockquote with attribution
+&lt;/h3>&lt;blockquote>
+&lt;p>Don&amp;rsquo;t communicate by sharing memory, share memory by communicating.&lt;br>
+— &lt;cite>Rob Pike&lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup>&lt;/cite>&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="tables">Tables
+&lt;/h2>&lt;p>Tables aren&amp;rsquo;t part of the core Markdown spec, but Hugo supports supports them out-of-the-box.&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Name&lt;/th>
+&lt;th>Age&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>Bob&lt;/td>
+&lt;td>27&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Alice&lt;/td>
+&lt;td>23&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h3 id="inline-markdown-within-tables">Inline Markdown within tables
+&lt;/h3>&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Italics&lt;/th>
+&lt;th>Bold&lt;/th>
+&lt;th>Code&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>&lt;em>italics&lt;/em>&lt;/td>
+&lt;td>&lt;strong>bold&lt;/strong>&lt;/td>
+&lt;td>&lt;code>code&lt;/code>&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>A&lt;/th>
+&lt;th>B&lt;/th>
+&lt;th>C&lt;/th>
+&lt;th>D&lt;/th>
+&lt;th>E&lt;/th>
+&lt;th>F&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>Lorem ipsum dolor sit amet, consectetur adipiscing elit.&lt;/td>
+&lt;td>Phasellus ultricies, sapien non euismod aliquam, dui ligula tincidunt odio, at accumsan nulla sapien eget ex.&lt;/td>
+&lt;td>Proin eleifend dictum ipsum, non euismod ipsum pulvinar et. Vivamus sollicitudin, quam in pulvinar aliquam, metus elit pretium purus&lt;/td>
+&lt;td>Proin sit amet velit nec enim imperdiet vehicula.&lt;/td>
+&lt;td>Ut bibendum vestibulum quam, eu egestas turpis gravida nec&lt;/td>
+&lt;td>Sed scelerisque nec turpis vel viverra. Vivamus vitae pretium sapien&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h2 id="code-blocks">Code Blocks
+&lt;/h2>&lt;h3 id="code-block-with-backticks">Code block with backticks
+&lt;/h3>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-html" data-lang="html">&lt;span class="line">&lt;span class="cl">&lt;span class="cp">&amp;lt;!doctype html&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">html&lt;/span> &lt;span class="na">lang&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s">&amp;#34;en&amp;#34;&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">head&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">meta&lt;/span> &lt;span class="na">charset&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s">&amp;#34;utf-8&amp;#34;&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">title&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>Example HTML5 Document&lt;span class="p">&amp;lt;/&lt;/span>&lt;span class="nt">title&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">&amp;lt;/&lt;/span>&lt;span class="nt">head&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">body&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">p&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>Test&lt;span class="p">&amp;lt;/&lt;/span>&lt;span class="nt">p&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">&amp;lt;/&lt;/span>&lt;span class="nt">body&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">&amp;lt;/&lt;/span>&lt;span class="nt">html&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="code-block-indented-with-four-spaces">Code block indented with four spaces
+&lt;/h3>&lt;pre>&lt;code>&amp;lt;!doctype html&amp;gt;
+&amp;lt;html lang=&amp;quot;en&amp;quot;&amp;gt;
+&amp;lt;head&amp;gt;
+&amp;lt;meta charset=&amp;quot;utf-8&amp;quot;&amp;gt;
+&amp;lt;title&amp;gt;Example HTML5 Document&amp;lt;/title&amp;gt;
+&amp;lt;/head&amp;gt;
+&amp;lt;body&amp;gt;
+&amp;lt;p&amp;gt;Test&amp;lt;/p&amp;gt;
+&amp;lt;/body&amp;gt;
+&amp;lt;/html&amp;gt;
+&lt;/code>&lt;/pre>
+&lt;h3 id="diff-code-block">Diff code block
+&lt;/h3>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-diff" data-lang="diff">&lt;span class="line">&lt;span class="cl">[dependencies.bevy]
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git = &amp;#34;https://github.com/bevyengine/bevy&amp;#34;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">rev = &amp;#34;11f52b8c72fc3a568e8bb4a4cd1f3eb025ac2e13&amp;#34;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="gd">- features = [&amp;#34;dynamic&amp;#34;]
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="gd">&lt;/span>&lt;span class="gi">+ features = [&amp;#34;jpeg&amp;#34;, &amp;#34;dynamic&amp;#34;]
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="one-line-code-block">One line code block
+&lt;/h3>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-html" data-lang="html">&lt;span class="line">&lt;span class="cl">&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">p&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>A paragraph&lt;span class="p">&amp;lt;/&lt;/span>&lt;span class="nt">p&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h2 id="list-types">List Types
+&lt;/h2>&lt;h3 id="ordered-list">Ordered List
+&lt;/h3>&lt;ol>
+&lt;li>First item&lt;/li>
+&lt;li>Second item&lt;/li>
+&lt;li>Third item&lt;/li>
+&lt;/ol>
+&lt;h3 id="unordered-list">Unordered List
+&lt;/h3>&lt;ul>
+&lt;li>List item&lt;/li>
+&lt;li>Another item&lt;/li>
+&lt;li>And another item&lt;/li>
+&lt;/ul>
+&lt;h3 id="nested-list">Nested list
+&lt;/h3>&lt;ul>
+&lt;li>Fruit
+&lt;ul>
+&lt;li>Apple&lt;/li>
+&lt;li>Orange&lt;/li>
+&lt;li>Banana&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Dairy
+&lt;ul>
+&lt;li>Milk&lt;/li>
+&lt;li>Cheese&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="other-elements--abbr-sub-sup-kbd-mark">Other Elements — abbr, sub, sup, kbd, mark
+&lt;/h2>&lt;p>&lt;abbr title="Graphics Interchange Format">GIF&lt;/abbr> is a bitmap image format.&lt;/p>
+&lt;p>H&lt;sub>2&lt;/sub>O&lt;/p>
+&lt;p>X&lt;sup>n&lt;/sup> + Y&lt;sup>n&lt;/sup> = Z&lt;sup>n&lt;/sup>&lt;/p>
+&lt;p>Press &lt;kbd>CTRL&lt;/kbd> + &lt;kbd>ALT&lt;/kbd> + &lt;kbd>Delete&lt;/kbd> to end the session.&lt;/p>
+&lt;p>Most &lt;mark>salamanders&lt;/mark> are nocturnal, and hunt for insects, worms, and other small creatures.&lt;/p>
+&lt;div class="footnotes" role="doc-endnotes">
+&lt;hr>
+&lt;ol>
+&lt;li id="fn:1">
+&lt;p>The above quote is excerpted from Rob Pike&amp;rsquo;s &lt;a class="link" href="https://www.youtube.com/watch?v=PAAkCSZUG1c" target="_blank" rel="noopener"
+>talk&lt;/a> during Gopherfest, November 18, 2015.&amp;#160;&lt;a href="#fnref:1" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;/div></description></item><item><title>Hugo's markdown extension usages</title><link>https://loongson-neuq.pages.dev/p/hugos-markdown-extension-usages/</link><pubDate>Thu, 24 Aug 2023 00:00:00 +0000</pubDate><guid>https://loongson-neuq.pages.dev/p/hugos-markdown-extension-usages/</guid><description>&lt;h2 id="math-typesetting">Math Typesetting
+&lt;/h2>&lt;p>Stack has built-in support for math typesetting using &lt;a class="link" href="https://katex.org/" target="_blank" rel="noopener"
+>KaTeX&lt;/a>.&lt;/p>
+&lt;p>&lt;strong>It&amp;rsquo;s not enabled by default side-wide,&lt;/strong> but you can enable it for individual posts by adding &lt;code>math: true&lt;/code> to the front matter. Or you can enable it side-wide by adding &lt;code>math = true&lt;/code> to the &lt;code>params.article&lt;/code> section in &lt;code>config.toml&lt;/code>.&lt;/p>
+&lt;h3 id="inline-math">Inline math
+&lt;/h3>&lt;p>This is an inline mathematical expression: $\varphi = \dfrac{1+\sqrt5}{2}= 1.6180339887…$&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-markdown" data-lang="markdown">&lt;span class="line">&lt;span class="cl">$\varphi = \dfrac{1+\sqrt5}{2}= 1.6180339887…$
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="block-math">Block math
+&lt;/h3>$$
+\varphi = 1+\frac{1} {1+\frac{1} {1+\frac{1} {1+\cdots} } }
+$$
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-markdown" data-lang="markdown">&lt;span class="line">&lt;span class="cl">$$
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> \varphi = 1+\frac{1} {1+\frac{1} {1+\frac{1} {1+\cdots} } }
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">$$
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>$$
+f(x) = \int_{-\infty}^\infty\hat f(\xi)\,e^{2 \pi i \xi x}\,d\xi
+$$
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-markdown" data-lang="markdown">&lt;span class="line">&lt;span class="cl">$$
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> f(x) = \int_{-\infty}^\infty\hat f(\xi)\,e^{2 \pi i \xi x}\,d\xi
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">$$
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h2 id="inline-shortcodes">Inline Shortcodes
+&lt;/h2>&lt;p>For more details, check out the &lt;a class="link" href="https://stack.jimmycai.com/writing/shortcodes" target="_blank" rel="noopener"
+>documentation&lt;/a>.&lt;/p>
+&lt;h3 id="bilibili-video">Bilibili video
+&lt;/h3>
+&lt;div class="video-wrapper">
+&lt;iframe src="https://player.bilibili.com/player.html?as_wide=1&amp;amp;high_quality=1&amp;amp;page=1&amp;bvid=BV1d4411N7zD"
+scrolling="no"
+frameborder="no"
+framespacing="0"
+allowfullscreen="true"
+>
+&lt;/iframe>
+&lt;/div>
+&lt;h3 id="tencent-video">Tencent video
+&lt;/h3>
+&lt;div class="video-wrapper">
+&lt;iframe src="https://v.qq.com/txp/iframe/player.html?vid=g0014r3khdw&amp;auto=0"
+scrolling="no"
+frameborder="no"
+framespacing="0"
+allowfullscreen="true"
+>
+&lt;/iframe>
+&lt;/div>
+&lt;h3 id="youtube-video">YouTube video
+&lt;/h3>&lt;div class="video-wrapper">
+&lt;iframe loading="lazy"
+src="https://www.youtube.com/embed/0qwALOOvUik"
+allowfullscreen
+title="YouTube Video"
+>
+&lt;/iframe>
+&lt;/div>
+&lt;h3 id="generic-video-file">Generic video file
+&lt;/h3>&lt;div class="video-wrapper">
+&lt;video
+controls
+src="https://www.w3schools.com/tags/movie.mp4"
+>
+&lt;p>
+Your browser doesn't support HTML5 video. Here is a
+&lt;a href="https://www.w3schools.com/tags/movie.mp4">link to the video&lt;/a> instead.
+&lt;/p>
+&lt;/video>
+&lt;/div>
+&lt;h3 id="gist">Gist
+&lt;/h3>&lt;script src="https://gist.github.com/CaiJimmy/e2751a943de10b2a5b3a8a6c2120cb86.js">&lt;/script>
+&lt;h5 id="gitlab">GitLab
+&lt;/h5>&lt;script
+type="application/javascript"
+src="https://gitlab.com/-/snippets/2589724.js"
+>&lt;/script>
+&lt;h3 id="quote">Quote
+&lt;/h3>&lt;blockquote>
+&lt;p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.&lt;/p>&lt;span class="cite">&lt;span>― &lt;/span>&lt;span>A famous person, &lt;/span>&lt;a href="https://en.wikipedia.org/wiki/Book">&lt;cite>The book they wrote&lt;/cite>&lt;/a>&lt;/span>&lt;/blockquote>
+&lt;hr>
+&lt;blockquote>
+&lt;p>Photo by &lt;a class="link" href="https://unsplash.com/@codioful" target="_blank" rel="noopener"
+>Codioful&lt;/a> on &lt;a class="link" href="https://unsplash.com/photos/WDSN62Qdxuk" target="_blank" rel="noopener"
+>Unsplash&lt;/a>&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="image-gallery">Image gallery
+&lt;/h2>&lt;p>Hugo theme Stack supports the creation of interactive image galleries using Markdown. It&amp;rsquo;s powered by &lt;a class="link" href="https://photoswipe.com/" target="_blank" rel="noopener"
+>PhotoSwipe&lt;/a> and its syntax was inspired by &lt;a class="link" href="https://typlog.com/" target="_blank" rel="noopener"
+>Typlog&lt;/a>.&lt;/p>
+&lt;p>To use this feature, the image must be in the same directory as the Markdown file, as it uses Hugo&amp;rsquo;s page bundle feature to read the dimensions of the image. &lt;strong>External images are not supported.&lt;/strong>&lt;/p>
+&lt;h3 id="syntax">Syntax
+&lt;/h3>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-markdown" data-lang="markdown">&lt;span class="line">&lt;span class="cl">![&lt;span class="nt">Image 1&lt;/span>](&lt;span class="na">1.jpg&lt;/span>) ![&lt;span class="nt">Image 2&lt;/span>](&lt;span class="na">2.jpg&lt;/span>)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="result">Result
+&lt;/h3>&lt;p>&lt;img src="https://loongson-neuq.pages.dev/p/hugos-markdown-extension-usages/1.jpg"
+width="2000"
+height="1400"
+srcset="https://loongson-neuq.pages.dev/p/hugos-markdown-extension-usages/1_hudd2e8259c20ed0dcaa856c253552e90f_14625_480x0_resize_q75_box.jpg 480w, https://loongson-neuq.pages.dev/p/hugos-markdown-extension-usages/1_hudd2e8259c20ed0dcaa856c253552e90f_14625_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+alt="Image 1"
+class="gallery-image"
+data-flex-grow="142"
+data-flex-basis="342px"
+> &lt;img src="https://loongson-neuq.pages.dev/p/hugos-markdown-extension-usages/2.jpg"
+width="1500"
+height="2250"
+srcset="https://loongson-neuq.pages.dev/p/hugos-markdown-extension-usages/2_hubce42636ecacc1a380b462f3110efcec_37455_480x0_resize_q75_box.jpg 480w, https://loongson-neuq.pages.dev/p/hugos-markdown-extension-usages/2_hubce42636ecacc1a380b462f3110efcec_37455_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+alt="Image 2"
+class="gallery-image"
+data-flex-grow="66"
+data-flex-basis="160px"
+>&lt;/p>
+&lt;blockquote>
+&lt;p>Photo by &lt;a class="link" href="https://unsplash.com/@mymind" target="_blank" rel="noopener"
+>mymind&lt;/a> and &lt;a class="link" href="https://unsplash.com/@lukechesser" target="_blank" rel="noopener"
+>Luke Chesser&lt;/a> on &lt;a class="link" href="https://unsplash.com/" target="_blank" rel="noopener"
+>Unsplash&lt;/a>&lt;/p>
+&lt;/blockquote></description></item></channel></rss>
