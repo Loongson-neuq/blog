@@ -166,3 +166,11 @@ More usages:
 [The Rust Programming Language](https://doc.rust-lang.org/stable/book/)
 
 [Unofficial Chinese Translation](https://kaisery.github.io/trpl-zh-cn/)
+
+### 下集预告
+
+有重量级内容，敬请期待！
+
+[Understanding Rust via Memory management](https://loongson-neuq.pages.dev/p/advanced-rust/)
+
+做了 Rustlings 的同学可以提前看一下。
