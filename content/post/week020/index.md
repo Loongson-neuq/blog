@@ -45,7 +45,7 @@ Rust 是一种系统编程语言，因此可用于编写系统（如操作系统
 
 - `crates.io` (https://crates.io/) 是 Rust 社区的 crate 注册表。crates.io 托管大量的 crate，可以通过 Cargo 下载，并自动解决依赖关系。
 
-## Progarmming language Concepts
+## Programming language Concepts
 
 ### Type syetem
 
