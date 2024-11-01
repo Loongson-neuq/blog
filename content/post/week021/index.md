@@ -468,3 +468,7 @@ let nice_slice = &a[1..4];
 用作 indexer 时类型为 usize，也就是 `0..=18446744073709551615`
 
 也可以仅指定一边的端点，例如 `..5` 或 `5..`
+
+## Solutions
+
+https://github.com/Loongson-neuq/rustlings-Cai1Hsu/pull/7/files
