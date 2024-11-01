@@ -376,7 +376,19 @@ Note: You need to have a .NET 8 runtime installed to run the demo. Install it fr
 
 #### Read-write Lock
 
-TODO： Unimplemented
+We don't really have to lock the whole object always. In fact, the lock is to resolve the data inconsistency issue, and the data inconsistency issue is caused by the write operation.
+
+If all threads is just *reading* the data, the data never changes, it's just there. So we can allow multiple threads to read the data at the same time as long as there's no thread is writing the data.
+
+So the key is:
+
+- Only allow one thread to write the data
+- Allow multiple threads to read the data
+- Can't have read lock and write lock at the same time
+
+The lock that can resolve the issue is called **Read-Write Lock**.
+
+Think about Rust's borrow rule? Did you find the similarity?
 
 ## Rust
 
