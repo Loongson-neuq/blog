@@ -254,7 +254,7 @@ fn foo (·) {···
 
 ### if1
 
-```Rust
+```rust
 // if1.rs
 //
 // Execute `rustlings hint if1` or use the `hint` watch subcommand for a hint.
@@ -291,7 +291,7 @@ pub fn bigger(a: i32, b: i32) -> i32 {
 
 ### if2
 
-```Rust
+```rust
 
 // if2.rs
 //
@@ -320,7 +320,7 @@ pub fn foo_if_fizz(fizzish: &str) -> &str {
 
 ### if3
 
-```Rust
+```rust
 // if3.rs
 //
 // Execute `rustlings hint if3` or use the `hint` watch subcommand for a hint.
@@ -358,7 +358,7 @@ pub fn animal_habitat(animal: &str) -> &'static str {
 
 ### quiz1
 
-```Rust
+```rust
 fn calculate_price_of_apples(qty: i32) -> i32 {
     if qty > 40 {
         qty
@@ -388,7 +388,7 @@ in fact, all CJK characters are alphabetic. And letters from other languages lik
 
 这些是由 Unicode 规范定义的，所以 Rust 的 `char::is_alphabetic` 方法也是按照 Unicode 规范来判断的。
 
-```Rust
+```rust
 fn main() {
     assert!('字'.is_alphabetic());
     assert!('あ'.is_alphabetic());
@@ -411,7 +411,7 @@ Links:
 
 - [Rust char::is_alphabetic](https://github.com/rust-lang/rust/blob/9ccfedf186d1ee3ef7c17737167f2f90276f9ed0/library/core/src/char/methods.rs#L741-L749)
 
-```Rust
+```rust
 #[must_use]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[inline]
@@ -427,13 +427,13 @@ pub fn is_alphabetic(self) -> bool {
 
 Common solution:
 
-```Rust
+```rust
 let second = tuple.1;
 ```
 
 Also, you can use pattern matching to deconstruct the tuple:
 
-```Rust
+```rust
 let (_, second, ..) = tuple;
 ```
 
@@ -447,12 +447,12 @@ see https://github.com/rust-lang/rust/issues/37854
 
 so you can write:
 
-```Rust
+```rust
 let slice = &array[1..=3];
 ```
 
 This is basically equivalent to:
 
-```Rust
+```rust
 let nice_slice = &a[1..4];
 ```
