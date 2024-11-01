@@ -456,3 +456,13 @@ This is basically equivalent to:
 ```rust
 let nice_slice = &a[1..4];
 ```
+
+#### Implicit range
+
+`..` 不指定开始和结束端点，实际等价于`TYPE::MIN..=TYPE::MAX`
+
+通常情况下为 i32，也就是 `-2147483648..=2147483647`
+
+用作 indexer 时类型为 usize，也就是 `0..=18446744073709551615`
+
+也可以仅指定一边的端点，例如 `..5` 或 `5..`
