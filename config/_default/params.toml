@@ -90,6 +90,7 @@ lightTheme = "preferred_color_scheme"
 darkTheme = "preferred_color_scheme"
 reactionsEnabled = 1
 emitMetadata = 0
+lang = "zh-CN"
 dataInputPosition = "top"
 
 # [comments.disqusjs]
