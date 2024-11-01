@@ -388,6 +388,8 @@ in fact, all CJK characters are alphabetic. And letters from other languages lik
 
 这些是由 Unicode 规范定义的，所以 Rust 的 `char::is_alphabetic` 方法也是按照 Unicode 规范来判断的。
 
+**因此，你可能会想使用`is_ascii_alphabetic` 而不是 `is_alphabetic`**
+
 ```rust
 fn main() {
     assert!('字'.is_alphabetic());
