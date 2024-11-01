@@ -220,6 +220,8 @@ You might know stack is FILO or LIFO, but that doesn't mean we have to pop the s
 
 Since all instance on the stack is fixed size, all of their position is fixed, we know where the object is at the compile time. We know that all local variables can be accessed by frame pointer plus a fixed offset.
 
+Actually, we have to uses **address** to access all memory blocks, including those allocated on the stack. But we seems never uses a pointer. That's because when we have to uses a pointer, the address can NOT be known at the compile time, we have to fetch the address at runtime. But for those allocated on the stack, the known local variables, we know where they are, we can access them directly with `sp + offset`, where offset is a constant. So the address(`sp + offset`) is **embedded** in the instruction.
+
 The stack is array-like, but not a real array. It's a memory block, a memory block means that you can access whatever you want with the memory block. Stack is just a convention which constraints the way we access the memory block - FILO or LIFO.
 
 An example is that, in Rust, we don't have a specific data structure for Stack. In C++, in python, in .NET you would have a Type like `Stack<T>`, but in Rust, we don't have that. We just use `Vec<T>`(`vector<T>` in Cpp). As long as you only call push and pop method.
