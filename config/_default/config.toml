@@ -1,6 +1,6 @@
 # TODO
 baseurl = "https://Loongson-neuq.github.io"
-languageCode = "zh-cn"
+languageCode = "zh-CN"
 title = "NEUQ 龙芯实验室博客"
 
 # Theme i18n support
