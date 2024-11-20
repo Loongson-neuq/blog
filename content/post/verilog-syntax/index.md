@@ -228,7 +228,7 @@ assign x = y;
 always @(*) begin
     out1 = a;
     a = b;
-    out2 = b;
+    out2 = a;
 end
 ```
 
@@ -242,7 +242,7 @@ end
 always @(posedge clk) begin
     out1 <= a;
     a <= b;
-    out2 <= b;
+    out2 <= a;
 end
 ```
 
