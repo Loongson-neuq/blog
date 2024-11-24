@@ -1,0 +1,505 @@
+<!doctype html><html lang=zh-CN dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="Verilog 基础语法与注意事项"><title>Verilog 基础知识</title>
+<link rel=canonical href=https://loongson-neuq.pages.dev/p/verilog-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/><link rel=stylesheet href=/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css><meta property='og:title' content="Verilog 基础知识"><meta property='og:description' content="Verilog 基础语法与注意事项"><meta property='og:url' content='https://loongson-neuq.pages.dev/p/verilog-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/'><meta property='og:site_name' content='NEUQ 龙芯实验室博客'><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='Verilog'><meta property='article:published_time' content='2024-10-19T00:00:00+00:00'><meta property='article:modified_time' content='2024-10-19T00:00:00+00:00'><meta name=twitter:title content="Verilog 基础知识"><meta name=twitter:description content="Verilog 基础语法与注意事项"><link rel="shortcut icon" href=/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/img/avatar_hu27a039529b0e16f185ca51fbed76013f_26164_300x0_resize_box_3.png width=300 height=300 class=site-logo loading=lazy alt=Avatar></a></figure><div class=site-meta><h1 class=site-name><a href=/>NEUQ 龙芯实验室博客</a></h1><h2 class=site-description></h2></div></header><ol class=menu-social><li><a href=https://github.com/Loongson-neuq/blog target=_blank title=GitHub rel=me><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>Home</span></a></li><li><a href=/archives/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>Archives</span></a></li><li><a href=/search/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>Search</span></a></li><li><a href=/intro/><span>龙芯班介绍及招新宣传</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav id=TableOfContents><ol><li><a href=#基础知识>基础知识</a><ol><li><a href=#模块module>模块(Module)</a><ol><li><a href=#模块描述>模块描述</a></li><li><a href=#模块输入输出信号>模块输入输出信号</a></li><li><a href=#模块实例化>模块实例化</a></li></ol></li><li><a href=#逻辑块alwaysgenerate>逻辑块(always、generate)</a><ol><li><a href=#always逻辑块>always逻辑块</a></li><li><a href=#generate逻辑块>generate逻辑块</a></li><li><a href=#initial块>initial块</a></li></ol></li><li><a href=#赋值方式>赋值方式</a><ol><li><a href=#连续赋值assign>连续赋值(assign)</a></li><li><a href=#阻塞赋值>阻塞赋值(=)</a></li><li><a href=#非阻塞赋值>非阻塞赋值(&lt;=)</a></li></ol></li></ol></li><li><a href=#基础语法>基础语法</a><ol><li><a href=#标识符>标识符</a></li><li><a href=#逻辑值与逻辑运算>逻辑值与逻辑运算      </a><ol><li><a href=#逻辑值>逻辑值</a></li><li><a href=#逻辑运算>逻辑运算</a></li></ol></li><li><a href=#常量的表示方法>常量的表示方法</a><ol><li><a href=#用十进制整数表示整型常量>用十进制整数表示整型常量</a></li><li><a href=#用基数法表示整数型常量>用基数法表示整数型常量</a></li><li><a href=#字符串用双引号>字符串(用双引号)</a></li></ol></li><li><a href=#注释方式>注释方式</a></li><li><a href=#变量wirereg>变量(wire、reg)</a><ol><li><a href=#wire>wire</a></li><li><a href=#reg>reg</a></li><li><a href=#用法与注意事项>用法与注意事项</a></li></ol></li><li><a href=#向量vector与-参数常量>向量(vector)与 参数(常量)</a><ol><li><a href=#parameter-参数常量>parameter 参数(常量)</a></li><li><a href=#向量vector>向量(vector)</a></li><li><a href=#向量片选>向量片选</a></li></ol></li><li><a href=#三元表达式>三元表达式</a></li><li><a href=#分支语句if-elsecase>分支语句(if-else、case)</a><ol><li><a href=#if-else语句>if-else语句</a></li><li><a href=#case-语句>case 语句</a></li></ol></li></ol></li><li><a href=#for循环语句>for循环语句</a><ol><li><a href=#关系运算符>关系运算符(>、&lt;、>=、&lt;=)</a></li><li><a href=#拼接运算符-->拼接运算符({ , })</a><ol><li><a href=#拼接>拼接</a></li><li><a href=#通过拼接实现移位>通过拼接实现移位</a></li><li><a href=#连接符中重复多次的操作>连接符中重复多次的操作</a></li></ol></li><li><a href=#移位运算符>移位运算符</a></li></ol></li><li><a href=#完整模块示例>完整模块示例</a><ol><li><a href=#二进制全加器>二进制全加器</a></li><li><a href=#16进制全加器>16进制全加器</a></li></ol></li><li><a href=#模块中的参数传递>模块中的参数传递</a><ol><li><a href=#定义可传递参数的模块>定义可传递参数的模块</a></li><li><a href=#带参数模块的实例化>带参数模块的实例化</a></li></ol></li></ol></nav></div></section></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/cpu/>CPU
+</a><a href=/categories/tutorial/>Tutorial</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/verilog-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/>Verilog 基础知识</a></h2><h3 class=article-subtitle>Verilog 基础语法与注意事项</h3></div><footer class=article-time><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published>Oct 19, 2024</time></div><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 11 分钟</time></div></footer></div></header><section class=article-content><h2 id=基础知识>基础知识</h2><h3 id=模块module>模块(Module)</h3><p>​Verilog中的module可以看成一个具有输入输出端口的黑盒子，该黑盒子有输入和输出接口(信号)，通过把输入在盒子中执行某些操作来实现某项功能。(类似于C语言中的函数)</p><p><img src=/p/verilog-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/assets/module.png width=996 height=468 srcset="/p/verilog-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/assets/module_huf162340d60312438ca10b5bb1786ae94_83604_480x0_resize_box_3.png 480w, /p/verilog-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/assets/module_huf162340d60312438ca10b5bb1786ae94_83604_1024x0_resize_box_3.png 1024w" loading=lazy alt=img class=gallery-image data-flex-grow=212 data-flex-basis=510px></p><h4 id=模块描述>模块描述</h4><p>顶层模块(top_module)结构用Verilog语言可描述为：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=k>module</span> <span class=n>top_module</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>	<span class=k>input</span> <span class=n>a</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>	<span class=k>input</span> <span class=n>b</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>	<span class=k>output</span> <span class=n>out</span>
+</span></span><span class=line><span class=cl><span class=p>);</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=p>......</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl><span class=k>endmodule</span>
+</span></span></code></pre></td></tr></table></div></div><ul><li>模块以module 开始，endmodule结束</li><li>top_module 为模块名</li><li>input : 为输入端口</li><li>output:  为输出端口</li><li><strong>所有代码必须处于module模块中！</strong></li></ul><p>同理，次级模块(mod_a)结构用Verilog语言可描述为：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=k>module</span> <span class=n>mod_a</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>	<span class=k>input</span> <span class=n>in1</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>	<span class=k>input</span> <span class=n>in2</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>	<span class=k>output</span> <span class=n>out</span>
+</span></span><span class=line><span class=cl><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=p>......</span>
+</span></span><span class=line><span class=cl>	
+</span></span><span class=line><span class=cl><span class=k>endmodule</span>
+</span></span></code></pre></td></tr></table></div></div><p><strong>注意事项：每个模应单独块处于一个.v文件中，模块名即为文件名(规范代码！)</strong></p><h4 id=模块输入输出信号>模块输入输出信号</h4><ul><li>输出：output</li><li>输入：input</li></ul><p>模块的输入输出端口都可看出模块的信号，若不写信号类型则默认为wire类型信号！</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=c1>// 以下两个语句本质是一致的
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>input</span> <span class=n>a</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>input</span> <span class=kt>wire</span> <span class=n>a</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p>除了wire型信号，还有reg型信号，具体详见1.4节！</p><h4 id=模块实例化>模块实例化</h4><p>如图1所示，top_module的两个输入端口连接到次级模块(mod_a)的输入端口，那如何在top_module模块模块中使用mod_a模块的功能呢？这就需要通过模块实例化，可以把top_module看成C语言中的主函数，次级模块mod_a看成普通函数，这样就可以在主函数中调用其他函数来完成相应的功能！</p><p>在top_module中实例化mod_a的方式为：</p><p><strong>模块实例化语法：模块名 实例名(定义连接port的信号);</strong></p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=k>module</span> <span class=n>top_module</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>    <span class=k>input</span> <span class=n>a</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=k>input</span> <span class=n>b</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=k>output</span> <span class=n>out</span>
+</span></span><span class=line><span class=cl><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>mod_a</span> <span class=n>instance1</span> <span class=p>(</span><span class=n>a</span><span class=p>,</span> <span class=n>b</span><span class=p>,</span> <span class=n>out</span><span class=p>);</span> <span class=c1>// 按mod_a定义的端口顺序实例化
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=n>mod_a</span> <span class=n>instance2</span> <span class=p>(.</span><span class=n>in1</span><span class=p>(</span><span class=n>a</span><span class=p>),</span> <span class=p>.</span><span class=n>in2</span><span class=p>(</span><span class=n>b</span><span class=p>),</span> <span class=p>.</span><span class=n>out</span><span class=p>(</span><span class=n>out</span><span class=p>));</span> <span class=c1>// 按mod_a端口名实例化(推荐此种写法)
+</span></span></span></code></pre></td></tr></table></div></div><h3 id=逻辑块alwaysgenerate>逻辑块(always、generate)</h3><h4 id=always逻辑块>always逻辑块</h4><p>always块可构建 <em>组合逻辑块</em> 和 <em>时序逻辑块</em>，复杂的逻辑操作都需要处于该逻辑块中，如if、case、for等</p><h5 id=组合逻辑块>组合逻辑块</h5><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=k>module</span> <span class=n>top_module</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>always</span> <span class=p>@(</span><span class=o>*</span><span class=p>)</span> <span class=k>begin</span>
+</span></span><span class=line><span class=cl>        <span class=p>......</span>
+</span></span><span class=line><span class=cl>    <span class=k>end</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>endmodule</span>
+</span></span></code></pre></td></tr></table></div></div><ul><li>always逻辑块中任意信号变化时立即触发，执行begin - end之间的语句</li><li>begin - end用于将多条语句组成一个代码块，只有一条语句时可省略</li></ul><h5 id=时序逻辑电路>时序逻辑电路</h5><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=k>module</span> <span class=n>top_module</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>always</span> <span class=p>@(</span><span class=k>posedge</span> <span class=n>clk</span><span class=p>)</span> <span class=k>begin</span>
+</span></span><span class=line><span class=cl>        <span class=p>......</span>
+</span></span><span class=line><span class=cl>    <span class=k>end</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>endmodule</span>
+</span></span></code></pre></td></tr></table></div></div><ul><li>clk 信号的上升沿触发</li><li>posedge: 上升沿</li><li>negedge: 下降沿</li></ul><h4 id=generate逻辑块>generate逻辑块</h4><p>generate主要结合for循环使用，主要用途有：</p><ul><li>对向量中的多个位进行重复操作</li><li>对同一个模块进行多次重复实例化(主要用途)</li></ul><h5 id=操作向量>操作向量</h5><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=k>module</span> <span class=n>top_module</span><span class=p>(</span><span class=k>input</span> <span class=p>[</span><span class=mh>7</span><span class=o>:</span><span class=mh>0</span><span class=p>]</span> <span class=n>in</span><span class=p>,</span> <span class=k>output</span> <span class=p>[</span><span class=mh>7</span><span class=o>:</span><span class=mh>0</span><span class=p>]</span> <span class=n>out</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>genvar</span> <span class=n>i</span><span class=p>;</span>   <span class=c1>// genvar i;也可以定义在generate内部
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=k>generate</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span><span class=p>(</span><span class=n>i</span> <span class=o>=</span> <span class=mh>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=mh>8</span><span class=p>;</span> <span class=n>i</span> <span class=o>=</span> <span class=n>i</span> <span class=o>+</span> <span class=mh>1</span><span class=p>)</span> <span class=k>begin</span>  <span class=c1>// verilog中for循环不支持i++
+</span></span></span><span class=line><span class=cl><span class=c1></span>            <span class=k>assign</span> <span class=n>out</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>=</span> <span class=o>^</span><span class=n>in</span><span class=p>[</span><span class=mh>7</span><span class=o>:</span><span class=n>i</span><span class=p>];</span>       <span class=c1>// ^:异或运算符
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=k>end</span>
+</span></span><span class=line><span class=cl>    <span class=k>endgenerate</span>
+</span></span><span class=line><span class=cl><span class=k>endmodule</span>
+</span></span></code></pre></td></tr></table></div></div><h5 id=模块重复多次实例化>模块重复多次实例化</h5><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=k>module</span> <span class=n>top_module</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>    <span class=k>input</span> <span class=n>a</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=k>input</span> <span class=n>b</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=k>output</span> <span class=n>out</span>
+</span></span><span class=line><span class=cl><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>genvar</span> <span class=n>i</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>generate</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span><span class=p>(</span><span class=n>i</span> <span class=o>=</span> <span class=mh>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=mh>8</span><span class=p>;</span> <span class=n>i</span> <span class=o>=</span> <span class=n>i</span> <span class=o>+</span> <span class=mh>1</span><span class=p>)</span> <span class=k>begin</span> <span class=o>:</span> <span class=n>gen_mod_a</span>  <span class=c1>// gen_mod_a为每个begin_end结构的名称
+</span></span></span><span class=line><span class=cl><span class=c1></span>            <span class=n>mod_a</span> <span class=n>instance2</span> <span class=p>(.</span><span class=n>in1</span><span class=p>(</span><span class=n>a</span><span class=p>),</span> <span class=p>.</span><span class=n>in2</span><span class=p>(</span><span class=n>b</span><span class=p>),</span> <span class=p>.</span><span class=n>out</span><span class=p>(</span><span class=n>out</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>        <span class=k>end</span>
+</span></span><span class=line><span class=cl>    <span class=k>endgenerate</span>
+</span></span><span class=line><span class=cl><span class=k>endmodule</span>
+</span></span></code></pre></td></tr></table></div></div><ul><li>注意：模块多次实例化时必须写每个begin_end结构的名称(gen_mod_a)</li><li>仿真器会通过gen_mod_a来标识生成结构: gen_mod_a[0],gen_mod_a[1]&mldr;.</li></ul><h4 id=initial块>initial块</h4><p>initial块可以理解为一个初始化块，在initial的起始位置的语句在0时刻即开始执行，之后如果遇到延时，则延时之后执行接下来的语句。</p><p>初始块是<strong>不可综合</strong>的，因此不能将其转化为带有数字元素的硬件原理图。因此初始块除了在仿真中使用外，并没有太大的作用。</p><p>如:在仿真文件中初始化各种参数：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=k>initial</span>
+</span></span><span class=line><span class=cl><span class=k>begin</span>
+</span></span><span class=line><span class=cl>    <span class=n>sys_clk</span>     <span class=o>=</span> <span class=mh>1</span><span class=mb>&#39;b1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>sys_rst_n</span>   <span class=o>=</span> <span class=mh>1</span><span class=mb>&#39;b0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>#</span><span class=mh>50</span>                 <span class=c1>// #n 代表延时n个时间单位
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=n>sys_rst_n</span>   <span class=o>=</span> <span class=mh>1</span><span class=mb>&#39;b1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=k>end</span>
+</span></span></code></pre></td></tr></table></div></div><p>注意：</p><ul><li>initial 块在电路中不可综合，故一般不出现在RTL代码中</li><li>initial 一般只在仿真文件中使用</li></ul><p>若需要在RTL代码中初始化参数，需要用always块，用initial块会导致错误！</p><p>如下所示，在RTL代码中初始化存储器的方式为：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=kt>reg</span> <span class=p>[</span><span class=mh>255</span><span class=o>:</span><span class=mh>0</span><span class=p>]</span> <span class=n>char_data</span><span class=p>[</span><span class=mh>4</span><span class=o>:</span><span class=mh>0</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>always</span> <span class=p>@</span> <span class=p>(</span><span class=k>posedge</span> <span class=n>clk</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>begin</span>
+</span></span><span class=line><span class=cl>        <span class=n>char_data</span><span class=p>[</span><span class=mh>0</span><span class=p>]</span> <span class=o>&lt;=</span> <span class=mh>256&#39;h0000000000000000000000000000000000000000000000000000000000000000</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>char_data</span><span class=p>[</span><span class=mh>1</span><span class=p>]</span> <span class=o>&lt;=</span> <span class=mh>256&#39;h0000000000000000000000000000000000000000000000000000000000000000</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>char_data</span><span class=p>[</span><span class=mh>2</span><span class=p>]</span> <span class=o>&lt;=</span> <span class=mh>256&#39;h0000000000000000000000000000000000000000000000000000000000000000</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>char_data</span><span class=p>[</span><span class=mh>3</span><span class=p>]</span> <span class=o>&lt;=</span> <span class=mh>256&#39;h0000000000000000000000000000000000000000000000000000000000000000</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>char_data</span><span class=p>[</span><span class=mh>4</span><span class=p>]</span> <span class=o>&lt;=</span> <span class=mh>256&#39;h0000000000000000000000000000000000000000000000000000000000000000</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>end</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=赋值方式>赋值方式</h3><p>Verilog 中赋值方式有三种：连续赋值、阻塞赋值、非阻塞赋值</p><h4 id=连续赋值assign>连续赋值(assign)</h4><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=k>assign</span> <span class=n>x</span> <span class=o>=</span> <span class=n>y</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><ul><li>该语句表示把x和y两个信号进行连接，真实的物理连接！</li><li><strong>不能在always块中使用</strong></li></ul><h4 id=阻塞赋值>阻塞赋值(=)</h4><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=c1>// 组合块
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>always</span> <span class=p>@(</span><span class=o>*</span><span class=p>)</span> <span class=k>begin</span>
+</span></span><span class=line><span class=cl>    <span class=n>out1</span> <span class=o>=</span> <span class=n>a</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>a</span> <span class=o>=</span> <span class=n>b</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>out2</span> <span class=o>=</span> <span class=n>a</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=k>end</span>
+</span></span></code></pre></td></tr></table></div></div><ul><li><strong>组合always块中用阻塞式赋值</strong></li><li>执行顺序：按照begin_end语句块中的<strong>顺序依次执行</strong>，上述输出结果为：out1 = a ，out2 = b</li></ul><h4 id=非阻塞赋值>非阻塞赋值(&lt;=)</h4><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=c1>// 时序块
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>always</span> <span class=p>@(</span><span class=k>posedge</span> <span class=n>clk</span><span class=p>)</span> <span class=k>begin</span>
+</span></span><span class=line><span class=cl>    <span class=n>out1</span> <span class=o>&lt;=</span> <span class=n>a</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>a</span> <span class=o>&lt;=</span> <span class=n>b</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>out2</span> <span class=o>&lt;=</span> <span class=n>a</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=k>end</span>
+</span></span></code></pre></td></tr></table></div></div><ul><li><strong>时序always块中用非阻塞赋值</strong></li><li>执行顺序：begin_end中所有语句<strong>并行执行</strong>，上述输出结果为：out1 = a ，out2 = a</li></ul><h2 id=基础语法>基础语法</h2><h3 id=标识符>标识符</h3><ul><li>用途：标识符用于定义常数、变量、信号、端口、参数名、模块名等。</li><li>组成：字母、数字、$、下划线任意组合而成</li><li>注意事项：<ul><li>区分大小写(Verilog 和 verilog是不同的)</li><li>第一个字符只能是字母或下划线(123demo 是非法标识符)</li></ul></li></ul><h3 id=逻辑值与逻辑运算>逻辑值与逻辑运算      </h3><h4 id=逻辑值>逻辑值</h4><p>Verilog中有4中逻辑值：0、1、x、z</p><ul><li>0: 低电平</li><li>1: 高电平</li><li>x: 表示状态未知</li><li>z: 表示高阻状态</li></ul><p>注意：这里的z、x是不区分大小写的(X、Z也可)</p><h4 id=逻辑运算>逻辑运算</h4><h5 id=逻辑运算符与相等或不等>逻辑运算符：&&(与)、==（相等）、||（或）、!=（不等）</h5><ul><li>如 m&&amp;n  : 判断m和n是否全为真(非0即为真)，真则输出1&rsquo;b1，否则输出1&rsquo;b0 (4’b1010&amp;4’b0101 = 1’b1)</li><li>最后输出结果只有1bit</li></ul><h5 id=按位运算符>按位运算符：&、|、~、^、~&、~^、~| </h5><ul><li>如 m&amp;n  : 是把m的每一位与n的每一位按位做与运算 (4’b1010&amp;4’b0101 = 4’b0000)</li><li>输出结果与m/n的bit数相同</li></ul><h5 id=归约运算符->归约运算符：  &、|、~、^、&、~^、~| </h5><ul><li>只有一个参量参与运算时( &为一元运算符),表示规约与，即向量内部进行与运算</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=o>&amp;</span><span class=n>a</span> <span class=p>[</span><span class=mh>3</span><span class=o>:</span><span class=mh>0</span><span class=p>]</span> <span class=c1>// 表示a[3]&amp;a[2]&amp;a[1]&amp;a[0] 相当于(a[3:0]==4&#39;b1111)
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=n>b</span> <span class=p>[</span><span class=mh>3</span><span class=o>:</span><span class=mh>0</span><span class=p>]</span> <span class=c1>// 表示b[3]|b[2]|b[1]|b[0] 相当于(b[3:0]!=4&#39;b0000)
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>^</span><span class=n>c</span> <span class=p>[</span><span class=mh>3</span><span class=o>:</span><span class=mh>0</span><span class=p>]</span> <span class=c1>// 表示c[3]^c[2]^c[1]^c[0]
+</span></span></span></code></pre></td></tr></table></div></div><ul><li>即(&amp;4’b0101 = 0&amp;1&amp;0&amp;1 = 1&rsquo;b0 )</li><li>最后输出结果只有1bit</li></ul><h3 id=常量的表示方法>常量的表示方法</h3><p>与C语言类似，常量主要有：整数型、实数型和字符串型三种</p><h4 id=用十进制整数表示整型常量>用十进制整数表示整型常量</h4><p>(1) 正数：直接写 10 表示位宽为32bit的十进制整数(系统默认)
+(2) 负数：-10需要用二进制补码表示，多了一位符号位(1 1010)
+(3) 用科学计数法表示：12.345e3   表示 12345</p><h4 id=用基数法表示整数型常量>用基数法表示整数型常量</h4><p>[换算成二进制数后的位宽]&rsquo;<em>[数制符号][与数制对应的值]</em></p><ul><li>二进制(b):     8&rsquo;b1000_1100      </li><li>十六进制(h):  8&rsquo;h8c</li><li>八进制(o):     8&rsquo;o214</li><li>十进制(d):     8&rsquo;d140</li></ul><p>注意事项：</p><ul><li>当表示二进制时，最好每4位写一个下划线以增强可读性：如8&rsquo;b1000_1100   与8&rsquo;b10001100 是一样的</li><li>基数表示法中遇到x时：十六进制表示4个x，八进制中表示3个x  </li><li><strong>当位宽大于二进制位数时左边自动补0，小于二进制数时2从左边截断！</strong></li></ul><h4 id=字符串用双引号>字符串(用双引号)</h4><ul><li>每个字符由1个8位的ASCII码值表示，即需要1byte存储空间</li><li>如：“Hello world”字符串由11个ASCII符号构成，需要11byte存储空间</li></ul><h3 id=注释方式>注释方式</h3><p>Verilog中注释主要有行注释(//)和块注释(/*  &mldr;.     */)两种，表示方法与C语言一致！</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=c1>// 行注释
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl><span class=cm>/* 
+</span></span></span><span class=line><span class=cl><span class=cm>    块注释
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> */</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=变量wirereg>变量(wire、reg)</h3><p>Verilog中的变量主要有两种：wire和reg</p><h4 id=wire>wire</h4><p>(1) 线网型(wire): 表示电路间的物理连接，wire定义的变量也可看成信号端口
+(2) 当两个wire信号被连续赋值时，在逻辑块中会被映射成真实的物理连线，此时这两个信号端口的变化是同步的！</p><h4 id=reg>reg</h4><p>(1) 寄存器型(reg): 表示一个抽象的数据存储单元
+(2) reg 具有对某一时间点状态进行保持的功能</p><h4 id=用法与注意事项>用法与注意事项</h4><p>(1) 在always、initial语句中被赋值的变量(赋值号左边的变量)都是reg型变量
+(2) 在assign语句中被赋值的变量，为wire型变量</p><h3 id=向量vector与-参数常量>向量(vector)与 参数(常量)</h3><h4 id=parameter-参数常量>parameter 参数(常量)</h4><p>(1) 参数是一种常量，通常出现在module内部，常被用于定义状态、数据位宽等</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=k>parameter</span> <span class=n>STATE</span> <span class=o>=</span> <span class=mh>1</span><span class=mb>&#39;b0</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p>(2) <strong>只作用于声明的那个文件</strong>，且可以被灵活改变！
+(3) 局部参数localparam，只在本模块中使用</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=k>localparam</span> <span class=n>WIDTH</span> <span class=o>=</span> <span class=mh>8</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p>(4) 参数的名称一般为大写，以区分其他变量 </p><h4 id=向量vector>向量(vector)</h4><p>vector(向量)，是一组信号的集合,可视为位宽超过1bit 的 wire 信号。</p><p>(1) 定义方式：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=c1>// 输入输出型
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>input</span> <span class=p>[</span><span class=mh>7</span><span class=o>:</span><span class=mh>0</span><span class=p>]</span> <span class=n>a</span><span class=p>,</span><span class=n>b</span><span class=p>,</span>
+</span></span><span class=line><span class=cl><span class=k>output</span> <span class=kt>reg</span> <span class=p>[</span><span class=mh>7</span><span class=o>:</span><span class=mh>0</span><span class=p>]</span> <span class=n>out</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 模块中间向量
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kt>wire</span> <span class=p>[</span><span class=mh>7</span><span class=o>:</span><span class=mh>0</span><span class=p>]</span> <span class=n>c</span><span class=p>,</span><span class=n>d</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=kt>reg</span> <span class=p>[</span><span class=mh>7</span><span class=o>:</span><span class=mh>0</span><span class=p>]</span> <span class=n>d</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p>(2) 向量的位宽定义：</p><ul><li>[upper:lower] 定义位宽，如 [7:0] 表示位宽为8 bit ，即upper=7，lower=0</li><li>vector_name可以一次写多个向量</li></ul><h4 id=向量片选>向量片选</h4><ul><li>a[3:0]    取向量a的0~4位数据</li><li>b[n]      取向量b的第n位数据</li><li>c[-1:-2]  取向量c的最低2位数据</li><li>c[0:3]    取向量c的最高4位数据</li></ul><p>多路选择器应用：实现一个 256 选 1 选择器，sel 信号作为选择信号，当 sel = 0 时选择 in[3:0]，sel = 1 时选择 in[7:4],以此类推。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=k>module</span> <span class=n>top_module</span> <span class=p>(</span>
+</span></span><span class=line><span class=cl>    <span class=k>input</span> <span class=p>[</span><span class=mh>255</span><span class=o>:</span><span class=mh>0</span><span class=p>]</span> <span class=n>in</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=k>input</span> <span class=p>[</span><span class=mh>7</span><span class=o>:</span><span class=mh>0</span><span class=p>]</span> <span class=n>sel</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=k>output</span> <span class=p>[</span><span class=mh>3</span><span class=o>:</span><span class=mh>0</span><span class=p>]</span> <span class=n>out</span>
+</span></span><span class=line><span class=cl><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>assign</span> <span class=n>out</span> <span class=o>=</span> <span class=p>{</span><span class=n>in</span><span class=p>[</span><span class=n>sel</span><span class=o>*</span><span class=mh>4</span><span class=o>+</span><span class=mh>3</span><span class=p>],</span> <span class=n>in</span><span class=p>[</span><span class=n>sel</span><span class=o>*</span><span class=mh>4</span><span class=o>+</span><span class=mh>2</span><span class=p>],</span> <span class=n>in</span><span class=p>[</span><span class=n>sel</span><span class=o>*</span><span class=mh>4</span><span class=o>+</span><span class=mh>1</span><span class=p>],</span> <span class=n>in</span><span class=p>[</span><span class=n>sel</span><span class=o>*</span><span class=mh>4</span><span class=o>+</span><span class=mh>0</span><span class=p>]};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// assign out = {in[sel*4 +: 4]};
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=c1>// assign out = {in[sel*4+3 -: 4]};
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>endmodule</span>
+</span></span></code></pre></td></tr></table></div></div><ul><li>片选信号sel输入为n位二进制数，当参与运算、充当索引时会自动转换成十进制数</li><li>该题所选取的信号片段为: in[sel*4+3: sel*4] ,但这不符合Verilog的片选语法规则故应写成：</li></ul><p>in[sel*4 +: 4]   表示索引从sel*4开始的高4bit信号</p><p>in[sel*4+3 -: 4] 表示索引从sel*4+3开始的低4bit信号</p><ul><li>或是直接选出需要的每一位，再用{ }拼接成新向量：</li></ul><p>{in[sel*4+3], in[sel*4+2], in[sel*4+1], in[sel*4+0]}</p><h3 id=三元表达式>三元表达式</h3><p>(1) 与C语言相同，Verilog也有三元表达式：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=n>condition</span> <span class=o>?</span> <span class=n>if_true</span> <span class=o>:</span> <span class=n>if_false</span>
+</span></span></code></pre></td></tr></table></div></div><p>当条件为真，表达式值为if_true ，否则表达式值为if_false。</p><p>(2) 应用</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=p>(</span><span class=n>sel</span> <span class=o>?</span> <span class=n>b</span> <span class=o>:</span> <span class=n>a</span><span class=p>)</span>   <span class=c1>// 一个二选一MUX，通过sel的值选择a或b
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl><span class=k>always</span> <span class=p>@(</span><span class=k>posedge</span> <span class=n>clk</span><span class=p>)</span>       <span class=c1>// 一个T触发器
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=n>q</span> <span class=o>&lt;=</span> <span class=n>toggle</span> <span class=o>?</span> <span class=o>~</span><span class=n>q</span> <span class=o>:</span> <span class=n>q</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>assign</span> <span class=n>out</span> <span class=o>=</span> <span class=n>ena</span> <span class=o>?</span> <span class=n>q</span> <span class=o>:</span> <span class=mh>1</span><span class=p>&#39;</span><span class=n>bz</span><span class=p>;</span>    <span class=c1>// 三态缓冲器
+</span></span></span></code></pre></td></tr></table></div></div><h3 id=分支语句if-elsecase>分支语句(if-else、case)</h3><h4 id=if-else语句>if-else语句</h4><p>(1) 最常用的形式：(优势：<strong>输出的所有可能都写到，不存在未知电平输出！</strong>)</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=k>if</span> <span class=p>(</span><span class=n>condition1</span><span class=p>)</span> <span class=k>begin</span>
+</span></span><span class=line><span class=cl>    <span class=p>......</span>
+</span></span><span class=line><span class=cl><span class=k>end</span>
+</span></span><span class=line><span class=cl><span class=k>else</span> <span class=k>if</span> <span class=p>(</span><span class=n>condition2</span><span class=p>)</span> <span class=k>begin</span>
+</span></span><span class=line><span class=cl>    <span class=p>......</span>
+</span></span><span class=line><span class=cl><span class=k>end</span>
+</span></span><span class=line><span class=cl><span class=k>else</span> <span class=k>begin</span>
+</span></span><span class=line><span class=cl>    <span class=p>......</span>
+</span></span><span class=line><span class=cl><span class=k>end</span>
+</span></span></code></pre></td></tr></table></div></div><p>(2) 不建议使用if-else嵌套，会存在优先级问题，导致逻辑混乱，
+(3) 所有if-else语句都应写成(1)的形式！
+(4) 根据条件表达式依次比较，*<em>存在优先级！</em> *</p><h4 id=case-语句>case 语句</h4><p>(1) 书写形式：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=k>case</span> <span class=p>(</span><span class=o>&lt;</span><span class=err>控制表达式</span><span class=o>&gt;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=o>&lt;</span><span class=err>分支语句</span><span class=mh>1</span><span class=o>&gt;:</span> <span class=k>begin</span>
+</span></span><span class=line><span class=cl>        <span class=p>......</span>
+</span></span><span class=line><span class=cl>    <span class=k>end</span>
+</span></span><span class=line><span class=cl>    <span class=o>&lt;</span><span class=err>分支语句</span><span class=mh>2</span><span class=o>&gt;:</span> <span class=k>begin</span>
+</span></span><span class=line><span class=cl>        <span class=p>......</span>
+</span></span><span class=line><span class=cl>    <span class=k>end</span>
+</span></span><span class=line><span class=cl>    <span class=p>......</span>
+</span></span><span class=line><span class=cl>    <span class=k>default</span><span class=o>:</span> <span class=k>begin</span>
+</span></span><span class=line><span class=cl>        <span class=p>......</span>
+</span></span><span class=line><span class=cl>    <span class=k>end</span>
+</span></span><span class=line><span class=cl><span class=k>endcase</span>
+</span></span></code></pre></td></tr></table></div></div><p>比较&lt;控制表达式>与&lt;分支语句n>的取值相等则执行对应语句，否则执行default后语句！</p><p>(2) <em>执行完某一分支语句后立即跳出case语句结构，终止case语句执行。</em>
+(3) <strong>&lt;分支语句n>的取值必须互不相同！</strong>
+(4) 以encase结束case语句块
+(5) 各分支语句间<strong>不存在优先级！</strong>
+(6) 具体应用: 用case语句搭建多路选择器，（以9选1多路选择器为例）</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=k>module</span> <span class=n>top_module</span> <span class=p>(</span>
+</span></span><span class=line><span class=cl>    <span class=k>input</span> <span class=p>[</span><span class=mh>15</span><span class=o>:</span><span class=mh>0</span><span class=p>]</span> <span class=n>a</span><span class=p>,</span><span class=n>b</span><span class=p>,</span><span class=n>c</span><span class=p>,</span><span class=n>d</span><span class=p>,</span><span class=n>e</span><span class=p>,</span><span class=n>f</span><span class=p>,</span><span class=n>g</span><span class=p>,</span><span class=n>h</span><span class=p>,</span><span class=n>i</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=k>input</span> <span class=p>[</span><span class=mh>3</span><span class=o>:</span><span class=mh>0</span><span class=p>]</span> <span class=n>sel</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=k>output</span> <span class=p>[</span><span class=mh>15</span><span class=o>:</span><span class=mh>0</span><span class=p>]</span> <span class=n>out</span>
+</span></span><span class=line><span class=cl><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>always</span> <span class=p>@(</span><span class=o>*</span><span class=p>)</span> <span class=k>begin</span>
+</span></span><span class=line><span class=cl>        <span class=k>case</span><span class=p>(</span><span class=n>sel</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>            <span class=mh>4</span><span class=mb>&#39;b0000</span><span class=o>:</span> <span class=n>out</span> <span class=o>=</span> <span class=n>a</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=mh>4</span><span class=mb>&#39;b0001</span><span class=o>:</span> <span class=n>out</span> <span class=o>=</span> <span class=n>b</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=mh>4</span><span class=mb>&#39;b0010</span><span class=o>:</span> <span class=n>out</span> <span class=o>=</span> <span class=n>c</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=mh>4</span><span class=mb>&#39;b0011</span><span class=o>:</span> <span class=n>out</span> <span class=o>=</span> <span class=n>d</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=mh>4</span><span class=mb>&#39;b0100</span><span class=o>:</span> <span class=n>out</span> <span class=o>=</span> <span class=n>e</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=mh>4</span><span class=mb>&#39;b0101</span><span class=o>:</span> <span class=n>out</span> <span class=o>=</span> <span class=n>f</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=mh>4</span><span class=mb>&#39;b0110</span><span class=o>:</span> <span class=n>out</span> <span class=o>=</span> <span class=n>g</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=mh>4</span><span class=mb>&#39;b0111</span><span class=o>:</span> <span class=n>out</span> <span class=o>=</span> <span class=n>h</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=k>default</span><span class=o>:</span> <span class=n>out</span> <span class=o>=</span> <span class=mh>16&#39;hffff</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=k>endcase</span>
+</span></span><span class=line><span class=cl>    <span class=k>end</span>
+</span></span><span class=line><span class=cl><span class=k>endmodule</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=for循环语句>for循环语句</h2><p>(1) 书写形式：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=k>integer</span> <span class=n>i</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=k>always</span> <span class=p>@(</span><span class=o>*</span><span class=p>)</span> <span class=k>begin</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span><span class=p>(</span><span class=n>i</span> <span class=o>=</span> <span class=mh>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=mh>8</span><span class=p>;</span> <span class=n>i</span> <span class=o>=</span> <span class=n>i</span> <span class=o>+</span> <span class=mh>1</span><span class=p>)</span> <span class=k>begin</span> <span class=o>:</span> <span class=n>for_name</span>
+</span></span><span class=line><span class=cl>        <span class=p>......</span>
+</span></span><span class=line><span class=cl>    <span class=k>end</span>
+</span></span><span class=line><span class=cl><span class=k>end</span>
+</span></span></code></pre></td></tr></table></div></div><ul><li>执行&lt;循环语句>n次</li><li>for_name为每一次循环的名称</li></ul><h3 id=关系运算符>关系运算符(>、&lt;、>=、&lt;=)</h3><ul><li>运算结果为真返回 1</li><li>运算结果为假返回 0</li><li>若某个操作数值不定(x)，则返回值为 x</li></ul><h3 id=拼接运算符-->拼接运算符({ , })</h3><h4 id=拼接>拼接</h4><p>用一对花括号加逗号组成“{ , }”拼接运算符，逗号隔开的数据<strong>按顺序拼接成新数据！</strong></p><h4 id=通过拼接实现移位>通过拼接实现移位</h4><p>在左边拼接实现右移，右边拼接实现左移！</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=p>{</span><span class=n>a</span><span class=p>[</span><span class=mh>3</span><span class=o>:</span><span class=mh>0</span><span class=p>],</span> <span class=mh>4</span><span class=mb>&#39;b0000</span><span class=p>}</span> <span class=c1>// a[3:0]左移4位
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>{</span><span class=mh>4</span><span class=mb>&#39;b0000</span><span class=p>,</span> <span class=n>a</span><span class=p>[</span><span class=mh>3</span><span class=o>:</span><span class=mh>0</span><span class=p>]}</span> <span class=c1>// a[3:0]右移4位
+</span></span></span></code></pre></td></tr></table></div></div><h4 id=连接符中重复多次的操作>连接符中重复多次的操作</h4><p>语法： {重复次数{vector}}</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=p>{</span><span class=mh>4</span><span class=p>{</span><span class=n>a</span><span class=p>[</span><span class=mh>3</span><span class=o>:</span><span class=mh>0</span><span class=p>]}}</span> <span class=c1>// 重复4次a[3:0]
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>{</span><span class=mh>3</span><span class=mi>&#39;d5</span><span class=p>,</span> <span class=mh>4</span><span class=p>{</span><span class=n>a</span><span class=p>[</span><span class=mh>3</span><span class=o>:</span><span class=mh>0</span><span class=p>]}}</span> <span class=c1>// 3&#39;d5与a[3:0]重复4次拼接
+</span></span></span></code></pre></td></tr></table></div></div><h3 id=移位运算符>移位运算符</h3><p>移位运算符用于将左边操作数左移或右移指定的位数！移位后空闲位用0填充。</p><ul><li><p>左移运算符：&#171;
+如：4‘b1101 &#171; 3 结果为：4‘b1000</p></li><li><p>右移算法符: &#187;
+如：4‘b1101 &#187; 3 结果为：4‘b0001</p></li><li><p>移位运算符其他用途：左移一位可以看成是乘以 2，右移一位可以看成是除以 2。</p></li><li><p>移位运算符代替乘除法可以节省资源！</p></li></ul><h2 id=完整模块示例>完整模块示例</h2><h3 id=二进制全加器>二进制全加器</h3><p><img src=/p/verilog-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/assets/adder.png width=307 height=212 srcset="/p/verilog-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/assets/adder_hu89533cf0424ba3323edd0db86c96d53c_11547_480x0_resize_box_3.png 480w, /p/verilog-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/assets/adder_hu89533cf0424ba3323edd0db86c96d53c_11547_1024x0_resize_box_3.png 1024w" loading=lazy alt=img class=gallery-image data-flex-grow=144 data-flex-basis=347px></p><ul><li>a、b为输入 1bit 数据</li><li>cin为上一个加法器进位输入</li><li>cout为本加法器的进位输出</li><li>sum = a+b</li></ul>$$
+\begin{array}{c}
+sum=a \wedge b \wedge cin \\
+cout=(a \& b) | (a \& cin) | (b \& cin)
+\end{array}
+$$<p>代码实现：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=k>module</span> <span class=n>full_adder</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>    <span class=k>input</span> <span class=n>a</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=k>input</span> <span class=n>b</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=k>input</span> <span class=n>cin</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=k>output</span> <span class=n>sum</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=k>output</span> <span class=n>cout</span>
+</span></span><span class=line><span class=cl><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>assign</span> <span class=n>sum</span> <span class=o>=</span> <span class=n>a</span> <span class=o>^</span> <span class=n>b</span> <span class=o>^</span> <span class=n>cin</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>assign</span> <span class=n>cout</span> <span class=o>=</span> <span class=p>(</span><span class=n>a</span> <span class=o>&amp;</span> <span class=n>b</span><span class=p>)</span> <span class=o>|</span> <span class=p>(</span><span class=n>a</span> <span class=o>&amp;</span> <span class=n>cin</span><span class=p>)</span> <span class=o>|</span> <span class=p>(</span><span class=n>b</span> <span class=o>&amp;</span> <span class=n>cin</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=k>endmodule</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=16进制全加器>16进制全加器</h3><p><img src=/p/verilog-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/assets/adder16bit.png width=562 height=727 srcset="/p/verilog-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/assets/adder16bit_hu18c208ace072546113281d8f502ec621_55264_480x0_resize_box_3.png 480w, /p/verilog-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/assets/adder16bit_hu18c208ace072546113281d8f502ec621_55264_1024x0_resize_box_3.png 1024w" loading=lazy alt=img class=gallery-image data-flex-grow=77 data-flex-basis=185px></p><p>16进制全加器如上图所示，它可由上节中16个二进制全加器组合而成。</p><p>用Verilog实现16进制全加器代码为：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=k>module</span> <span class=n>adder16</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>    <span class=k>input</span> <span class=p>[</span><span class=mh>15</span><span class=o>:</span><span class=mh>0</span><span class=p>]</span> <span class=n>a</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=k>input</span> <span class=p>[</span><span class=mh>15</span><span class=o>:</span><span class=mh>0</span><span class=p>]</span> <span class=n>b</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=k>input</span> <span class=n>cin</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=k>output</span> <span class=p>[</span><span class=mh>15</span><span class=o>:</span><span class=mh>0</span><span class=p>]</span> <span class=n>sum</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=k>output</span> <span class=n>cout</span>
+</span></span><span class=line><span class=cl><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kt>wire</span> <span class=p>[</span><span class=mh>16</span><span class=o>:</span><span class=mh>0</span><span class=p>]</span> <span class=n>c</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>assign</span> <span class=n>c</span><span class=p>[</span><span class=mh>0</span><span class=p>]</span> <span class=o>=</span> <span class=n>cin</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>genvar</span> <span class=n>i</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>generate</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span><span class=p>(</span><span class=n>i</span> <span class=o>=</span> <span class=mh>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=mh>16</span><span class=p>;</span> <span class=n>i</span> <span class=o>=</span> <span class=n>i</span> <span class=o>+</span> <span class=mh>1</span><span class=p>)</span> <span class=k>begin</span> <span class=o>:</span> <span class=n>gen_full_adder</span>
+</span></span><span class=line><span class=cl>            <span class=n>full_adder</span> <span class=n>instance1</span> <span class=p>(.</span><span class=n>a</span><span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>i</span><span class=p>]),</span> <span class=p>.</span><span class=n>b</span><span class=p>(</span><span class=n>b</span><span class=p>[</span><span class=n>i</span><span class=p>]),</span> <span class=p>.</span><span class=n>cin</span><span class=p>(</span><span class=n>c</span><span class=p>[</span><span class=n>i</span><span class=p>]),</span> <span class=p>.</span><span class=n>sum</span><span class=p>(</span><span class=n>sum</span><span class=p>[</span><span class=n>i</span><span class=p>]),</span> <span class=p>.</span><span class=n>cout</span><span class=p>(</span><span class=n>c</span><span class=p>[</span><span class=n>i</span><span class=o>+</span><span class=mh>1</span><span class=p>]));</span>
+</span></span><span class=line><span class=cl>        <span class=k>end</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>assign</span> <span class=n>cout</span> <span class=o>=</span> <span class=n>c</span><span class=p>[</span><span class=mh>16</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>endmodule</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=模块中的参数传递>模块中的参数传递</h2><h3 id=定义可传递参数的模块>定义可传递参数的模块</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=k>module</span> <span class=n>counter</span>
+</span></span><span class=line><span class=cl><span class=c1>// 参数
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>#(</span>
+</span></span><span class=line><span class=cl>    <span class=k>parameter</span> <span class=n>COUNT_MAX</span> <span class=o>=</span> <span class=mh>25</span><span class=mi>&#39;d24</span><span class=n>_999_999</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=k>parameter</span> <span class=n>STATE</span>     <span class=o>=</span> <span class=mh>1</span><span class=mb>&#39;b0</span>
+</span></span><span class=line><span class=cl><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>(</span>
+</span></span><span class=line><span class=cl>    <span class=k>input</span> <span class=kt>wire</span> <span class=n>sys_clk</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=k>output</span> <span class=kt>reg</span> <span class=n>led_out</span>
+</span></span><span class=line><span class=cl><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=p>......</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>endmodule</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=带参数模块的实例化>带参数模块的实例化</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=n>counter</span> <span class=p>#(</span>
+</span></span><span class=line><span class=cl>    <span class=p>.</span><span class=n>COUNT_MAX</span><span class=p>(</span><span class=mh>25</span><span class=mi>&#39;d24</span><span class=n>_999_999</span><span class=p>),</span> <span class=c1>// 参数赋值
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=p>.</span><span class=n>STATE</span><span class=p>(</span><span class=mh>1</span><span class=mb>&#39;b0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>)</span> <span class=n>counter_instance</span> <span class=p>(</span>
+</span></span><span class=line><span class=cl>    <span class=p>.</span><span class=n>sys_clk</span><span class=p>(</span><span class=n>sys_clk</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>    <span class=p>.</span><span class=n>led_out</span><span class=p>(</span><span class=n>led_out</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>);</span>
+</span></span></code></pre></td></tr></table></div></div></section><footer class=article-footer><section class=article-tags><a href=/tags/verilog/>Verilog</a></section><section class=article-copyright><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer></article><aside class=related-content--wrapper><h2 class=section-title>相关文章</h2><div class=related-content><div class="flex article-list--tile"><article><a href=/p/vivado-2023.2%E5%AE%89%E8%A3%85/><div class=article-details><h2 class=article-title>vivado 2023.2安装</h2></div></a></article><article><a href=/p/vivado%E4%BB%BF%E7%9C%9F%E7%9A%84%E5%B8%B8%E8%A7%81error/><div class=article-details><h2 class=article-title>Vivado仿真的常见ERROR</h2></div></a></article><article><a href=/p/os-week2-get-started-with-rust/><div class=article-details><h2 class=article-title>[OS Week2] Get started with Rust</h2></div></a></article><article class=has-image><a href=/p/os-week1-git-and-linux-basics/><div class=article-image><img src=/p/os-week1-git-and-linux-basics/background.bf6810ec384f763b831c15f3672eb91e_hub7bd9424949445f7cb4edac68fee9448_2942088_250x150_fill_box_smart1_3.png width=250 height=150 loading=lazy alt="Featured image of post [OS Week1] Git and Linux Basics" data-hash="md5-v2gQ7DhPdjuDHBXzZy65Hg=="></div><div class=article-details><h2 class=article-title>[OS Week1] Git and Linux Basics</h2></div></a></article><article><a href=/p/markdown-syntax-guide/><div class=article-details><h2 class=article-title>Markdown Syntax Guide</h2></div></a></article></div></div></aside><script src=https://giscus.app/client.js data-repo=Loongson-neuq/blog data-repo-id=R_kgDOM20epQ data-category=Giscus data-category-id=DIC_kwDOM20epc4CixXm data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-CN data-loading crossorigin=anonymous async></script><script>function setGiscusTheme(e){let t=document.querySelector("iframe.giscus-frame");t&&t.contentWindow.postMessage({giscus:{setConfig:{theme:e}}},"https://giscus.app")}(function(){addEventListener("message",t=>{if(event.origin!=="https://giscus.app")return;e()}),window.addEventListener("onColorSchemeChange",e);function e(){setGiscusTheme(document.documentElement.dataset.scheme==="light"?"preferred_color_scheme":"preferred_color_scheme")}})()</script><footer class=site-footer><section class=copyright>&copy;
+2024 NEUQ 龙芯实验室博客</section><section class=powerby>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=3.29.0>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><div class=pswp tabindex=-1 role=dialog aria-hidden=true><div class=pswp__bg></div><div class=pswp__scroll-wrap><div class=pswp__container><div class=pswp__item></div><div class=pswp__item></div><div class=pswp__item></div></div><div class="pswp__ui pswp__ui--hidden"><div class=pswp__top-bar><div class=pswp__counter></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+<button class="pswp__button pswp__button--share" title=Share></button>
+<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class=pswp__preloader><div class=pswp__preloader__icn><div class=pswp__preloader__cut><div class=pswp__preloader__donut></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class=pswp__share-tooltip></div></div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+</button>
+<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class=pswp__caption><div class=pswp__caption__center></div></div></div></div></div><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo=" crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU=" crossorigin=anonymous defer></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css crossorigin=anonymous><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css crossorigin=anonymous></main></div><script src=https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z+KMkF24hUW8WePSA9HM=" crossorigin=anonymous></script><script type=text/javascript src=/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js defer></script><script>(function(){const e=document.createElement("link");e.href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap",e.type="text/css",e.rel="stylesheet",document.head.appendChild(e)})()</script></body></html>

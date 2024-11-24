@@ -1,0 +1,533 @@
+<!doctype html><html lang=zh-CN dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="内存管理 2 & Rust 所有权"><title>[OS Week6] 内存管理 2 & Rust 所有权</title>
+<link rel=canonical href=https://loongson-neuq.pages.dev/p/os-week6-%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86-2-rust-%E6%89%80%E6%9C%89%E6%9D%83/><link rel=stylesheet href=/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css><meta property='og:title' content="[OS Week6] 内存管理 2 & Rust 所有权"><meta property='og:description' content="内存管理 2 & Rust 所有权"><meta property='og:url' content='https://loongson-neuq.pages.dev/p/os-week6-%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86-2-rust-%E6%89%80%E6%9C%89%E6%9D%83/'><meta property='og:site_name' content='NEUQ 龙芯实验室博客'><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='Rust'><meta property='article:published_time' content='2024-11-24T00:00:00+00:00'><meta property='article:modified_time' content='2024-11-24T00:00:00+00:00'><meta name=twitter:title content="[OS Week6] 内存管理 2 & Rust 所有权"><meta name=twitter:description content="内存管理 2 & Rust 所有权"><link rel="shortcut icon" href=/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/img/avatar_hu27a039529b0e16f185ca51fbed76013f_26164_300x0_resize_box_3.png width=300 height=300 class=site-logo loading=lazy alt=Avatar></a></figure><div class=site-meta><h1 class=site-name><a href=/>NEUQ 龙芯实验室博客</a></h1><h2 class=site-description></h2></div></header><ol class=menu-social><li><a href=https://github.com/Loongson-neuq/blog target=_blank title=GitHub rel=me><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>Home</span></a></li><li><a href=/archives/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>Archives</span></a></li><li><a href=/search/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>Search</span></a></li><li><a href=/intro/><span>龙芯班介绍及招新宣传</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav id=TableOfContents><ol><li><a href=#关于作业>关于作业</a><ol><li><a href=#后面的路怎么走>后面的路怎么走？</a></li></ol></li><li><a href=#上次作业>上次作业</a><ol><li><a href=#简答题>简答题</a><ol><li><a href=#手动使用-brk-系统调用>手动使用 brk 系统调用</a></li><li><a href=#探索调用栈---手动栈展开>探索调用栈 - 手动栈展开</a></li></ol></li><li><a href=#汇编视角的栈内存>汇编视角的栈内存</a></li><li><a href=#补充寻址模式>补充：寻址模式</a></li></ol></li><li><a href=#继续-rust-所有权原理的内容>继续 Rust 所有权原理的内容</a></li></ol></nav></div></section></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/os/>OS</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/os-week6-%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86-2-rust-%E6%89%80%E6%9C%89%E6%9D%83/>[OS Week6] 内存管理 2 & Rust 所有权</a></h2><h3 class=article-subtitle>内存管理 2 & Rust 所有权</h3></div><footer class=article-time><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published>Nov 24, 2024</time></div><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 16 分钟</time></div></footer></div></header><section class=article-content><h1 id=关于课程计划>关于课程计划</h1><p>由于临近期末（一月初考试），同时我们（助教）最近在编写操作系统（可以看到我又换回了 Arch Linux 进行工作）上占用大量时间，所以我们决定尽快结束课程。预计下一周是最后一周课程。计划下周讲解协程及 Async/Await 等内容。原计划第 13 周讲解的 Dynamic Dispatch 被取消。因为大家对 OOP 的理解不够深入，而且 Rust 的 OOP 与传统 OOP 有很大不同，所以我们决定取消这一部分内容。</p><p>同时，Dynamic Dispatch 也不是原计划的内容，原计划的内容仍然会在下周讲解完毕。</p><h2 id=关于作业>关于作业</h2><p>从本周开始，不再布置作业。仅有最后一份期末作业，涉及到本学期所有的内容以及编写操作系统所需要的所有基本知识。Rustlings 和期末作业的参考答案我已经完成，下周一并发布。期末作业大家自行完成即可，不需要提交。有疑问还是请及时联系助教。</p><p><a class=link href=https://github.com/Loongson-neuq/2024-neuq-os-2024-neuq-final-assignment-1 target=_blank rel=noopener>https://github.com/Loongson-neuq/2024-neuq-os-2024-neuq-final-assignment-1</a></p><p>目前这份作业中涉及的内容只有以下部分还没有讲解：</p><ul><li>系统调用</li><li>锁/原子操作</li><li>协程</li><li>Async/Await</li></ul><p>前三个部分会在这节课讲解完毕，协程和 Async/Await 会在下周讲解。</p><h3 id=后面的路怎么走>后面的路怎么走？</h3><p>有很多同学很迷茫，总是问我学完了能会什么，或者学完了就能编写操作系统了吗？</p><p>我可以负责任地告诉大家，大部分同学仍然离操作系统编写很远。但是知识是日积月累而不是一蹴而就的。你要清楚一个事实，操作系统是一个非常庞大的系统，涉及到的知识非常多，而且很多知识都是非常深入的。你花的几个月的间断的学习，凭什么能超过别人数年甚至数十年的积累？更别说别人经验比你丰富，基础比你扎实，会的知识面比你广泛。</p><p>再问自己一些问题：</p><ul><li>你有丰富的软件工程经验吗？ 你能写出高质量的代码吗？高质量意味者代码可读性好，可维护性好，性能好，安全性好。你能写出这样的代码吗？</li><li>你有大型项目的经验吗？你最多的一个项目写过几万行代码？你有没有一个人参与过一个项目的设计，开发，测试，部署，维护的全过程？</li><li>你有多少编程语言的经验？你有多少编程范式的经验？你有多少编程工具的经验？</li></ul><p>这些只是编程的基础，编写操作系统，要求你的编程基础非常扎实，更需要的是对操作系统原理的深入理解，对硬件的深入理解，对软硬件协同的深入理解。操作系统是软件与硬件高度耦合的产物。你既要对软件有深入理解，又要对硬件有深入理解。你要知道你的代码是如何在硬件上运行的，你的代码是如何与硬件交互的。</p><p>对软件的深入理解意味着你要对编程语言有深入理解，你看着高级语言的代码，就能知道它是如何在底层运行的。会执行哪些指令，会访问哪些内存，会调用哪些系统调用。</p><p>对硬件的深入理解意味着你要对计算机组成原理有深入理解，你要知道计算机是如何工作的，CPU 是如何工作的，内存是如何工作的，外设是如何工作的。对软硬件协同的深入理解意味着你要知道操作系统是如何管理硬件的，是如何与硬件交互的，是如何保证软硬件的正确协同工作的。</p><p>那是不是就搞不出来了呢？当然不是。你需要慢慢积累，慢慢学习。并且我同样可以负责任地告诉你，学习操作系统是提升底层编程能力的最快途径。只是需要一定知识基础的。</p><p>**关于 rcore 实验，如果你已经明显感觉到自己难以理解某些操作系统的概念，我的建议是立即停止。以提升软件工程能力为主，等你有了一定的软件工程能力，再回过头来学习操作系统，会事半功倍。**否则目前的学习只会让你感到困惑，所谓的学习也只是抄代码，能学到的东西非常有限。</p><p>最早的计划是要包含对软件工程的训练的，要求大家独立完成一个大型项目，同时包含设计模式的训练和课程，考虑到大家还是比较急于学习操作系统，所以这部分内容被取消了，只保留了编写操作系统需要的主线知识。</p><h2 id=上次作业>上次作业</h2><p>上次的作业的完成的情况我就不多说了，大家自己清楚，也没有人来问问题。我只能认为大家可能还有些困难，那这节课我来带着大家完成，顺便讲解一下如何手动使用系统调用。</p><h3 id=简答题>简答题</h3><p>关于简答题，大部分都是上次课件里的内容，直接参考课件即可。这里我只讲解一下一些补充内容。</p><h4 id=手动使用-brk-系统调用>手动使用 brk 系统调用</h4><p>题目：&ldquo;尝试使用 brk 或 sbrk 分配 1024 字节，并尝试访问第 1024 ~ 4095 字节的内存，说明为什么可以访问这些内存？&rdquo;</p><p>这里以 brk 系统调用为例，讲解一下系统调用是什么，如何使用系统调用。</p><h5 id=系统调用>系统调用</h5><p>系统调用是操作系统提供给用户程序的接口，用户程序通过系统调用可以请求操作系统提供服务。系统调用是用户态程序与内核态程序之间的桥梁。用户态程序通过系统调用请求内核态程序执行某些操作，比如读写文件，分配内存等。</p><p>看着比较抽象？实际上，就跟你调用外部库的一个函数一样。只不过这个函数是操作系统提供的，你需要通过一些<em>特殊</em>的方式调用。</p><p>下面我们从另一个角度，来看看系统调用到底是怎么<em>特殊</em>的。</p><p>系统调用是操作系统的一种<strong>异常</strong>。而<strong>异常</strong>和<strong>中断</strong>在操作系统中都属于<strong>Trap</strong>。Trap 是一种异步事件，它会打断 CPU 的正常执行流程，转而执行操作系统内核中的一段代码。这段代码就是系统调用的实现。</p><p>本质上来说，当<strong>Trap</strong>发生的一瞬间，会发生一下改变：</p><ul><li>CPU特权级被提升，从用户态提升到内核态 x86 中是从 ring3 提升到 ring0。RISC-V 中是从 U 模式提升到 S 模式。</li><li>PC 指针被修改，指向内核态的代码。PC 指针是 CPU 核心当前/或下一条执行指令的地址，操作它就是操作 CPU 的执行流程。</li></ul><p>这两者是同时且瞬间发生的，从发生异常的指令到内核态代码执行，这个过程是没有空隙的，是瞬间完成的。</p><p>当<strong>Trap</strong>发生后，也就是 PC 来到了操作系统的代码，操作系统会首先保存用户态的寄存器状态，然后根据 Trap 的类型，执行相应的操作。</p><p>如果是系统调用，操作系统会根据用户传递的参数，执行<strong>相应的操作</strong>，然后将结果返回给用户程序。这个过程是一个<strong>系统调用</strong>的过程。例如 brk 就是给用户程序分配内存的系统调用，exit 是退出程序的系统调用。</p><p>系统调用由特殊汇编指令触发，在 x86 中是 syscall 指令，在 RISC-V 中是 ecall 指令。在进入操作系统 Trap 后，操作系统可以读取 CPU 特权寄存器，判断 Trap 到底是 Exception 还是 Interrupt。Exception 是 Syscall，还是其他异常。根据这些信息，操作系统可以执行相应的操作。</p><p>如果是其他不可恢复的异常，比如除零异常，操作系统会直接终止用户程序的执行（由于信号机制的出现，操作系统现在通常不会直接杀死进程），然后将控制权交给其他程序。操作系统也会利用异常来实现一些功能，比如页错误异常，就是操作系统用来实现虚拟内存和COW的一种方式。</p><p>而<strong>中断</strong>是一种异步事件，分为硬中断和软中断。外部中断是由硬件设备发出的，比如键盘中断（仅针对PS接口，USB接口是轮询机制），网卡中断等，目的是让 CPU 处理硬件设备的事件。时钟中断是由CPU时钟发出的，目的是让 操作系统从用户程序中夺回控制权，进行调度。如果没有时钟中断，CPU 就会一直执行用户程序，操作系统就无法进行调度。假如我在这里写一个死循环，那么其他进程就无法被执行，因为同一时刻一个CPU的PC只能指向一个地址。t同时操作系统的代码也永远无法执行，也就意味着操作系统无法杀死这个进程。</p><p>因此，异常是操作系统与用户程序交互的方式，中断是操作系统夺回 CPU 控制权的方式。</p><p>下面来看看我们如何触发一个系统调用。</p><p>在 x86 中，我们可以使用 syscall 指令来触发系统调用。使用系统调用，我们需要做以下几件事：</p><ul><li>在指定寄存器中存放系统调用号，这个号码是操作系统用来查找系统调用的实现。因为所有系统调用都是通过syscall指令触发的，所以操作系统需要根据这个号码来查找对应的系统调用实现。</li><li>在指定寄存器中存放系统调用的参数，这些参数是用户程序传递给操作系统的，操作系统根据这些参数来执行相应的操作。</li></ul><p>参数必须是寄存器宽度的，因为我们只能通过寄存器传递参数。在 x86 中，系统调用的参数是通过 rax, rdi, rsi, rdx, r10, r8, r9 这几个寄存器传递的。rax 寄存器存放系统调用号，rdi, rsi, rdx, r10, r8, r9 分别存放系统调用的参数。在 RISC-V 中，系统调用的参数是通过 a0, a1, a2, a3, a4, a5 这几个寄存器传递的。
+a7 寄存器存放系统调用号。上面的期末作业中给出了一些系统调用的号码，这些号码是操作系统用来查找系统调用实现的。</p><p>这里给出一个 x86_64 的 syscall 表，包含系统调用的寄存器使用约定: <a class=link href=https://blog.rchapman.org/posts/Linux_System_Call_Table_for_x86_64/ target=_blank rel=noopener>https://blog.rchapman.org/posts/Linux_System_Call_Table_for_x86_64/</a></p><p>可以看到，系统调用的返回值是存放在 rax 寄存器中的。系统调用 id 也被放在 rax 寄存器中。然后我们还需要在 rdi 中放置第一个参数。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span><span class=lnt>60
+</span><span class=lnt>61
+</span><span class=lnt>62
+</span><span class=lnt>63
+</span><span class=lnt>64
+</span><span class=lnt>65
+</span><span class=lnt>66
+</span><span class=lnt>67
+</span><span class=lnt>68
+</span><span class=lnt>69
+</span><span class=lnt>70
+</span><span class=lnt>71
+</span><span class=lnt>72
+</span><span class=lnt>73
+</span><span class=lnt>74
+</span><span class=lnt>75
+</span><span class=lnt>76
+</span><span class=lnt>77
+</span><span class=lnt>78
+</span><span class=lnt>79
+</span><span class=lnt>80
+</span><span class=lnt>81
+</span><span class=lnt>82
+</span><span class=lnt>83
+</span><span class=lnt>84
+</span><span class=lnt>85
+</span><span class=lnt>86
+</span><span class=lnt>87
+</span><span class=lnt>88
+</span><span class=lnt>89
+</span><span class=lnt>90
+</span><span class=lnt>91
+</span><span class=lnt>92
+</span><span class=lnt>93
+</span><span class=lnt>94
+</span><span class=lnt>95
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-Rust data-lang=Rust><span class=line><span class=cl><span class=cp>#![no_std]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=cp>#![no_main]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>use</span><span class=w> </span><span class=n>core</span>::<span class=n>arch</span>::<span class=n>asm</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>use</span><span class=w> </span><span class=n>core</span>::<span class=n>panic</span>::<span class=n>PanicInfo</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=cp>#[allow(unused)]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=cp>#[allow(unused_mut)]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=cp>#[allow(unreachable_code)]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=cp>#[no_mangle]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>pub</span><span class=w> </span><span class=k>extern</span><span class=w> </span><span class=s>&#34;C&#34;</span><span class=w> </span><span class=k>fn</span> <span class=nf>main</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>let</span><span class=w> </span><span class=n>brk_start</span>: <span class=kt>usize</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>unsafe</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// brk 是指向用户堆的指针。我们使用brk是扩大堆的大小，也就是分配内存。
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>        </span><span class=c1>// 但是我们需要知道堆的起始位置，所以我们需要先获取当前的brk值。
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>        </span><span class=fm>asm!</span><span class=p>(</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=s>&#34;mov rax, 12&#34;</span><span class=p>,</span><span class=w>  </span><span class=c1>// sys_brk system call number on x86_64
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>            </span><span class=s>&#34;mov rdi, 0&#34;</span><span class=p>,</span><span class=w>   </span><span class=c1>// brk(0) to get the current brk value
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>            </span><span class=s>&#34;syscall&#34;</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>out</span><span class=p>(</span><span class=s>&#34;rax&#34;</span><span class=p>)</span><span class=w> </span><span class=n>brk_start</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>options</span><span class=p>(</span><span class=n>nostack</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kd>let</span><span class=w> </span><span class=k>mut</span><span class=w> </span><span class=n>new_brk</span>: <span class=kt>usize</span> <span class=o>=</span><span class=w> </span><span class=n>brk_start</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=mi>1024</span><span class=p>;</span><span class=w> </span><span class=c1>// 分配 1024 字节内存
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kd>let</span><span class=w> </span><span class=n>brk_ret</span>: <span class=kt>isize</span><span class=p>;</span><span class=w> </span><span class=c1>// 系统调用返回值
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 调用 brk 系统调用进行内存分配
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>        </span><span class=fm>asm!</span><span class=p>(</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=s>&#34;mov rax, 12&#34;</span><span class=p>,</span><span class=w>  </span><span class=c1>// sys_brk system call number on x86_64
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>            </span><span class=s>&#34;syscall&#34;</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>in</span><span class=p>(</span><span class=s>&#34;rdi&#34;</span><span class=p>)</span><span class=w> </span><span class=n>new_brk</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>out</span><span class=p>(</span><span class=s>&#34;rax&#34;</span><span class=p>)</span><span class=w> </span><span class=n>brk_ret</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>options</span><span class=p>(</span><span class=n>nostack</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=n>brk_ret</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=o>-</span><span class=mi>1</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>new_brk</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>brk_start</span><span class=p>;</span><span class=w> </span><span class=c1>// 分配失败，恢复原来的 brk
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>            </span><span class=fm>panic!</span><span class=p>(</span><span class=s>&#34;brk failed&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kd>let</span><span class=w> </span><span class=k>mut</span><span class=w> </span><span class=n>ptr</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>brk_start</span><span class=w> </span><span class=k>as</span><span class=w> </span><span class=o>*</span><span class=k>mut</span><span class=w> </span><span class=kt>u8</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>ptr</span><span class=p>.</span><span class=n>write_volatile</span><span class=p>(</span><span class=mi>42</span><span class=p>);</span><span class=w> </span><span class=c1>// 访问 brk 的第一个字节
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>print</span><span class=p>(</span><span class=s>&#34;brk success</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>for</span><span class=w> </span><span class=n>i</span><span class=w> </span><span class=k>in</span><span class=w> </span><span class=mi>0</span><span class=o>..</span><span class=mi>4099</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>unsafe</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>ptr</span><span class=p>.</span><span class=n>add</span><span class=p>(</span><span class=n>i</span><span class=p>).</span><span class=n>write_volatile</span><span class=p>(</span><span class=mi>42</span><span class=p>);</span><span class=w> </span><span class=c1>// 访问超出分配的内存
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>                </span><span class=c1>// 你应该一定会看到4096行的write success。一行不多，一行不少。
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>                </span><span class=n>print</span><span class=p>(</span><span class=s>&#34;write success</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=cp>#[no_mangle]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>pub</span><span class=w> </span><span class=k>extern</span><span class=w> </span><span class=s>&#34;C&#34;</span><span class=w> </span><span class=k>fn</span> <span class=nf>__libc_start_main</span><span class=p>()</span><span class=w> </span>-&gt; <span class=o>!</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>main</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>print</span><span class=p>(</span><span class=s>&#34;main returned</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>exit</span><span class=p>(</span><span class=mi>0</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>pub</span><span class=w> </span><span class=k>fn</span> <span class=nf>print</span><span class=p>(</span><span class=n>s</span>: <span class=kp>&amp;</span><span class=kt>str</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>let</span><span class=w> </span><span class=n>ptr</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>s</span><span class=p>.</span><span class=n>as_ptr</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>let</span><span class=w> </span><span class=n>count</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>s</span><span class=p>.</span><span class=n>len</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>unsafe</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=fm>asm!</span><span class=p>(</span><span class=s>&#34;syscall&#34;</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>in</span><span class=p>(</span><span class=s>&#34;rax&#34;</span><span class=p>)</span><span class=w> </span><span class=mi>1</span><span class=p>,</span><span class=w> </span><span class=c1>// sys_write system call number on x86_64
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>            </span><span class=k>in</span><span class=p>(</span><span class=s>&#34;rdi&#34;</span><span class=p>)</span><span class=w> </span><span class=mi>1</span><span class=p>,</span><span class=w> </span><span class=c1>// file descriptor 1 is stdout
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>            </span><span class=k>in</span><span class=p>(</span><span class=s>&#34;rsi&#34;</span><span class=p>)</span><span class=w> </span><span class=n>ptr</span><span class=p>,</span><span class=w> </span><span class=c1>// pointer to the buffer
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>            </span><span class=k>in</span><span class=p>(</span><span class=s>&#34;rdx&#34;</span><span class=p>)</span><span class=w> </span><span class=n>count</span><span class=p>,</span><span class=w> </span><span class=c1>// buffer size
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>        </span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>fn</span> <span class=nf>exit</span><span class=p>(</span><span class=n>code</span>: <span class=kt>i32</span><span class=p>)</span><span class=w> </span>-&gt; <span class=o>!</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>unsafe</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 退出程序
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>        </span><span class=fm>asm!</span><span class=p>(</span><span class=s>&#34;syscall&#34;</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>in</span><span class=p>(</span><span class=s>&#34;rax&#34;</span><span class=p>)</span><span class=w> </span><span class=mi>60</span><span class=p>,</span><span class=w> </span><span class=c1>// sys_exit system call number on x86_64
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>            </span><span class=k>in</span><span class=p>(</span><span class=s>&#34;rdi&#34;</span><span class=p>)</span><span class=w> </span><span class=n>code</span><span class=p>,</span><span class=w> </span><span class=c1>// exit code;
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>            </span><span class=n>options</span><span class=p>(</span><span class=n>noreturn</span><span class=p>,</span><span class=w> </span><span class=n>nostack</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=cp>#[panic_handler]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>fn</span> <span class=nf>panic</span><span class=p>(</span><span class=n>_info</span>: <span class=kp>&amp;</span><span class=nc>PanicInfo</span><span class=p>)</span><span class=w> </span>-&gt; <span class=o>!</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>print</span><span class=p>(</span><span class=s>&#34;panicked!</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>exit</span><span class=p>(</span><span class=mi>1</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>你可以在<a class=link href=https://github.com/Loongson-neuq/blog/tree/main/content/post/week060/brk_demo target=_blank rel=noopener>这里</a>找到这个代码的完整版本。</p><p>使用</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>cargo +nightly run -Z build-std<span class=o>=</span>core --target x86_64-unknown-linux-gnu
+</span></span></code></pre></td></tr></table></div></div><p>来编译运行</p><p>你可以看到，刚好在第 4096 行的时候，程序会被操作系统杀死。这是因为我们访问了超出分配的内存，操作系统检测到了这个错误，就会杀死程序。</p><p>但是我们明明只要了 1024 个字节，为什么我们可以访问 4096 字节呢？这是因为操作系统会按照页的大小来分配内存。在 x86_64 上，页的大小是 4096 字节。所以我们分配 1024 字节的时候，实际上操作系统会分配 4096 字节的内存。这个内存是连续的，所以我们可以访问 1024 ~ 4095 字节的内存。按页分配内存是为了提高内存的使用效率，因为内存是按页来管理的，所以我们只能按页来分配内存。分页机制同时也是虚拟内存和内存权限控制的基础。</p><p>上面你可以看到我使用汇编调用<code>exit</code>, <code>write</code>系统调用的实现，这是因为我们在 <code>no_std</code> 环境下，没有标准库，所以我们需要自己实现这些功能。这里我使用了汇编来调用系统调用。</p><h4 id=探索调用栈---手动栈展开>探索调用栈 - 手动栈展开</h4><p>接下来看下一道题：https://github.com/Loongson-neuq/mem-management-01/tree/main/explore-call-stack</p><p>题目要求我们通过修改栈，来实现修改控制流。</p><p>让我们先来看看这个题的简化版本，也是一个经典的返回地址攻击：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nf>foo</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>int</span> <span class=nf>foo</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// 在这里修改栈，使得代码不回到 main，而是回到 bar
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>int</span> <span class=nf>bar</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// Some dangerous code that can be exploited
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>这需要如何实现呢？我们首先需要知道函数是什么。</p><p>函数也叫子过程，是一段代码的集合，从汇编或者说内存的角度说，就是一片内存区域，这片内存区域储存了指令。函数实际上就只是这片内存区域的地址，或者说这些指令集合的第一条指令的地址。而其他的参数，返回值都是编译器设计的约定，实际上就是一些寄存器或者内存的操作。如果我们自己编写汇编代码，则需要自己实现以及遵守这些约定。</p><p>函数的特性包括以下几点:</p><ol><li>传递参数给子过程</li><li>转移控制权给子过程</li><li>子过程返回返回值</li><li>子过程返回控制权给父过程</li></ol><p>我们今天不关注 1 和 3，有兴趣的同学请自己搜索 <code>Calling Conventions</code>。</p><p>2 和 4 都涉及控制权的转移，通过上面的内容，你应该知道，实际上就是修改 PC 指针。</p><p>对于 2，通常由一条 &ldquo;call&rdquo; 指令实现，call 指令是一条比较复杂的伪指令，实际上是多条指令的组合。</p><p>让我先介绍一个简单跳转指令 <code>jmp</code>。它的作用就只是修改PC到目标地址，没有任何其他操作。</p><p>接下来再说说 <code>call</code> 指令。<code>call</code> 指令的作用是将当前的指令的下一条指令的地址压入栈，然后跳转到目标地址。</p><p>也就是</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-asm data-lang=asm><span class=line><span class=cl><span class=nf>push</span> <span class=err>&lt;</span><span class=no>ADDRESS_OF_NEXT_INSTRUCTION</span><span class=err>&gt;</span> <span class=err>&#39;</span> <span class=err>需要注意的是&lt;</span><span class=no>ADDRESS_OF_NEXT_INSTRUCTION</span><span class=err>&gt;由编译器硬编码嵌入到指令中，所以我们无法直接获取到这个地址</span>
+</span></span><span class=line><span class=cl><span class=nf>jmp</span> <span class=err>&lt;</span><span class=no>TARGET_ADDRESS</span><span class=err>&gt;</span>
+</span></span></code></pre></td></tr></table></div></div><p>这样就实现了函数调用。</p><p>那返回时呢？返回时我们需要从栈中弹出地址，然后跳转到这个地址。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-asm data-lang=asm><span class=line><span class=cl><span class=nf>pop</span> <span class=no>t0</span> <span class=err>&#39;</span> <span class=err>将&lt;</span><span class=no>ADDRESS_OF_NEXT_INSTRUCTION</span><span class=err>&gt;弹出到</span><span class=no>t0</span>
+</span></span><span class=line><span class=cl><span class=nf>jmp</span> <span class=no>t0</span> <span class=err>&#39;</span> <span class=err>跳转到</span><span class=no>t0</span>
+</span></span></code></pre></td></tr></table></div></div><p>这就是 <code>ret</code> 指令。ADDRESS_OF_NEXT_INSTRUCTION 被称为 Return Address。某些架构例如 RISCV 使用专用寄存器保存 Return Address，但是对于嵌套函数，仍然需要将 Return Address 压入栈中。</p><p>在 <code>ret</code> 前，需要清空当前栈帧，这样pop弹出的才是正确的地址。而不是局部变量。</p><p>这就是函数调用的原理。</p><p>接下来再让我们从高处看看栈的结构，以上面的代码为例：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>+-------------------+  --+ &lt;- rbp
+</span></span><span class=line><span class=cl>|                   |    |
+</span></span><span class=line><span class=cl>|                   |    |
+</span></span><span class=line><span class=cl>|                   |    +--- main 的栈帧
+</span></span><span class=line><span class=cl>|                   |    |
+</span></span><span class=line><span class=cl>|                   |    |
+</span></span><span class=line><span class=cl>+-------------------+  --+ &lt;- rsp
+</span></span></code></pre></td></tr></table></div></div><p>这是 main 的栈帧，在进入 main 时，就确定了大小和位置。在调用 foo 前，栈的结构是这样的。</p><p>接下来我们执行 <code>call foo</code> 指令的第一件事，压入 Return Address，栈的结构变成这样：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>+-------------------+  --+ &lt;- rbp, BASE POINTER，也就是序幕代码中的 rsp 或者 riscv 中的 sp
+</span></span><span class=line><span class=cl>|                   |    |
+</span></span><span class=line><span class=cl>|                   |    |
+</span></span><span class=line><span class=cl>|                   |    +--- main 的栈帧
+</span></span><span class=line><span class=cl>|                   |    |
+</span></span><span class=line><span class=cl>|                   |    |
+</span></span><span class=line><span class=cl>+-------------------+  --+  &lt;- rsp
+</span></span><span class=line><span class=cl>|   RETURN ADDRESS  |  
+</span></span><span class=line><span class=cl>+-------------------+
+</span></span></code></pre></td></tr></table></div></div><p>接下来我们执行 <code>jmp foo</code> 指令，控制权转移到 foo 函数。但是还没有执行 foo 函数的代码，所以 foo 的栈帧还没有建立，栈的结构保持不变。</p><p>我们知道，函数具有 prelude 代码，包含以下两条指令：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-asm data-lang=asm><span class=line><span class=cl><span class=nf>push</span> <span class=no>rbp</span>
+</span></span><span class=line><span class=cl><span class=nf>mov</span> <span class=no>rbp</span><span class=p>,</span> <span class=no>rsp</span>
+</span></span></code></pre></td></tr></table></div></div><p>这是为了建立当前函数的栈帧。其中，push 将 rsp 指令 +8，然后将 rbp 的值压入栈中。然后将 rsp 的值赋给 rbp。这样就建立了当前函数的栈帧。现在栈的结构变成这样：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>+-------------------+  --+
+</span></span><span class=line><span class=cl>|                   |    |
+</span></span><span class=line><span class=cl>|                   |    |
+</span></span><span class=line><span class=cl>|                   |    +--- main 的栈帧
+</span></span><span class=line><span class=cl>|                   |    |
+</span></span><span class=line><span class=cl>|                   |    |
+</span></span><span class=line><span class=cl>+-------------------+  --+
+</span></span><span class=line><span class=cl>|   RETURN ADDRESS  |  
+</span></span><span class=line><span class=cl>+-------------------+
+</span></span><span class=line><span class=cl>|     SAVED RBP     |
+</span></span><span class=line><span class=cl>+-------------------+  &lt;- 新的 rbp, 这里我们不关注 rsp，因为 rsp 是动态的
+</span></span><span class=line><span class=cl>|                   |
+</span></span><span class=line><span class=cl>|                   |  &lt;--- foo 的栈帧
+</span></span><span class=line><span class=cl>|                   |
+</span></span><span class=line><span class=cl>|                   | 
+</span></span></code></pre></td></tr></table></div></div><p>你可以看到，foo 的栈帧建立完成。现在我们可以执行 foo 的代码了。</p><p>现在回来考虑返回地址攻击，其实非常简单，只要修改 Return Address 就可以了。我们可以通过修改 Return Address 来控制程序的控制流。那如何知道 Return Address 的地址呢？事实上，对于本函数的 Return Address，我们是很容易知道的，它就位于 SAVED RBP 的正上方。而 SAVED RBP 的地址是 rbp 的值。</p><p>也就是说，RETURN ADDRESS 的地址就是 rbp + 8。</p><p>我们使用<code>((size_t*)(rbp + 8)) = bar</code>，就能够修改 Return Address 为 bar 的地址。</p><p>这下，在 foo 返回时，pop 出来的地址就是 bar 的地址，程序就会跳转到 bar 函数。</p><p>这就是返回地址攻击的原理。</p><p>现在让我们回来看我们的题目。我们的题目稍微复杂了一些，因为我们不再是修改自己的返回地址了，而是修改自己上方某个函数的返回地址。这就需要我们知道上方函数的栈帧的大小，以及 Return Address 的地址。那我们如何知道上方函数的栈帧的大小呢？我们可以遍历基指针实现。</p><p>还是考虑这个例子，我们知道，main 也是被别人调用的，也有 RETURN ADDRESS 和 SAVED RBP。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>+-------------------+  --+
+</span></span><span class=line><span class=cl>|                   |    |
+</span></span><span class=line><span class=cl>|                   |    |
+</span></span><span class=line><span class=cl>|                   |    +--- main 的栈帧
+</span></span><span class=line><span class=cl>|                   |    |
+</span></span><span class=line><span class=cl>|                   |    |
+</span></span><span class=line><span class=cl>+-------------------+  --+
+</span></span><span class=line><span class=cl>|   RETURN ADDRESS  |  
+</span></span><span class=line><span class=cl>+-------------------+
+</span></span><span class=line><span class=cl>|     SAVED RBP     |
+</span></span><span class=line><span class=cl>+-------------------+  &lt;- 新的 rbp, 这里我们不关注 rsp，因为 rsp 是动态的
+</span></span><span class=line><span class=cl>|                   |
+</span></span><span class=line><span class=cl>|                   |  &lt;--- foo 的栈帧
+</span></span><span class=line><span class=cl>|                   |
+</span></span><span class=line><span class=cl>|                   | 
+</span></span></code></pre></td></tr></table></div></div><p>rbp 寄存器指向的是当前函数的栈帧的底部，也就是 SAVED RBP 的地址。那我们对 rbp 进行解引用，就可以得到上一个函数的 rbp 的地址。再次解引用，就可以得到上上一个函数的 RBP。如此循环下去，直到某一个 SAVED RBP 为 0，就说明到了栈的底部。这就是栈的展开的原理。</p><p>这就是我们的题目的原理。我们需要遍历栈，找到我们要修改的函数的栈帧，然后修改 Return Address。</p><p>需要补充的一点是，现代编译器并不总是会保存 RBP，因此这种遍历栈的方法并不总是有效。他们使用 fda 来保存栈帧的大小，这样就不需要 RBP 了。这样就能够多出一个通用寄存器。在 RISCV 中，基指针 fp 有两个名字，在保存基指针时，叫做 fp，如果不保存基指针，叫做 s0，即 saved register 0。多一个通用寄存器的好处是显著的，因为通用寄存器是非常宝贵的资源。但是进行栈展开就变得困难了，因为解析 fda 是非常困难的。但是你可以对指示链接器强制保存基指针。</p><h3 id=汇编视角的栈内存>汇编视角的栈内存</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span><span class=lnt>60
+</span><span class=lnt>61
+</span><span class=lnt>62
+</span><span class=lnt>63
+</span><span class=lnt>64
+</span><span class=lnt>65
+</span><span class=lnt>66
+</span><span class=lnt>67
+</span><span class=lnt>68
+</span><span class=lnt>69
+</span><span class=lnt>70
+</span><span class=lnt>71
+</span><span class=lnt>72
+</span><span class=lnt>73
+</span><span class=lnt>74
+</span><span class=lnt>75
+</span><span class=lnt>76
+</span><span class=lnt>77
+</span><span class=lnt>78
+</span><span class=lnt>79
+</span><span class=lnt>80
+</span><span class=lnt>81
+</span><span class=lnt>82
+</span><span class=lnt>83
+</span><span class=lnt>84
+</span><span class=lnt>85
+</span><span class=lnt>86
+</span><span class=lnt>87
+</span><span class=lnt>88
+</span><span class=lnt>89
+</span><span class=lnt>90
+</span><span class=lnt>91
+</span><span class=lnt>92
+</span><span class=lnt>93
+</span><span class=lnt>94
+</span><span class=lnt>95
+</span><span class=lnt>96
+</span><span class=lnt>97
+</span><span class=lnt>98
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-asm data-lang=asm><span class=line><span class=cl><span class=nl>foo:</span>
+</span></span><span class=line><span class=cl><span class=c1>; 函数序幕
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>PUSH</span> <span class=no>BP</span>                <span class=c1>; 保存基指针
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>MOV</span> <span class=no>BP</span><span class=p>,</span> <span class=no>SP</span>             <span class=c1>; 初始化基指针
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl><span class=nf>PUSH</span> <span class=no>t0</span>
+</span></span><span class=line><span class=cl><span class=nf>PUSH</span> <span class=no>t1</span>
+</span></span><span class=line><span class=cl><span class=nf>PUSH</span> <span class=no>t2</span>
+</span></span><span class=line><span class=cl><span class=nf>PUSH</span> <span class=no>t3</span>
+</span></span><span class=line><span class=cl><span class=nf>PUSH</span> <span class=no>t4</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>; int a = 42;
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>MOV</span> <span class=no>t0</span><span class=p>,</span> <span class=mi>42</span>             <span class=c1>; 将值 42 存入 t0 寄存器
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>PUSH</span> <span class=no>t0</span>                <span class=c1>; 将 t0 的值压入栈，栈顶即为变量 a 的地址
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl><span class=c1>; int* ptrA = &amp;a;
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>LEA</span> <span class=no>t1</span><span class=p>,</span> <span class=p>[</span><span class=no>BP-8</span><span class=p>]</span>         <span class=c1>; 获取变量 a 的地址，存入 t1
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>PUSH</span> <span class=no>t1</span>                <span class=c1>; 将 t1 的值压入栈，栈顶即为变量 ptrA 的地址
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl><span class=c1>; Object* obj = new Object();
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>HEAP_ALLOC</span> <span class=no>t3</span><span class=p>,</span> <span class=mi>32</span>      <span class=c1>; 分配 32 字节的堆空间，存入 t3
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>MOV</span> <span class=p>[</span><span class=no>t3</span><span class=p>],</span> <span class=err>&lt;</span><span class=no>Program.exe</span><span class=err>+</span><span class=no>Object</span><span class=p>::</span><span class=no>GetHashCode</span><span class=err>&gt;</span> <span class=c1>; 初始化 vtable 的第一个函数地址
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>MOV</span> <span class=p>[</span><span class=no>t3</span><span class=err>+</span><span class=mi>8</span><span class=p>],</span> <span class=err>&lt;</span><span class=no>Program.exe</span><span class=err>+</span><span class=no>Object</span><span class=p>::</span><span class=no>ToString</span><span class=err>&gt;</span>  <span class=c1>; 初始化 vtable 的第二个函数地址
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>MOV</span> <span class=p>[</span><span class=no>t3</span><span class=err>+</span><span class=mi>16</span><span class=p>],</span> <span class=err>&lt;</span><span class=no>Program.exe</span><span class=err>+</span><span class=no>Object</span><span class=p>::</span><span class=no>Equals</span><span class=err>&gt;</span>   <span class=c1>; 初始化 vtable 的第三个函数地址
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>PUSH</span> <span class=no>t3</span>                <span class=c1>; 将堆地址压入栈，栈顶即为变量 obj 的地址
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl><span class=c1>; char* str = &#34;Hello&#34;;
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>MOV_STR</span> <span class=no>t0</span><span class=p>,</span> <span class=err>&lt;</span><span class=no>Program.exe</span><span class=err>+</span><span class=no>offset_of_Hello</span><span class=err>&gt;</span> <span class=c1>; 假设字符串 &#34;Hello&#34; 的偏移地址
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>PUSH</span> <span class=no>t0</span>                                   <span class=c1>; 将 t0 的值压入栈，栈顶即为变量 str 的地址
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl><span class=c1>; StructType value = StructType {1, 2, 3};
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>MOV</span> <span class=no>t0</span><span class=p>,</span> <span class=mi>1</span>              <span class=c1>; 将值 1 存入 t0 寄存器
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>PUSH</span> <span class=no>t0</span>                <span class=c1>; 将 t0 的值压入栈，初始化 field1
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>MOV</span> <span class=no>t0</span><span class=p>,</span> <span class=mi>2</span>              <span class=c1>; 将值 2 存入 t0 寄存器
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>PUSH</span> <span class=no>t0</span>                <span class=c1>; 将 t0 的值压入栈，初始化 field2
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>MOV</span> <span class=no>t0</span><span class=p>,</span> <span class=mi>3</span>              <span class=c1>; 将值 3 存入 t0 寄存器
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>PUSH</span> <span class=no>t0</span>                <span class=c1>; 将 t0 的值压入栈，初始化 field3
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl><span class=c1>; 你也可以使用静态SP的方式
+</span></span></span><span class=line><span class=cl><span class=c1>; SUB SP, 12            ; 为结构体 value 分配 12 字节的栈空间
+</span></span></span><span class=line><span class=cl><span class=c1>; MOV [SP-4], 1
+</span></span></span><span class=line><span class=cl><span class=c1>; MOV [SP-8], 2
+</span></span></span><span class=line><span class=cl><span class=c1>; MOV [SP-12], 3
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl><span class=c1>; StructType* pValue = (StructType*)malloc(sizeof(StructType));
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>HEAP_ALLOC</span> <span class=no>t3</span><span class=p>,</span> <span class=mi>12</span>      <span class=c1>; 分配 12 字节的堆空间，存入 t3
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>MOV</span> <span class=p>[</span><span class=no>t3</span><span class=p>],</span> <span class=mi>1</span>            <span class=c1>; 初始化堆上的 field1
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>MOV</span> <span class=p>[</span><span class=no>t3</span><span class=err>+</span><span class=mi>4</span><span class=p>],</span> <span class=mi>2</span>          <span class=c1>; 初始化堆上的 field2
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>MOV</span> <span class=p>[</span><span class=no>t3</span><span class=err>+</span><span class=mi>8</span><span class=p>],</span> <span class=mi>3</span>          <span class=c1>; 初始化堆上的 field3
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>PUSH</span> <span class=no>t3</span>                <span class=c1>; 将堆地址压入栈，栈顶即为变量 pValue 的地址
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl><span class=c1>; std::vector&lt;int&gt; vec = {1, 2, 3};
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>PUSH</span> <span class=mi>3</span>                 <span class=c1>; 将 3 压入栈，初始化 vector 的大小
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>PUSH</span> <span class=mi>3</span>                 <span class=c1>; 将 3 压入栈，初始化 vector 的容量
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>HEAP_ALLOC</span> <span class=no>t3</span><span class=p>,</span> <span class=mi>12</span>      <span class=c1>; 分配 12 字节的堆空间，存入 t3
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>MOV</span> <span class=p>[</span><span class=no>t3</span><span class=p>],</span> <span class=mi>1</span>            <span class=c1>; 初始化堆上的第一个元素
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>MOV</span> <span class=p>[</span><span class=no>t3</span><span class=err>+</span><span class=mi>4</span><span class=p>],</span> <span class=mi>2</span>          <span class=c1>; 初始化堆上的第二个元素
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>MOV</span> <span class=p>[</span><span class=no>t3</span><span class=err>+</span><span class=mi>8</span><span class=p>],</span> <span class=mi>3</span>          <span class=c1>; 初始化堆上的第三个元素
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>PUSH</span> <span class=no>t3</span>                <span class=c1>; 将堆地址压入栈，栈顶即为变量 vec 的地址
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl><span class=c1>; std::vector&lt;int&gt;* pVec = new std::vector&lt;int&gt;({1, 2, 3});
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>HEAP_ALLOC</span> <span class=no>t3</span><span class=p>,</span> <span class=mi>12</span>      <span class=c1>; 分配 12 字节的堆空间，存入 t3
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>MOV</span> <span class=p>[</span><span class=no>t3</span><span class=p>],</span> <span class=mi>1</span>            <span class=c1>; 初始化堆上的第一个元素
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>MOV</span> <span class=p>[</span><span class=no>t3</span><span class=err>+</span><span class=mi>4</span><span class=p>],</span> <span class=mi>2</span>          <span class=c1>; 初始化堆上的第二个元素
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>MOV</span> <span class=p>[</span><span class=no>t3</span><span class=err>+</span><span class=mi>8</span><span class=p>],</span> <span class=mi>3</span>          <span class=c1>; 初始化堆上的第三个元素
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>HEAP_ALLOC</span> <span class=no>t4</span><span class=p>,</span> <span class=mi>24</span>      <span class=c1>; 分配 24 字节的堆空间，存入 t4
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>MOV</span> <span class=p>[</span><span class=no>t4</span><span class=p>],</span> <span class=mi>3</span>            <span class=c1>; 初始化堆上的大小
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>MOV</span> <span class=p>[</span><span class=no>t4</span><span class=err>+</span><span class=mi>4</span><span class=p>],</span> <span class=mi>3</span>          <span class=c1>; 初始化堆上的容量
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>MOV</span> <span class=p>[</span><span class=no>t4</span><span class=err>+</span><span class=mi>8</span><span class=p>],</span> <span class=no>t3</span>         <span class=c1>; 初始化堆上的指针
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>PUSH</span> <span class=no>t4</span>                <span class=c1>; 将堆地址压入栈，栈顶即为变量 pVec 的地址
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl><span class=c1>; int array[512];
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>SUB</span> <span class=no>SP</span><span class=p>,</span> <span class=mi>2048</span>           <span class=c1>; 为数组 array 分配 512 * 4 字节的栈空间
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>LEA</span> <span class=no>t2</span><span class=p>,</span> <span class=p>[</span><span class=no>BP-2056</span><span class=p>]</span>      <span class=c1>; 获取数组 array 的基址，存入 t2
+</span></span></span><span class=line><span class=cl><span class=c1>; 我决定将这个数组放在最后，因为这样其他局部变量的偏移就会比较小
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl><span class=c1>; 清理局部变量
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>ADD</span> <span class=no>SP</span><span class=p>,</span> <span class=mi>2048</span>           <span class=c1>; 清理数组 array 的栈空间
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>POP</span>                    <span class=c1>; 清理 pVec
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>ADD</span> <span class=no>SP</span><span class=p>,</span> <span class=mi>12</span>             <span class=c1>; 清理 vec
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>ADD</span> <span class=no>SP</span><span class=p>,</span> <span class=mi>8</span>              <span class=c1>; 清理 pValue
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>ADD</span> <span class=no>SP</span><span class=p>,</span> <span class=mi>12</span>             <span class=c1>; 清理 value
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>ADD</span> <span class=no>SP</span><span class=p>,</span> <span class=mi>8</span>              <span class=c1>; 清理 str
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>ADD</span> <span class=no>SP</span><span class=p>,</span> <span class=mi>8</span>              <span class=c1>; 清理 obj
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>ADD</span> <span class=no>SP</span><span class=p>,</span> <span class=mi>8</span>              <span class=c1>; 清理 ptrA
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>ADD</span> <span class=no>SP</span><span class=p>,</span> <span class=mi>4</span>              <span class=c1>; 清理 a
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl><span class=c1>; 恢复临时寄存器
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>POP</span> <span class=no>t4</span>
+</span></span><span class=line><span class=cl><span class=nf>POP</span> <span class=no>t3</span>
+</span></span><span class=line><span class=cl><span class=nf>POP</span> <span class=no>t2</span>
+</span></span><span class=line><span class=cl><span class=nf>POP</span> <span class=no>t1</span>
+</span></span><span class=line><span class=cl><span class=nf>POP</span> <span class=no>t0</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>; 函数尾声
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>POP</span> <span class=no>BP</span>                 <span class=c1>; 恢复基指针
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl><span class=nf>RET</span>
+</span></span></code></pre></td></tr></table></div></div><p>这里我使用的是动态 sp，某些编译器不会使用动态 sp，而是使用 rbp + 固定偏移，也就是课件中代码的形式。
+使用哪种方式完全取决于编译器的实现，这里只是为了说明栈内存的分配。并且现代编译器也是多种方式混合使用，例如保存 rbp 的时候都是使用的 push/pop，但是局部变量的偏移是使用 rbp + 固定偏移的方式。</p><h3 id=补充寻址模式>补充：寻址模式</h3><p>我们进行内存访问，总是需要一个根，然后再加上一个偏移量。这个根叫做基址，这种寻址方式叫做基址寻址。基址寻址是一种非常常见的寻址方式，但是并不是唯一的寻址方式。</p><p>我们还有一种寻址方式叫做立即数寻址，这种寻址方式是直接使用一个立即数作为地址。这种寻址方式通常用于访问全局变量，因为全局变量的地址是固定的。</p><p>这里稍微說一下基址寻址。除了全局符号外，所有的寻址都是基址寻址。对于堆内存，它的根总是栈上的某个局部变量，这也是 Gargage Collection 的基础，对于引用托管堆对象的局部变量被视为 GC 根，通过遍历 GC 根，可以确定所有可达的托管对象。然后其他被判定为不可达的对象就可以被回收。</p><p>而对与栈内存，它的根是栈顶指针，也就是 rsp 或者 rbp。因此，不管是堆内存还是栈内存，通过寄存器来访问内存，无非是一次跳转和多次跳转的区别。</p><h2 id=继续-rust-所有权原理的内容>继续 Rust 所有权原理的内容</h2><p>回到上次的课件</p></section><footer class=article-footer><section class=article-tags><a href=/tags/rust/>Rust</a></section><section class=article-copyright><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer></article><aside class=related-content--wrapper><h2 class=section-title>相关文章</h2><div class=related-content><div class="flex article-list--tile"><article><a href=/p/os-week2-get-started-with-rust/><div class=article-details><h2 class=article-title>[OS Week2] Get started with Rust</h2></div></a></article><article><a href=/p/advanced-rust/><div class=article-details><h2 class=article-title>Advanced Rust</h2></div></a></article><article><a href=/p/os-week2-%E4%BD%9C%E4%B8%9A%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/><div class=article-details><h2 class=article-title>[OS Week2] 作业常见问题</h2></div></a></article><article><a href=/p/os-week1-%E4%BD%9C%E4%B8%9A%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/><div class=article-details><h2 class=article-title>[OS Week1] 作业常见问题</h2></div></a></article><article class=has-image><a href=/p/os-week1-git-and-linux-basics/><div class=article-image><img src=/p/os-week1-git-and-linux-basics/background.bf6810ec384f763b831c15f3672eb91e_hub7bd9424949445f7cb4edac68fee9448_2942088_250x150_fill_box_smart1_3.png width=250 height=150 loading=lazy alt="Featured image of post [OS Week1] Git and Linux Basics" data-hash="md5-v2gQ7DhPdjuDHBXzZy65Hg=="></div><div class=article-details><h2 class=article-title>[OS Week1] Git and Linux Basics</h2></div></a></article></div></div></aside><script src=https://giscus.app/client.js data-repo=Loongson-neuq/blog data-repo-id=R_kgDOM20epQ data-category=Giscus data-category-id=DIC_kwDOM20epc4CixXm data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-CN data-loading crossorigin=anonymous async></script><script>function setGiscusTheme(e){let t=document.querySelector("iframe.giscus-frame");t&&t.contentWindow.postMessage({giscus:{setConfig:{theme:e}}},"https://giscus.app")}(function(){addEventListener("message",t=>{if(event.origin!=="https://giscus.app")return;e()}),window.addEventListener("onColorSchemeChange",e);function e(){setGiscusTheme(document.documentElement.dataset.scheme==="light"?"preferred_color_scheme":"preferred_color_scheme")}})()</script><footer class=site-footer><section class=copyright>&copy;
+2024 NEUQ 龙芯实验室博客</section><section class=powerby>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=3.29.0>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><div class=pswp tabindex=-1 role=dialog aria-hidden=true><div class=pswp__bg></div><div class=pswp__scroll-wrap><div class=pswp__container><div class=pswp__item></div><div class=pswp__item></div><div class=pswp__item></div></div><div class="pswp__ui pswp__ui--hidden"><div class=pswp__top-bar><div class=pswp__counter></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+<button class="pswp__button pswp__button--share" title=Share></button>
+<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class=pswp__preloader><div class=pswp__preloader__icn><div class=pswp__preloader__cut><div class=pswp__preloader__donut></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class=pswp__share-tooltip></div></div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+</button>
+<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class=pswp__caption><div class=pswp__caption__center></div></div></div></div></div><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo=" crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU=" crossorigin=anonymous defer></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css crossorigin=anonymous><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css crossorigin=anonymous></main></div><script src=https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z+KMkF24hUW8WePSA9HM=" crossorigin=anonymous></script><script type=text/javascript src=/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js defer></script><script>(function(){const e=document.createElement("link");e.href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap",e.type="text/css",e.rel="stylesheet",document.head.appendChild(e)})()</script></body></html>
