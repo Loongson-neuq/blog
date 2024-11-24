@@ -414,6 +414,12 @@ PUSH t0                ; 将 t0 的值压入栈，初始化 field2
 MOV t0, 3              ; 将值 3 存入 t0 寄存器
 PUSH t0                ; 将 t0 的值压入栈，初始化 field3
 
+; 你也可以使用静态SP的方式
+; SUB SP, 12            ; 为结构体 value 分配 12 字节的栈空间
+; MOV [SP-4], 1
+; MOV [SP-8], 2
+; MOV [SP-12], 3
+
 ; StructType* pValue = (StructType*)malloc(sizeof(StructType));
 HEAP_ALLOC t3, 12      ; 分配 12 字节的堆空间，存入 t3
 MOV [t3], 1            ; 初始化堆上的 field1
