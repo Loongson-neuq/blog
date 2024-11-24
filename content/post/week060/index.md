@@ -422,9 +422,9 @@ PUSH t0                ; 将 t0 的值压入栈，初始化 field3
 
 ; StructType* pValue = (StructType*)malloc(sizeof(StructType));
 HEAP_ALLOC t3, 12      ; 分配 12 字节的堆空间，存入 t3
-MOV [t3+8], 1            ; 初始化堆上的 field1
+MOV [t3], 1            ; 初始化堆上的 field1
 MOV [t3+4], 2          ; 初始化堆上的 field2
-MOV [t3], 3          ; 初始化堆上的 field3
+MOV [t3+8], 3          ; 初始化堆上的 field3
 PUSH t3                ; 将堆地址压入栈，栈顶即为变量 pValue 的地址
 
 ; std::vector<int> vec = {1, 2, 3};
