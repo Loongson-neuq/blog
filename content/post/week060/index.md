@@ -387,6 +387,12 @@ foo:
 PUSH BP                ; 保存基指针
 MOV BP, SP             ; 初始化基指针
 
+PUSH t0
+PUSH t1
+PUSH t2
+PUSH t3
+PUSH t4
+
 ; int a = 42;
 MOV t0, 42             ; 将值 42 存入 t0 寄存器
 PUSH t0                ; 将 t0 的值压入栈，栈顶即为变量 a 的地址
@@ -436,10 +442,44 @@ MOV [t3+4], 2          ; 初始化堆上的第二个元素
 MOV [t3+8], 3          ; 初始化堆上的第三个元素
 PUSH t3                ; 将堆地址压入栈，栈顶即为变量 vec 的地址
 
+; std::vector<int>* pVec = new std::vector<int>({1, 2, 3});
+HEAP_ALLOC t3, 12      ; 分配 12 字节的堆空间，存入 t3
+MOV [t3], 1            ; 初始化堆上的第一个元素
+MOV [t3+4], 2          ; 初始化堆上的第二个元素
+MOV [t3+8], 3          ; 初始化堆上的第三个元素
+HEAP_ALLOC t4, 24      ; 分配 24 字节的堆空间，存入 t4
+MOV [t4], 3            ; 初始化堆上的大小
+MOV [t4+4], 3          ; 初始化堆上的容量
+MOV [t4+8], t3         ; 初始化堆上的指针
+PUSH t4                ; 将堆地址压入栈，栈顶即为变量 pVec 的地址
+
 ; int array[512];
 SUB SP, 2048           ; 为数组 array 分配 512 * 4 字节的栈空间
 LEA t2, [BP-2056]      ; 获取数组 array 的基址，存入 t2
 ; 我决定将这个数组放在最后，因为这样其他局部变量的偏移就会比较小
+
+; 清理局部变量
+ADD SP, 2048           ; 清理数组 array 的栈空间
+POP                    ; 清理 pVec
+ADD SP, 12             ; 清理 vec
+ADD SP, 8              ; 清理 pValue
+ADD SP, 12             ; 清理 value
+ADD SP, 8              ; 清理 str
+ADD SP, 8              ; 清理 obj
+ADD SP, 8              ; 清理 ptrA
+ADD SP, 4              ; 清理 a
+
+; 恢复临时寄存器
+POP t4
+POP t3
+POP t2
+POP t1
+POP t0
+
+; 函数尾声
+POP BP                 ; 恢复基指针
+
+RET
 ```
 
 这里我使用的是动态 sp，某些编译器不会使用动态 sp，而是使用 rbp + 固定偏移，也就是课件中代码的形式。
