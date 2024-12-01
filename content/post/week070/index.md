@@ -480,7 +480,7 @@ impl<'a, T> BinaryTreeIterator<'a, T> {
 
 # Asynchronous Programming
 
-C# 最早引入了异步编程模型和`async/await`编程模式，也是将异步应用得最成功的语言。，通过 `async` 和 `await` 关键字，使得异步编程变得非常简单。Rust 也引入了异步编程模型，通过 `async` 和 `await` 关键字，使得异步编程变得非常简单。
+C# 最早引入了异步编程模型和`async/await`编程模式，也是将异步应用得最成功的语言。通过 `async` 和 `await` 关键字，使得异步编程变得非常简单。Rust 也引入了异步编程模型，通过 `async` 和 `await` 关键字，使得异步编程变得非常简单。
 
 这里引用 Microsoft .NET team 员工 Stephen Toub 的文章，你可以在这里找到原文：[Stephen Toub - How Async/Await Really Works in C#](https://devblogs.microsoft.com/dotnet/how-async-await-really-works/#async/await-under-the-covers)。直接从我给的地方开始阅读即可。
 
