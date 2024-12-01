@@ -537,7 +537,7 @@ public Task CopyStreamToStreamAsync(Stream source, Stream destination)
 {
     var stateMachine = new CopyStreamToStreamAsyncStateMachine
     {
-        state = 0,
+        state = -1,
         source = source,
         destination = destination,
         buffer = new byte[0x1000],
