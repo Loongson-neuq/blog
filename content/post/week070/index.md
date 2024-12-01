@@ -264,6 +264,7 @@ enum State {
 
 struct FibonacciCoroutine {
     state: i32,
+}
 
 impl Fibonacci {
     fn new() -> Self {
