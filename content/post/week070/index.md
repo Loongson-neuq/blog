@@ -442,7 +442,7 @@ impl<'a, T> ArrayIterator<'a, T> {
 }
 ```
 
-## Post-order traversal of a binary tree
+## Preorder traversal of a binary tree
 ```rust
 enum BinaryTree<'a, T> {
     Leaf(&'a T),
