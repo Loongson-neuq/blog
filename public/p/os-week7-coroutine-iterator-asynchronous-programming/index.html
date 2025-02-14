@@ -1,0 +1,662 @@
+<!doctype html><html lang=zh-CN dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="Coroutine, Iterator & Asynchronous Programming"><title>[OS Week7] Coroutine, Iterator & Asynchronous Programming</title>
+<link rel=canonical href=https://loongson-neuq.pages.dev/p/os-week7-coroutine-iterator-asynchronous-programming/><link rel=stylesheet href=/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css><meta property='og:title' content="[OS Week7] Coroutine, Iterator & Asynchronous Programming"><meta property='og:description' content="Coroutine, Iterator & Asynchronous Programming"><meta property='og:url' content='https://loongson-neuq.pages.dev/p/os-week7-coroutine-iterator-asynchronous-programming/'><meta property='og:site_name' content='NEUQ 龙芯实验室博客'><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='Rust'><meta property='article:published_time' content='2024-12-01T00:00:00+00:00'><meta property='article:modified_time' content='2024-12-01T00:00:00+00:00'><meta name=twitter:title content="[OS Week7] Coroutine, Iterator & Asynchronous Programming"><meta name=twitter:description content="Coroutine, Iterator & Asynchronous Programming"><link rel="shortcut icon" href=/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/img/avatar_hu27a039529b0e16f185ca51fbed76013f_26164_300x0_resize_box_3.png width=300 height=300 class=site-logo loading=lazy alt=Avatar></a></figure><div class=site-meta><h1 class=site-name><a href=/>NEUQ 龙芯实验室博客</a></h1><h2 class=site-description></h2></div></header><ol class=menu-social><li><a href=https://github.com/Loongson-neuq/blog target=_blank title=GitHub rel=me><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>Home</span></a></li><li><a href=/archives/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>Archives</span></a></li><li><a href=/search/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>Search</span></a></li><li><a href=/intro/><span>龙芯班介绍及招新宣传</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav id=TableOfContents><ol><li><a href=#why-coroutine>Why Coroutine?</a></li></ol><ol><li><a href=#1-阻塞更差的响应性>1. 阻塞，更差的响应性</a></li><li><a href=#2-comsumer-producer-间的协作>2. Comsumer-Producer 间的协作</a></li></ol><ol><li><a href=#stackful-coroutine>Stackful Coroutine</a></li><li><a href=#stackless-coroutine>Stackless Coroutine</a></li></ol><ol><li><a href=#enumerating-an-array>Enumerating an array</a></li><li><a href=#preorder-traversal-of-a-binary-tree>Preorder traversal of a binary tree</a></li></ol></nav></div></section></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/os/>OS</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/os-week7-coroutine-iterator-asynchronous-programming/>[OS Week7] Coroutine, Iterator & Asynchronous Programming</a></h2><h3 class=article-subtitle>Coroutine, Iterator & Asynchronous Programming</h3></div><footer class=article-time><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published>Dec 01, 2024</time></div><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 14 分钟</time></div></footer></div></header><section class=article-content><h1 id=what-is-coroutine>What is Coroutine?</h1><p>协程，是相对与子过程（即我们熟悉的函数）的一种概念。子过程是一种被调用的过程，而协程是一种可以挂起和恢复的过程。简单地说，你调用一个子过程（函数），你就只能等它从头执行完毕，下一次你再调用它的时候，它还是从头开始执行。而协程，你可以在中途挂起它，然后再恢复它，它会从上次<strong>挂起</strong>的地方继续执行。</p><h2 id=why-coroutine>Why Coroutine?</h2><p>协程被称为 Green Thread，似乎与线程有些类似，但是他们完全不同。</p><p>对于用户程序来说，操作系统对 CPU 做了一层抽象，让用户程序感觉自己拥有了一个整个 CPU（核心）。而线程的意义在于用户程序，能够拥有多个 CPU 核心，从而提高程序的并发性。通过操作系统的抽象，你可以创建数千个线程，但是 CPU 实际上只有几个核心。通过多个 CPU 核心完成任务，来更好地利用一整块 CPU，这就是<strong>Parallelism（并行）</strong>。</p><p>协程，并不关注 CPU 核心的问题，相反，协程可以在任意一个或多个 CPU 核心上调度运行，取决于调度器的实现。通常，当我们谈论协程的时候，我们会只关心一个 CPU 核心的问题，而将调度的问题交给调度器来解决。因此，协程解决的问题是，如何更加<strong>充分</strong>地利用一个 CPU 核心。这就是<strong>Concurrency（并发）</strong>。</p><ol><li>定义角度：</li></ol><ul><li>并行(Parallelism)是指在同一时刻，有多个任务在<strong>多个</strong>处理器上同时执行</li><li>并发(Concurrency)是指在同一时间段内，有多个任务在交替执行，从<strong>宏观</strong>来看似乎是同时进行的，但是在<strong>微观</strong>上是交替执行（串行，单核心）的。</li></ul><ol start=2><li>CPU利用角度：</li></ol><ul><li>并行要求程序能够充分利用多个CPU核心，将任务分配到不同的核心上同时执行</li><li>并发则是通过合理安排任务的执行顺序，让单个CPU核心能够高效地处理多个任务</li></ul><ol start=3><li>实现机制：</li></ol><ul><li>并行通常依赖于硬件的多核心支持，通过线程或进程实现多任务的真正同时执行</li><li>并发可以通过协程、时间片轮转等机制，在单个核心上实现任务的交替执行</li></ul><ol start=4><li>一个形象的比喻：</li></ol><ul><li>并行就像多个收银员同时为不同顾客结账</li><li>并发就像一个收银员通过快速切换为多个顾客轮流结账</li></ul><ol start=5><li>性能提升方式：</li></ol><ul><li>并行通过增加计算资源(CPU核心)来提高程序的整体吞吐量</li><li>并发通过优化任务调度和执行顺序来提高单个计算资源的利用效率</li></ul><ol start=6><li>适用场景：</li></ol><ul><li>并行适合计算密集型任务，如图像处理、科学计算等</li><li>并发适合I/O密集型任务，如网络请求、文件操作等</li></ul><h1 id=单线程串行运行那么好为什么要一直切换正在运行的任务呢>单线程串行运行那么好，为什么要一直切换正在运行的任务呢？</h1><p>上节课中，展示了一个例子，即使用 Singlethreaded 允许 16 次 <code>Add_100000()</code> 函数，然后计算总时间。结果是 16 个任务串行执行的时间总和。然后，我们使用 Multithreaded 允许 16 次 <code>Add_100000()</code> 函数，然后计算总时间。结果是 16 个任务并行执行的时间总和。结果发现 Singlethreaded 的时间比 Multithreaded 的时间还要短。这是因为线程间争锁、切换线程等操作，会消耗额外的时间。</p><p>说明单线程对于性能来说其实是最好的，那么为什么要一直切换正在运行的任务呢？并且我们总是可以预料到，即使是单线程，一直切换任务也会消耗额外的时间。</p><p>这基于下面的两个主要原因：</p><h2 id=1-阻塞更差的响应性>1. 阻塞，更差的响应性</h2><p>当我们串行运行任务时，如果一个任务阻塞了，那么整个程序都会被阻塞。这是因为我们的程序是单线程的，只有一个任务在运行。</p><p>考虑以下一个场景，你在电脑上编写了以下程序：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-rust data-lang=rust><span class=line><span class=cl><span class=k>fn</span> <span class=nf>main</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>while</span><span class=w> </span><span class=kc>true</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=fm>println!</span><span class=p>(</span><span class=s>&#34;Hello, World!&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>然后运行它，好了，由于程序串行运行，你的 OS 无法处理你的键盘鼠标输入，也无法绘制屏幕输出，因为这个程序一直在运行，不会停止，导致排队在后面的任务无法执行。</p><p>但是如果我们不停切换任务，尽管一个任务阻塞，一段时间后，我们总是会切换到其他任务，这样就可以保证所有任务都能得到执行（至少有一小段时间），而不会因为一个任务阻塞而导致整个程序无法运行。</p><p>在这个过程中，这个死循环任务被称为**CPU-bound（计算密集型）**任务，因为它一直在占用 CPU，而不会释放。</p><h2 id=2-comsumer-producer-间的协作>2. Comsumer-Producer 间的协作</h2><p>那还有什么其他类型的任务呢？大多数情况下，我们的程序<strong>不是</strong>在一直不停地做 CPU 计算，而是在等待 I/O 操作完成，比如等待网络请求返回、等待文件读写，甚至等待用户鼠标键盘输入。这些任务被称为**I/O-bound（I/O 密集型）**任务，因为它们需要等待 I/O 操作完成，才能继续执行。</p><p>这些任务等待的对象通常归根结底是<strong>外部资源</strong>，比如网络、文件、用户输入等。这些资源的读写速度远远慢于 CPU 的计算速度，因此我们的程序在等待这些资源的时候，实际上是在<strong>浪费</strong> CPU 的时间。如果我们不停切换任务，那么当一个任务等待 I/O 时，我们可以切换到其他任务，让它们继续执行，这样就可以充分利用 CPU 的时间，提高程序的<strong>响应性</strong>。</p><p>在这个过程中，我们的任务被称为 Comsumer 任务，因为它们需要外设产生的数据；而外设产生数据的任务被称为 Producer 任务，因为它们给 Comsumer 任务提供数据。</p><p>对于 Comsumer-Producer 的协作关系，解决 IO 阻塞是相对简单的。更重要的是，我们需要一种编程模型，简化 Comsumer-Producer 之间的协作，让我们能够更加方便地编写这种类型的程序。而协程就是这样一种编程模型。</p><p>让我们考虑以下一种情况，其中一个 Produecer 一直不停地产生数据 1, 2, 3, 4, 5, &mldr;，而一个 Comsumer 一直不停地消费这些数，然后打印出来。你大概率 100% 会写出以下代码：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-rust data-lang=rust><span class=line><span class=cl><span class=k>fn</span> <span class=nf>main</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>let</span><span class=w> </span><span class=k>mut</span><span class=w> </span><span class=n>i</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=mi>0</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>loop</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=fm>println!</span><span class=p>(</span><span class=s>&#34;</span><span class=si>{}</span><span class=s>&#34;</span><span class=p>,</span><span class=w> </span><span class=n>i</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>i</span><span class=w> </span><span class=o>+=</span><span class=w> </span><span class=mi>1</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>这是相当糟糕的代码，因为生产者与消费者高度耦合在一起，无法分离。我们希望的是，生产者与消费者能够分离，互不干扰，这样我们可以更加方便地编写这种类型的程序。就像下面一样：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-rust data-lang=rust><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>static</span><span class=w> </span><span class=k>mut</span><span class=w> </span><span class=n>queue</span>: <span class=nc>VecDeque</span><span class=o>&lt;</span><span class=kt>i32</span><span class=o>&gt;</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>VecDeque</span>::<span class=n>new</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>fn</span> <span class=nf>producer</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>let</span><span class=w> </span><span class=k>mut</span><span class=w> </span><span class=n>i</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=mi>0</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>loop</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>queue</span><span class=p>.</span><span class=n>push_back</span><span class=p>(</span><span class=n>i</span><span class=p>);</span><span class=w> </span><span class=c1>// 把产生的数据放到队列中
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>        </span><span class=n>i</span><span class=w> </span><span class=o>+=</span><span class=w> </span><span class=mi>1</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>fn</span> <span class=nf>consumer</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>loop</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=kd>let</span><span class=w> </span><span class=nb>Some</span><span class=p>(</span><span class=n>i</span><span class=p>)</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>queue</span><span class=p>.</span><span class=n>pop_front</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w> </span><span class=c1>// 从队列中取出数据
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>            </span><span class=fm>println!</span><span class=p>(</span><span class=s>&#34;</span><span class=si>{}</span><span class=s>&#34;</span><span class=p>,</span><span class=w> </span><span class=n>i</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w> </span><span class=k>else</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=c1>// 如果队列为空，等待一段时间
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>这样，生产者与消费者之间就可以分离，互不干扰，我们可以更加方便地编写这种类型的程序。但是这样的代码还是有问题，因为我们的程序是单线程的，如果生产者一直在产生数据，那么消费者就无法执行，反之亦然。我们需要一种编程模型，让我们能够更加方便地编写这种类型的程序，这就是协程。</p><p>让我们考虑这个过程中的问题，即<em>生产者一直在产生数据，那么消费者就无法执行</em>。因此解决问题的方法就是，让其中一方，在执行到一定程度后，<strong>暂停执行</strong>，然后切换到另一方执行（调度方处理），这样就可以保证两者都能得到执行。这就是协程的作用。</p><h1 id=implement-a-coroutine>Implement a Coroutine</h1><p>我们知道，要让一个任务能够在中途挂起，然后再恢复，我们需要保存这个任务的<strong>上下文</strong>，然后再恢复这个任务的上下文。这就是协程的基本原理。</p><h2 id=stackful-coroutine>Stackful Coroutine</h2><p>最基本的实现是 Stackful Coroutine，即我们需要在挂起一个任务时，保存这个任务的<strong>栈</strong>和完整的<strong>寄存器</strong>状态。</p><p>为什么要保存栈呢？因为栈保存了函数的局部变量、参数、返回地址等信息，是函数能够<strong>嵌套</strong>调用的基础。如果我们不保存栈，那么函数退出后，无法返回到调用方，甚至，我们无法保存函数的局部变量等信息，因为这些信息都保存在栈帧中（上两节课的内容）。那为什么要保存寄存器呢？因为寄存器保存了函数的<strong>全局</strong>状态，比如函数的指令指针、栈指针等信息，是函数能够<strong>恢复</strong>执行的基础。如果我们不保存寄存器，那么函数退出后，无法恢复到函数的执行状态，因为这些信息都保存在寄存器中。</p><p>但是我们是否有必要保存整个栈呢？答案是当然的，因为我们需要保存函数的<strong>完整</strong>状态，包括局部变量、参数、返回地址等信息。因为所有嵌套调用的函数都保存在栈中，所以我们需要保存整个栈的状态。</p><p>但是我们是否有必要保存整个寄存器呢？答案是不一定的。</p><p>其实按道理说，我们需要保证在恢复任务后，任务的执行状态和挂起时一样，这就需要保存整个寄存器。但是实际上，我们可以从挂起任务的过程中做一些简化。Stackful Coroutine 挂起一个任务看起来就像调用一个函数一样，我们需要在这个函数中，将任务的状态保存到一个<strong>上下文</strong>中，然后再恢复任务的时候，将任务的状态从上下文中恢复。这个上下文保存了任务的<strong>完整</strong>状态，包括栈和寄存器等信息。写成代码就是这样：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-rust data-lang=rust><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>pub</span><span class=w> </span><span class=k>fn</span> <span class=nf>producer</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>let</span><span class=w> </span><span class=k>mut</span><span class=w> </span><span class=n>i</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=mi>0</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>loop</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>queue</span><span class=p>.</span><span class=n>push_back</span><span class=p>(</span><span class=n>i</span><span class=p>);</span><span class=w> </span><span class=c1>// 把产生的数据放到队列中
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>        </span><span class=n>i</span><span class=w> </span><span class=o>+=</span><span class=w> </span><span class=mi>1</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kr>yield</span><span class=p>();</span><span class=w> </span><span class=c1>// 挂起任务，任务从此处暂停，下次也将从此处恢复
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>这个 <code>yield()</code> 函数就是将任务的状态保存到一个上下文中，然后再恢复任务的时候，将任务的状态从上下文中恢复。这个上下文保存了任务的<strong>完整</strong>状态，包括栈和寄存器等信息。如果你比较好奇这样的函数长什么样子，可以看看<a class=link href=https://github.com/caiyih/bakaos/blob/b28d8421f6c030476ca0ae9050098983ac31e58c/kernel/src/trap/user.rs#L126-L142 target=_blank rel=noopener>我的操作系统里的实现</a>，我选中的这几行是保存操作系统内核协程上下文的代码，其他的则是保存/恢复用户程序上下文的的代码，基本上就是把一些寄存器和调用栈栈顶保存到一个结构体中，然后切换调用栈，然后再恢复的时候，将这些寄存器从结构体中恢复。注意这段代码必须使用汇编代码实现，一是我们需要手动操作指定寄存器，二是编译器生成的函数包含 Prologue 和 Epilogue，会修改我们的调用栈（同样是上两节课的内容）。</p><p>而我们<em>偷懒</em>的做法就以来于，这是一个函数调用。既然是函数调用，就必须要遵循<strong>Calling Conventions</strong>。</p><p><strong>Calling Conventions</strong>要求将寄存器的保存职责分为两部分：Caller-Save 和 Callee-Save。Caller-Save 负责保存调用者需要保存的寄存器，Callee-Save 负责保存被调用者需要保存的寄存器。</p><p>Caller-saved 要求，Caller在调用一个函数前保存这些寄存器，子过程可能使用这些寄存器的任意或全部，结束后，恢复也是 Caller 的责任。</p><p>而 Callee-saved 要求，Callee 在调用一个函数前保存这些寄存器，子过程可能使用这些寄存器的任意或全部，在回到 Caller 时，Callee 必须保证这些寄存器的值与 Caller 调用自己前一样。</p><p>因此，我们在这个过程中，只需要保存 Caller-saved 寄存器，而不需要保存 Callee-saved 寄存器。这样就可以简化我们的实现，只需要保存 Caller-saved 寄存器，而不需要保存 Callee-saved 寄存器。</p><h2 id=stackless-coroutine>Stackless Coroutine</h2><p>你一定觉得，什么和调用栈切换，保存寄存器，还要用汇编指令进行操作太麻烦了，而且开销还一定特别大。因为我们需要保存整个栈，这个栈可能非常大，而且我们还需要保存整个寄存器，这个寄存器可能非常多。这样的开销是非常大的，而且实现起来也非常复杂。</p><p>你的感觉没错！通常来说，一个栈的大小在，0.5 MB 到 4 MB 之间，而一个寄存器的数量在 16 到 32 个之间。这样的开销是非常大的，而且实现起来也非常复杂。</p><p>考虑一下一个简单的生产者消费者模型，我们的生产者只产生 3 个数据，然后消费者消费这 3 个数据。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-rust data-lang=rust><span class=line><span class=cl><span class=k>fn</span> <span class=nf>producer</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>// 产生数据 1
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>    </span><span class=kr>yield</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>// 产生数据 2
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>    </span><span class=kr>yield</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>// 产生数据 3
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>    </span><span class=kr>yield</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>我们可以联想到，由于我们的代码是确定的，因此协程被挂起的<em>时机</em>或者说<em>地点</em>也是确定的！因此我们其实可以把这个过程视为一个 State Machine，即我们的协程有一个状态，然后根据这个状态，我们执行不同的代码。这样我们就可以实现 Stackless Coroutine。下面的函数是对上面代码所抽象的协程的实现：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-rust data-lang=rust><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>static</span><span class=w> </span><span class=k>mut</span><span class=w> </span><span class=no>PRODUCER_STATE</span>: <span class=kt>i32</span> <span class=o>=</span><span class=w> </span><span class=o>-</span><span class=mi>1</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>static</span><span class=w> </span><span class=k>mut</span><span class=w> </span><span class=no>PRODUCER_DATA</span>: <span class=kt>i32</span> <span class=o>=</span><span class=w> </span><span class=mi>0</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>fn</span> <span class=nf>producer</span><span class=p>()</span><span class=w> </span>-&gt; <span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>match</span><span class=w> </span><span class=no>PRODUCER_STATE</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=o>-</span><span class=mi>1</span><span class=w> </span><span class=o>=&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=no>PRODUCER_STATE</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=mi>0</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=c1>// 产生数据 1，然后返回调用者
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>            </span><span class=no>PRODUCER_DATA</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=o>&lt;</span><span class=err>数据</span><span class=mi>1</span><span class=o>&gt;</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=mi>0</span><span class=w> </span><span class=o>=&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=no>PRODUCER_STATE</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=mi>1</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=c1>// 产生数据 2，然后返回调用者
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>            </span><span class=no>PRODUCER_DATA</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=o>&lt;</span><span class=err>数据</span><span class=mi>2</span><span class=o>&gt;</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=mi>1</span><span class=w> </span><span class=o>=&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=no>PRODUCER_STATE</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=mi>2</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=c1>// 产生数据 3，然后返回调用者
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>            </span><span class=no>PRODUCER_DATA</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=o>&lt;</span><span class=err>数据</span><span class=mi>3</span><span class=o>&gt;</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>_</span><span class=w> </span><span class=o>=&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=no>PRODUCER_STATE</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=kt>i32</span>::<span class=no>MAX</span><span class=p>;</span><span class=w> </span><span class=c1>// 标识协程过程的结束
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>            </span><span class=c1>// 任务结束，没有什么要做的
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>接下来，我们做一层包装，使得我们的协程看起来更加像一个函数：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-rust data-lang=rust><span class=line><span class=cl><span class=k>fn</span> <span class=nf>get_data</span><span class=p>()</span><span class=w> </span>-&gt; <span class=nb>Option</span><span class=o>&lt;</span><span class=kt>i32</span><span class=o>&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>if</span><span class=w> </span><span class=no>PRODUCER_STATE</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=kt>i32</span>::<span class=no>MAX</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=nb>None</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w> </span><span class=k>else</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>producer</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=nb>Some</span><span class=p>(</span><span class=no>PRODUCER_DATA</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>当我们调用一次 <code>get_data()</code> 函数，我们的协程就会执行一次，然后返回一个数据。这样我们就实现了 Stackless Coroutine。</p><p>不过我们这个 Stackless Coroutine 仍然非常 basic。倒不是说状态比较少。因为我们的状态是确定的，所以我们可以很容易地将状态转换为代码。事实上，像 .NET 这样的语言就会在编译期就将 Coroutine 方法转换为状态机函数，我们在编写代码时可以直接编写下面的代码：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C# data-lang=C#><span class=line><span class=cl><span class=kd>public</span> <span class=kd>static</span> <span class=n>IEnumerable</span><span class=p>&lt;</span><span class=kt>int</span><span class=p>&gt;</span> <span class=n>Fib</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>prev</span> <span class=p>=</span> <span class=m>0</span><span class=p>,</span> <span class=n>next</span> <span class=p>=</span> <span class=m>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>yield</span> <span class=k>return</span> <span class=n>prev</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>yield</span> <span class=k>return</span> <span class=n>next</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>while</span> <span class=p>(</span><span class=kc>true</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=kt>int</span> <span class=n>sum</span> <span class=p>=</span> <span class=n>prev</span> <span class=p>+</span> <span class=n>next</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=k>yield</span> <span class=k>return</span> <span class=n>sum</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>prev</span> <span class=p>=</span> <span class=n>next</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>next</span> <span class=p>=</span> <span class=n>sum</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>我想说的问题在于，我们的状态仍然是全局的，不与调用上下文关联，导致我们在不同地方想多次调用这个协程时，会出现问题。因此我们需要将状态与调用上下文关联，这就是下面要讲的 Generator。最显而易见的问题是，表示状态机状态的字段以及返回值的字段都是全局的，这样就无法在多个地方调用这个协程，因为这个协程的状态是全局的，不与调用上下文关联。因此我们定义一个 Struct。现在让我们尝试实现上面的 Fibonacci 协程：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-rust data-lang=rust><span class=line><span class=cl><span class=k>enum</span> <span class=nc>State</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>Uninitialized</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>State1</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>State2</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>State3</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>Finished</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>Corrupted</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>struct</span> <span class=nc>FibonacciCoroutine</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>state</span>: <span class=kt>i32</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>impl</span><span class=w> </span><span class=n>Fibonacci</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>fn</span> <span class=nf>new</span><span class=p>()</span><span class=w> </span>-&gt; <span class=nc>Self</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=bp>Self</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>state</span>: <span class=nc>State</span>::<span class=n>Uninitialized</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>当我们调用协程时，协程函数事实上需要与协程上下文关联，因此看起来像这样：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-rust data-lang=rust><span class=line><span class=cl><span class=k>impl</span><span class=w> </span><span class=n>Fibonacci</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>fn</span> <span class=nf>next</span><span class=p>(</span><span class=o>&amp;</span><span class=k>mut</span><span class=w> </span><span class=bp>self</span><span class=p>)</span><span class=w> </span>-&gt; <span class=nb>Option</span><span class=o>&lt;</span><span class=kt>i32</span><span class=o>&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>match</span><span class=w> </span><span class=bp>self</span><span class=p>.</span><span class=n>state</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>State</span>::<span class=n>Uninitialized</span><span class=w> </span><span class=o>=&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=bp>self</span><span class=p>.</span><span class=n>state</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>State</span>::<span class=n>State1</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=nb>Some</span><span class=p>(</span><span class=mi>0</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>State</span>::<span class=n>State1</span><span class=w> </span><span class=o>=&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=bp>self</span><span class=p>.</span><span class=n>state</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>State</span>::<span class=n>State2</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=nb>Some</span><span class=p>(</span><span class=mi>1</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>State</span>::<span class=n>State2</span><span class=w> </span><span class=o>=&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=bp>self</span><span class=p>.</span><span class=n>state</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>State</span>::<span class=n>State3</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=c1>// ???
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>            </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>_</span><span class=w> </span><span class=o>=&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=bp>self</span><span class=p>.</span><span class=n>state</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>State</span>::<span class=n>Finished</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=nb>None</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>这样我们就实现了一个与调用上下文关联的协程。现在我们的无栈协程能够处理前两种状态了，也就是</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C# data-lang=C#><span class=line><span class=cl><span class=kd>public</span> <span class=kd>static</span> <span class=n>IEnumerable</span><span class=p>&lt;</span><span class=kt>int</span><span class=p>&gt;</span> <span class=n>Fib</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>prev</span> <span class=p>=</span> <span class=m>0</span><span class=p>,</span> <span class=n>next</span> <span class=p>=</span> <span class=m>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>yield</span> <span class=k>return</span> <span class=n>prev</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>yield</span> <span class=k>return</span> <span class=n>next</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>但是后面的状态就麻烦了。当我们处于 State2 时，我们需要计算下一个数，然后返回。我们需要知道 prev 和 next 的值，但是这两个值是在上一个状态中计算的，我们无法在这个状态中访问这两个值。因此我们需要将这两个值保存到协程上下文中。让我们改造一下我们的状态机，将函数的所有<strong>局部变量</strong>都保存到协程上下文中：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-rust data-lang=rust><span class=line><span class=cl><span class=k>struct</span> <span class=nc>FibonacciCoroutine</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>state</span>: <span class=kt>i32</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>prev</span>: <span class=kt>i32</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>next</span>: <span class=kt>i32</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>然后我们的协程函数就变成了这样：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-rust data-lang=rust><span class=line><span class=cl><span class=k>impl</span><span class=w> </span><span class=n>FibonacciCoroutine</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>fn</span> <span class=nf>next</span><span class=p>(</span><span class=o>&amp;</span><span class=k>mut</span><span class=w> </span><span class=bp>self</span><span class=p>)</span><span class=w> </span>-&gt; <span class=nb>Option</span><span class=o>&lt;</span><span class=kt>i32</span><span class=o>&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>match</span><span class=w> </span><span class=bp>self</span><span class=p>.</span><span class=n>state</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>State</span>::<span class=n>Uninitialized</span><span class=w> </span><span class=o>=&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=bp>self</span><span class=p>.</span><span class=n>state</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>State</span>::<span class=n>State1</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=bp>self</span><span class=p>.</span><span class=n>prev</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=mi>0</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=bp>self</span><span class=p>.</span><span class=n>next</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=mi>1</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=nb>Some</span><span class=p>(</span><span class=mi>0</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>State</span>::<span class=n>State1</span><span class=w> </span><span class=o>=&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=bp>self</span><span class=p>.</span><span class=n>state</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>State</span>::<span class=n>State2</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=nb>Some</span><span class=p>(</span><span class=mi>1</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>State</span>::<span class=n>State2</span><span class=w> </span><span class=o>=&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=bp>self</span><span class=p>.</span><span class=n>state</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>State</span>::<span class=n>State3</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=c1>// Watch this!
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>                </span><span class=kd>let</span><span class=w> </span><span class=n>sum</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=bp>self</span><span class=p>.</span><span class=n>prev</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=bp>self</span><span class=p>.</span><span class=n>next</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=bp>self</span><span class=p>.</span><span class=n>prev</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=bp>self</span><span class=p>.</span><span class=n>next</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=bp>self</span><span class=p>.</span><span class=n>next</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>sum</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=nb>Some</span><span class=p>(</span><span class=n>sum</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>_</span><span class=w> </span><span class=o>=&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=bp>self</span><span class=p>.</span><span class=n>state</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>State</span>::<span class=n>Finished</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=nb>None</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>或者用更加 Type-safe 的方式：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-rust data-lang=rust><span class=line><span class=cl><span class=k>enum</span> <span class=nc>FibonacciCoroutine</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>Uninitialized</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>State1</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>State2</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>State3</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>prev</span>: <span class=kt>i32</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>next</span>: <span class=kt>i32</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>},</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>Finished</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>impl</span><span class=w> </span><span class=n>FibonacciCoroutine</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>fn</span> <span class=nf>new</span><span class=p>()</span><span class=w> </span>-&gt; <span class=nc>Self</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=bp>Self</span>::<span class=n>Uninitialized</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>fn</span> <span class=nf>next</span><span class=p>(</span><span class=o>&amp;</span><span class=k>mut</span><span class=w> </span><span class=bp>self</span><span class=p>)</span><span class=w> </span>-&gt; <span class=nb>Option</span><span class=o>&lt;</span><span class=kt>i32</span><span class=o>&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>match</span><span class=w> </span><span class=bp>self</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=bp>Self</span>::<span class=n>Uninitialized</span><span class=w> </span><span class=o>=&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=o>*</span><span class=bp>self</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=bp>Self</span>::<span class=n>State1</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=nb>Some</span><span class=p>(</span><span class=mi>0</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=bp>Self</span>::<span class=n>State1</span><span class=w> </span><span class=o>=&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=o>*</span><span class=bp>self</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=bp>Self</span>::<span class=n>State2</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=nb>Some</span><span class=p>(</span><span class=mi>1</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=bp>Self</span>::<span class=n>State2</span><span class=w> </span><span class=o>=&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=o>*</span><span class=bp>self</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=bp>Self</span>::<span class=n>State3</span><span class=w> </span><span class=p>{</span><span class=w> </span><span class=n>prev</span>: <span class=mi>0</span><span class=p>,</span><span class=w> </span><span class=n>next</span>: <span class=mi>1</span><span class=w> </span><span class=p>};</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=nb>Some</span><span class=p>(</span><span class=mi>1</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=bp>Self</span>::<span class=n>State3</span><span class=w> </span><span class=p>{</span><span class=w> </span><span class=n>prev</span><span class=p>,</span><span class=w> </span><span class=n>next</span><span class=w> </span><span class=p>}</span><span class=w> </span><span class=o>=&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=kd>let</span><span class=w> </span><span class=n>sum</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=o>*</span><span class=n>prev</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=o>*</span><span class=n>next</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=o>*</span><span class=n>prev</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=o>*</span><span class=n>next</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=o>*</span><span class=n>next</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>sum</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=nb>Some</span><span class=p>(</span><span class=n>sum</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>_</span><span class=w> </span><span class=o>=&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=o>*</span><span class=bp>self</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=bp>Self</span>::<span class=n>Finished</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=nb>None</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>可以看到，我们通过将局部变量保存到协程上下文中，解决了这个问题。这就是无栈协程的基本原理。你可以思考一下，这个过程和有栈协程保存栈和寄存器的过程有什么不同，它们为什么明明看起来这么不同，但是实际上却是一样的。</p><h1 id=iterator>Iterator</h1><p>Iterator 事实上就是一种无栈协程，只是是手动编写的。也并不总是一个显式状态机，但是它的实现原理和无栈协程是一样的。</p><p>这里我给出一个遍历数组和前序遍历二叉树的例子：</p><h2 id=enumerating-an-array>Enumerating an array</h2><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-rust data-lang=rust><span class=line><span class=cl><span class=k>struct</span> <span class=nc>ArrayIterator</span><span class=o>&lt;</span><span class=na>&#39;a</span><span class=p>,</span><span class=w> </span><span class=n>T</span><span class=o>&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>array</span>: <span class=kp>&amp;</span><span class=na>&#39;a</span> <span class=p>[</span><span class=n>T</span><span class=p>],</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>index</span>: <span class=kt>usize</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>impl</span><span class=o>&lt;</span><span class=na>&#39;a</span><span class=p>,</span><span class=w> </span><span class=n>T</span><span class=o>&gt;</span><span class=w> </span><span class=n>ArrayIterator</span><span class=o>&lt;</span><span class=na>&#39;a</span><span class=p>,</span><span class=w> </span><span class=n>T</span><span class=o>&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>fn</span> <span class=nf>new</span><span class=p>(</span><span class=n>array</span>: <span class=kp>&amp;</span><span class=na>&#39;a</span> <span class=p>[</span><span class=n>T</span><span class=p>])</span><span class=w> </span>-&gt; <span class=nc>Self</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=bp>Self</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>array</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>index</span>: <span class=mi>0</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>impl</span><span class=o>&lt;</span><span class=na>&#39;a</span><span class=p>,</span><span class=w> </span><span class=n>T</span><span class=o>&gt;</span><span class=w> </span><span class=n>ArrayIterator</span><span class=o>&lt;</span><span class=na>&#39;a</span><span class=p>,</span><span class=w> </span><span class=n>T</span><span class=o>&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>pub</span><span class=w> </span><span class=k>fn</span> <span class=nf>next</span><span class=p>(</span><span class=o>&amp;</span><span class=k>mut</span><span class=w> </span><span class=bp>self</span><span class=p>)</span><span class=w> </span>-&gt; <span class=nb>Option</span><span class=o>&lt;&amp;</span><span class=na>&#39;a</span><span class=w> </span><span class=n>T</span><span class=o>&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=bp>self</span><span class=p>.</span><span class=n>index</span><span class=w> </span><span class=o>&lt;</span><span class=w> </span><span class=bp>self</span><span class=p>.</span><span class=n>array</span><span class=p>.</span><span class=n>len</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=kd>let</span><span class=w> </span><span class=n>result</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=o>&amp;</span><span class=bp>self</span><span class=p>.</span><span class=n>array</span><span class=p>[</span><span class=bp>self</span><span class=p>.</span><span class=n>index</span><span class=p>];</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=bp>self</span><span class=p>.</span><span class=n>index</span><span class=w> </span><span class=o>+=</span><span class=w> </span><span class=mi>1</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=nb>Some</span><span class=p>(</span><span class=n>result</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w> </span><span class=k>else</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=nb>None</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><h2 id=preorder-traversal-of-a-binary-tree>Preorder traversal of a binary tree</h2><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-rust data-lang=rust><span class=line><span class=cl><span class=k>enum</span> <span class=nc>BinaryTree</span><span class=o>&lt;</span><span class=na>&#39;a</span><span class=p>,</span><span class=w> </span><span class=n>T</span><span class=o>&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>Leaf</span><span class=p>(</span><span class=o>&amp;</span><span class=na>&#39;a</span><span class=w> </span><span class=n>T</span><span class=p>),</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>Node</span><span class=p>(</span><span class=o>&amp;</span><span class=na>&#39;a</span><span class=w> </span><span class=n>T</span><span class=p>,</span><span class=w> </span><span class=nb>Box</span><span class=o>&lt;</span><span class=n>BinaryTree</span><span class=o>&lt;</span><span class=na>&#39;a</span><span class=p>,</span><span class=w> </span><span class=n>T</span><span class=o>&gt;&gt;</span><span class=p>,</span><span class=w> </span><span class=nb>Box</span><span class=o>&lt;</span><span class=n>BinaryTree</span><span class=o>&lt;</span><span class=na>&#39;a</span><span class=p>,</span><span class=w> </span><span class=n>T</span><span class=o>&gt;&gt;</span><span class=p>),</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>struct</span> <span class=nc>BinaryTreeIterator</span><span class=o>&lt;</span><span class=na>&#39;a</span><span class=p>,</span><span class=w> </span><span class=n>T</span><span class=o>&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>stack</span>: <span class=nb>Vec</span><span class=o>&lt;&amp;</span><span class=na>&#39;a</span><span class=w> </span><span class=n>BinaryTree</span><span class=o>&lt;</span><span class=na>&#39;a</span><span class=p>,</span><span class=w> </span><span class=n>T</span><span class=o>&gt;&gt;</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>impl</span><span class=o>&lt;</span><span class=na>&#39;a</span><span class=p>,</span><span class=w> </span><span class=n>T</span><span class=o>&gt;</span><span class=w> </span><span class=n>BinaryTreeIterator</span><span class=o>&lt;</span><span class=na>&#39;a</span><span class=p>,</span><span class=w> </span><span class=n>T</span><span class=o>&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>fn</span> <span class=nf>new</span><span class=p>(</span><span class=n>tree</span>: <span class=kp>&amp;</span><span class=na>&#39;a</span> <span class=nc>BinaryTree</span><span class=o>&lt;</span><span class=na>&#39;a</span><span class=p>,</span><span class=w> </span><span class=n>T</span><span class=o>&gt;</span><span class=p>)</span><span class=w> </span>-&gt; <span class=nc>Self</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kd>let</span><span class=w> </span><span class=k>mut</span><span class=w> </span><span class=n>stack</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=nb>Vec</span>::<span class=n>new</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>stack</span><span class=p>.</span><span class=n>push</span><span class=p>(</span><span class=n>tree</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=bp>Self</span><span class=w> </span><span class=p>{</span><span class=w> </span><span class=n>stack</span><span class=w> </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>impl</span><span class=o>&lt;</span><span class=na>&#39;a</span><span class=p>,</span><span class=w> </span><span class=n>T</span><span class=o>&gt;</span><span class=w> </span><span class=n>BinaryTreeIterator</span><span class=o>&lt;</span><span class=na>&#39;a</span><span class=p>,</span><span class=w> </span><span class=n>T</span><span class=o>&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>pub</span><span class=w> </span><span class=k>fn</span> <span class=nf>next</span><span class=p>(</span><span class=o>&amp;</span><span class=k>mut</span><span class=w> </span><span class=bp>self</span><span class=p>)</span><span class=w> </span>-&gt; <span class=nb>Option</span><span class=o>&lt;&amp;</span><span class=na>&#39;a</span><span class=w> </span><span class=n>T</span><span class=o>&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>while</span><span class=w> </span><span class=kd>let</span><span class=w> </span><span class=nb>Some</span><span class=p>(</span><span class=n>node</span><span class=p>)</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=bp>self</span><span class=p>.</span><span class=n>stack</span><span class=p>.</span><span class=n>pop</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>match</span><span class=w> </span><span class=n>node</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>BinaryTree</span>::<span class=n>Leaf</span><span class=p>(</span><span class=n>leaf</span><span class=p>)</span><span class=w> </span><span class=o>=&gt;</span><span class=w> </span><span class=k>return</span><span class=w> </span><span class=nb>Some</span><span class=p>(</span><span class=n>leaf</span><span class=p>),</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>BinaryTree</span>::<span class=n>Node</span><span class=p>(</span><span class=n>node</span><span class=p>,</span><span class=w> </span><span class=n>left</span><span class=p>,</span><span class=w> </span><span class=n>right</span><span class=p>)</span><span class=w> </span><span class=o>=&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=bp>self</span><span class=p>.</span><span class=n>stack</span><span class=p>.</span><span class=n>push</span><span class=p>(</span><span class=n>left</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=bp>self</span><span class=p>.</span><span class=n>stack</span><span class=p>.</span><span class=n>push</span><span class=p>(</span><span class=n>right</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=k>return</span><span class=w> </span><span class=nb>Some</span><span class=p>(</span><span class=n>node</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=nb>None</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><h1 id=asynchronous-programming>Asynchronous Programming</h1><p>C# 最早引入了异步编程模型和<code>async/await</code>编程模式，也是将异步应用得最成功的语言。通过 <code>async</code> 和 <code>await</code> 关键字，使得异步编程变得非常简单。Rust 也引入了异步编程模型，通过 <code>async</code> 和 <code>await</code> 关键字，使得异步编程变得非常简单。</p><p>这里引用 Microsoft .NET team 员工 Stephen Toub 的文章，你可以在这里找到原文：<a class=link href=https://devblogs.microsoft.com/dotnet/how-async-await-really-works/#async/await-under-the-covers target=_blank rel=noopener>Stephen Toub - How Async/Await Really Works in C#</a>。直接从我给的地方开始阅读即可。</p><p>Async/Await 编程模型最大的好处在于，你只需要做很小的修改，就可以将同步代码转换为异步代码。这样就可以非常方便地编写异步代码，而不需要关心异步编程的细节。很小的修改在于：</p><ol><li>为方法添加 <code>async</code> 关键字，表示这个函数是一个异步函数</li><li>将方法中调用的方法全部替换为异步方法，并添加 <code>await</code> 关键字来等待异步方法的返回值</li></ol><p>然后就结束了！考虑以下两段代码，一眼看上去几乎没有什么区别：</p><p>Synchronous Version:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C# data-lang=C#><span class=line><span class=cl><span class=kd>public</span> <span class=k>void</span> <span class=n>CopyStreamToStream</span><span class=p>(</span><span class=n>Stream</span> <span class=n>source</span><span class=p>,</span> <span class=n>Stream</span> <span class=n>destination</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kt>var</span> <span class=n>buffer</span> <span class=p>=</span> <span class=k>new</span> <span class=kt>byte</span><span class=p>[</span><span class=m>0x1000</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>numRead</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>while</span> <span class=p>((</span><span class=n>numRead</span> <span class=p>=</span> <span class=n>source</span><span class=p>.</span><span class=n>Read</span><span class=p>(</span><span class=n>buffer</span><span class=p>,</span> <span class=m>0</span><span class=p>,</span> <span class=n>buffer</span><span class=p>.</span><span class=n>Length</span><span class=p>))</span> <span class=p>!=</span> <span class=m>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>destination</span><span class=p>.</span><span class=n>Write</span><span class=p>(</span><span class=n>buffer</span><span class=p>,</span> <span class=m>0</span><span class=p>,</span> <span class=n>numRead</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>Asynchronous Version:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C# data-lang=C#><span class=line><span class=cl><span class=kd>public</span> <span class=kd>async</span> <span class=n>Task</span> <span class=n>CopyStreamToStreamAsync</span><span class=p>(</span><span class=n>Stream</span> <span class=n>source</span><span class=p>,</span> <span class=n>Stream</span> <span class=n>destination</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kt>var</span> <span class=n>buffer</span> <span class=p>=</span> <span class=k>new</span> <span class=kt>byte</span><span class=p>[</span><span class=m>0x1000</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>numRead</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>while</span> <span class=p>((</span><span class=n>numRead</span> <span class=p>=</span> <span class=k>await</span> <span class=n>source</span><span class=p>.</span><span class=n>ReadAsync</span><span class=p>(</span><span class=n>buffer</span><span class=p>,</span> <span class=m>0</span><span class=p>,</span> <span class=n>buffer</span><span class=p>.</span><span class=n>Length</span><span class=p>))</span> <span class=p>!=</span> <span class=m>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>await</span> <span class=n>destination</span><span class=p>.</span><span class=n>WriteAsync</span><span class=p>(</span><span class=n>buffer</span><span class=p>,</span> <span class=m>0</span><span class=p>,</span> <span class=n>numRead</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>这个过程与无栈协程非常相似，只是我们的状态是确定的，因此我们可以将状态转换为代码。首先我们可以构建以下状态机对象：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C# data-lang=C#><span class=line><span class=cl><span class=k>struct</span> <span class=nc>CopyStreamToStreamAsyncStateMachine</span> <span class=p>:</span> <span class=n>IAsyncStateMachine</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kd>public</span> <span class=kt>int</span> <span class=n>state</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kd>public</span> <span class=n>Stream</span> <span class=n>source</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kd>public</span> <span class=n>Stream</span> <span class=n>destination</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kd>private</span> <span class=kt>byte</span><span class=p>[]</span> <span class=n>buffer</span>
+</span></span><span class=line><span class=cl>    <span class=p>...</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>然后我们编写的方法被替换成一个状态机初始化器，并返回一个状态机对象</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C# data-lang=C#><span class=line><span class=cl><span class=kd>public</span> <span class=n>Task</span> <span class=n>CopyStreamToStreamAsync</span><span class=p>(</span><span class=n>Stream</span> <span class=n>source</span><span class=p>,</span> <span class=n>Stream</span> <span class=n>destination</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kt>var</span> <span class=n>stateMachine</span> <span class=p>=</span> <span class=k>new</span> <span class=n>CopyStreamToStreamAsyncStateMachine</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>state</span> <span class=p>=</span> <span class=p>-</span><span class=m>1</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>source</span> <span class=p>=</span> <span class=n>source</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>destination</span> <span class=p>=</span> <span class=n>destination</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>buffer</span> <span class=p>=</span> <span class=k>new</span> <span class=kt>byte</span><span class=p>[</span><span class=m>0x1000</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>    <span class=p>};</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>stateMachine</span><span class=p>.</span><span class=n>Task</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>当我们调用这个方法时，实际上并不会执行这个方法，而是返回一个状态机对象（C# 有些不同，具有 Fire and forget 的特性，但是这里我们不讨论这个问题）。然后们要调用这个方法时，实际上需要使用 await 关键字。</p><p>这个关键字的作用是，将当前的方法挂起，然后将控制权交给状态机对象，然后状态机对象根据当前的状态，执行相应的代码。这个过程就是异步编程的基本原理。</p><p>也就是说，对于下面的语句<code>await CopyStreamToStreamAsync(src, dst);</code>，实际上会被转换为：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C# data-lang=C#><span class=line><span class=cl><span class=k>while</span> <span class=p>(</span><span class=n>stateMachine</span><span class=p>.</span><span class=n>MoveNext</span><span class=p>())</span> <span class=c1>// 轮询一次状态机，如果有工作，就去工作，如果没有，返回 false</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>yield</span><span class=p>();</span> <span class=c1>// 这里的 yield，就是跟上面的 yield 一样，将当前任务挂起，然后返回调用者</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// 在实际的代码中，就是 return.</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=n>result</span> <span class=p>=</span> <span class=n>stateMachine</span><span class=p>.</span><span class=n>Result</span><span class=p>;</span> <span class=c1>// 获取状态机的返回值</span>
+</span></span></code></pre></td></tr></table></div></div><p>这就是异步编程的基本原理。你可以看到，异步编程的本质就是无栈协程，只是我们的状态是确定的，因此我们可以将状态转换为代码。这就是异步编程的基本原理。</p></section><footer class=article-footer><section class=article-tags><a href=/tags/rust/>Rust</a></section><section class=article-copyright><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer></article><aside class=related-content--wrapper><h2 class=section-title>相关文章</h2><div class=related-content><div class="flex article-list--tile"><article><a href=/p/os-week6-%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86-2-rust-%E6%89%80%E6%9C%89%E6%9D%83/><div class=article-details><h2 class=article-title>[OS Week6] 内存管理 2 & Rust 所有权</h2></div></a></article><article><a href=/p/os-week2-get-started-with-rust/><div class=article-details><h2 class=article-title>[OS Week2] Get started with Rust</h2></div></a></article><article><a href=/p/advanced-rust/><div class=article-details><h2 class=article-title>Advanced Rust</h2></div></a></article><article><a href=/p/os-week2-%E4%BD%9C%E4%B8%9A%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/><div class=article-details><h2 class=article-title>[OS Week2] 作业常见问题</h2></div></a></article><article><a href=/p/os-week1-%E4%BD%9C%E4%B8%9A%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/><div class=article-details><h2 class=article-title>[OS Week1] 作业常见问题</h2></div></a></article></div></div></aside><script src=https://giscus.app/client.js data-repo=Loongson-neuq/blog data-repo-id=R_kgDOM20epQ data-category=Giscus data-category-id=DIC_kwDOM20epc4CixXm data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-CN data-loading crossorigin=anonymous async></script><script>function setGiscusTheme(e){let t=document.querySelector("iframe.giscus-frame");t&&t.contentWindow.postMessage({giscus:{setConfig:{theme:e}}},"https://giscus.app")}(function(){addEventListener("message",t=>{if(event.origin!=="https://giscus.app")return;e()}),window.addEventListener("onColorSchemeChange",e);function e(){setGiscusTheme(document.documentElement.dataset.scheme==="light"?"preferred_color_scheme":"preferred_color_scheme")}})()</script><footer class=site-footer><section class=copyright>&copy;
+2024 -
+2025 NEUQ 龙芯实验室博客</section><section class=powerby>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=3.30.0>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><div class=pswp tabindex=-1 role=dialog aria-hidden=true><div class=pswp__bg></div><div class=pswp__scroll-wrap><div class=pswp__container><div class=pswp__item></div><div class=pswp__item></div><div class=pswp__item></div></div><div class="pswp__ui pswp__ui--hidden"><div class=pswp__top-bar><div class=pswp__counter></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+<button class="pswp__button pswp__button--share" title=Share></button>
+<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class=pswp__preloader><div class=pswp__preloader__icn><div class=pswp__preloader__cut><div class=pswp__preloader__donut></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class=pswp__share-tooltip></div></div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+</button>
+<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class=pswp__caption><div class=pswp__caption__center></div></div></div></div></div><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo=" crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU=" crossorigin=anonymous defer></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css crossorigin=anonymous><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css crossorigin=anonymous></main></div><script src=https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z+KMkF24hUW8WePSA9HM=" crossorigin=anonymous></script><script type=text/javascript src=/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js defer></script><script>(function(){const e=document.createElement("link");e.href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap",e.type="text/css",e.rel="stylesheet",document.head.appendChild(e)})()</script></body></html>
