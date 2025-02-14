@@ -2,7 +2,7 @@
 title: 龙芯实验攻略
 description: 概要
 date: 2025-01-19
-lastmod: 2025-01-20
+lastmod: 2025-02-14
 categories:
     - CPU
     - tutorial
@@ -15,7 +15,7 @@ tags:
 >
 > [实验代码仓库](https://gitee.com/loongson-edu/cdp_ede_local)
 
-## exp6
+## exp6：20条指令单周期CPU
 
 目标：
 
@@ -40,7 +40,7 @@ CPU的debug实际上就是在观察数据通路上各处流动的数据是不是
 2. 当CPU的第一条指令都没有成功运行，而你一点思路都没有的话，不妨试着在数据通路图上模拟运行一遍第一条指令
 3. 运行过程中的Error一般出在之前成功运行的指令都没有用的部分
 
-## exp7
+## exp7：不考虑相关冲突处理的简单流水线CPU
 
 目标：
 
@@ -74,7 +74,7 @@ CPU的debug实际上就是在观察数据通路上各处流动的数据是不是
 
 <a name="数据通路流水线"></a> 以下是流水线化后的CPU数据通路示意图：
 
-![datapath-简单流水线](assets/datapath-简单流水线.webp)
+![datapath-简单流水线](assets/datapath-简单流水线.png)
 
 ### 调试Tips
 
@@ -83,7 +83,7 @@ CPU的debug实际上就是在观察数据通路上各处流动的数据是不是
 3. 在流水线CPU中，调试定错可以基于级间寄存器的内容判断
 4. 各级流水线中命名需要有命名逻辑，很容易找不到
 
-## exp8
+## exp8：阻塞技术解决相关引发的冲突
 
 目标：
 
@@ -92,7 +92,7 @@ CPU的debug实际上就是在观察数据通路上各处流动的数据是不是
 
 ### 流水线冲突
 
-**流水线冲突（Hazard）**是指由于指令在流水线中并行执行时产生的依赖关系或资源竞争，导致后续指令无法正常执行的现象。主要分为三类：数据相关、控制相关和结构相关。
+**流水线冲突（Hazard）** 是指由于指令在流水线中并行执行时产生的依赖关系或资源竞争，导致后续指令无法正常执行的现象。主要分为三类：数据相关、控制相关和结构相关。
 
 #### 数据冲突
 
@@ -206,7 +206,7 @@ end
 2. 优先关注控制信号是否正确
 3. 如果需要可以先进行单独部件的仿真测试
 
-## exp9
+## exp9：前递技术解决相关引发的冲突
 
 目标：
 
@@ -225,14 +225,415 @@ end
 
 以下是添加了前递通路的数据通路参考：
 
-![](assets/datapath-前递.webp)
+<a name="前推流水线"></a>![](assets/datapath-前递.png)
 
 ### 调试Tips
 
 1. 同样的我们几乎只需要关注前推处理的逻辑
 2. 注意`ld.w`等访存指令需要在访存级结束才能有正确数据
 
+## exp10：算术逻辑运算指令和乘除法运算指令添加
 
+目标：
+
+- [x] 熟悉CPU的<a href="#前推流水线">数据通路</a>
+- [ ] 学习如何控制数据流动
+- [ ] 学习如何添加指令
+- [x] 学习如何使用IP核（基本方法参考[RAM IP核定制](https://bookdown.org/loongson/_book3/appendix-vivado-advanced-usage.html#sec-vivado-generate-ram-ip)，具体IP核请自行搜索）
+- [ ] 拓展：学习[乘法器](#乘法器)、[除法器](#除法器)原理
+
+### 算术逻辑运算类指令
+
+需要添加的指令有`slti`、`sltui`、`andi`、`ori`、`xori`、`sll.w`、`srl.w`、`sra.w`、`pcaddu12i`，指令具体信息可参考我的[LoongArch32r指令表]({{< ref "/posts/LoongArch32r指令集/index.md" >}})。
+
+**首先，我们来观察需要添加的指令有什么特点、和我们已有的指令有什么联系吗？**
+
+- `slti`、`sltui`等与已添加的指令`slt`、`sltu`等仅在源操作数2从寄存器还是立即数中取值有区别，所以我们可以几乎**复用**`slt`、`sltu等`指令的数据通路，仅需在源操作数2的仲裁信号`src2_is_imm`处修改即可
+- `sll.w`、`srl.w`等与已添加的指令`slli.w`、`srli.w`等仅在源操作数2从寄存器还是立即数中取值有区别，所以我们也可以**复用**
+- `pcaddu12i`指令实际上等同`addi.w`的运算过程，只不过源操作数1为该指令的PC值，源操作数2的立即数处理为在最低位后接12bit零，所以我们只需增加一些仲裁和处理逻辑即可
+
+> 你可能会在添加`pcaddu12i`的时候注意到，源操作数1的仲裁信号（`src1_is_pc`）和源操作数2的立即数处理和仲裁信号（`need_si20`、`src2_is_imm`）已经存在了，不需要额外添加。如果你傻乎乎的又新加了两块逻辑，那么你应该重新复习一下完整的数据通路了。
+>
+> 当我们需要新添加一些东西的时候，首先需要考虑一下能否**复用**已有的，或者进行一些小小的修改，而非直接开堆。冗杂的堆砌不仅是对资源的浪费，对代码可读性也是一种灾难。
+
+经过这一通分析，我想完成这9条指令对你来说是易如反掌了吧(　‘◟ ‘)✧
+
+你可以现在开始仿真debug，当pass了29个点的时候这些指令就没问题了，也可以接着添加最后一起仿真debug。
+
+### 乘除运算类指令
+
+需要添加的指令有`mul.w`、`mulh.w`、`mulh.wu`、`div.w`、`mod.w`、`div.wu`、`mod.wu`，指令具体信息可参考我的[LoongArch32r指令表]({{< ref "/posts/LoongArch32r指令集/index.md" >}})。
+
+**首先，我们还是分析一下这些指令**
+
+- 没有乘除法运算单元，肯定要添加乘除法器 ~~（或者你也可以试试用加减法来算）~~
+- 数据流动与`add.w`等 3R-type 指令相同，仅运算方式不一样（指令编码格式相同的指令的数据流动几乎相同）
+- 指令间的区别为有/无符号运算、如何选取结果输出
+
+这样来说，我们只需要新加一个乘除法运算单元，其它部分依照`add.w`复用即可。
+
+#### 使用Vivado IP核实现
+
+##### 乘法
+
+最简单的方式为：
+
+```verilog
+wire [31:0] src1, src2;
+wire [63:0] unsigned_prod;
+wire [63:0] signed_prod;
+
+assign unsigned_prod = src1 * src2;
+assign signed_prod = $signed(src1) * $signed(src2);
+```
+
+Vivado中的综合工具遇到上面代码中的“＊’’运算符时，会自动调用片上的DSP48（内含固化的16位乘法器电路）实现，最终实现的电路的时序通常不错，也几乎不消耗LUT资源，推荐大家使用。
+
+也可以使用IP核`Multiplier`实现。
+
+##### 除法
+
+使用`Divider Generator`IP核实现。
+
+###### **如何创建**
+
+首先找到`Divider Generator`IP核：
+
+![](assets/除法器IP0.jpg)
+
+开始定制`Divider Generator`IP核：
+
+<div align="center">
+    <img src="assets/除法器IP1.jpg" alt="除法器IP1" width="48%">
+    <img src="assets/除法器IP2.jpg" alt="除法器IP2" width="48%">
+</div>
+
+开始建立IP核：
+
+<img src="assets/除法器IP3.jpg" style="zoom:50%;" />
+
+实例化IP核：
+
+![](assets/除法器IP4.jpg)
+
+###### **如何使用**
+
+目前Vivado中提供的除法器IP一定是AXI接口的，所以接下来我们对模块顶层信号及其工作方式进行基本介绍。
+
+在定制IP核的界面中（可通过双击IP核的资源名称重新打开定制界面），左侧有接口信号图
+
+<img src="assets/除法器IP5.jpg" style="zoom: 50%;" />
+
+总体上我们会看到时钟信号、被除数、除数通道以及输出（商和余数）通道。
+
+对于被除数、除数通道，其有相同的信号组成
+
+- `tdata`信号为被除数、除数数据输入信号
+- `tready`、`tvalid`为一对握手信号。`tvalid`是请求信号，`tready`是应答信号，在时钟上升沿到来时，如果`tvalid`和`tready`都等于1则视为成功的握手，发送方的数据写入接收方的缓存中
+
+> 需要注意的是在握手成功后，**一定要把`tvalid`清0，如果再次握手成功的话将会被视为一个新的除法运算。**
+
+对于输出（商和余数）通道
+
+- `tdata`信号为商和余数数据输出信号，其中 [63:32] 位存放的是商，第 [31:0] 位存放的是余数
+- `tvalid`信号为输出有效信号，高电平表示除法计算完成，`tdata`线上为计算结果
+
+#### 自行设计电路实现
+
+可参考附录中的[乘法器](#乘法器)、[除法器](#除法器)部分以及其它网络资源。
+
+> 注意到IP核中无论是乘法还是除法都只能固定计算有/无符号数，这样需要实例化两个运算单元分别进行运算，这样看起来非常浪费资源。我们可以采取一些措施将符号单独计算，全部转化为无符号数处理；也可以将32位的运算全部转化为33位有符号运算，只要根据有/无符号在第33位补充符号位/0即可。
+
+## exp11：转移指令和访存指令添加
+
+目标：
+
+- [x] 熟悉CPU的<a href="#前推流水线">数据通路</a>
+- [ ] 练习如何修改数据流动
+- [ ] 练习如何添加指令
+- [ ] 了解“地址对齐”
+
+### 转移指令
+
+需要添加的指令有`blt`、`bge`、`bltu`、`bgeu`，指令具体信息可参考我的[LoongArch32r指令表]({{< ref "/posts/LoongArch32r指令集/index.md" >}})。
+
+相信经过exp10的分析，大家很快就能发现这些b指令都是换汤不换药（仅跳转条件判断不同）的一类指令，只要照着如`beq`指令的过程添加即可。
+
+### 访存指令
+
+需要添加的指令有`ld.b`、`ld.h`、`ld.bu`、`ld.hu`、`st.b`、`st.h`，指令具体信息可参考我的[LoongArch32r指令表]({{< ref "/posts/LoongArch32r指令集/index.md" >}})。
+
+在看完手册后，我们发现普通访存指令的**数据通路、控制逻辑都是相同的**，区别仅在**处理的数据位宽不同**。
+
+接下来让我们回忆一下我们的`data_sram`，它是一个宽度为32的Memory单元，每次读写的数据为32位。
+
+当读回32位数据后，我们选择访存地址对应的字/半字/字节并按照有/无符号扩展到32位就是读取的数据；当需要写入时，我们将需要写入的字/半字/字节按照**访存地址对应的位置**填入32位数据的位置，并将**字节写使能信号**的对应位使能即可。
+
+#### 地址对齐
+
+访存地址对应的位置即地址对齐，其有一定的规则，假设存储器中存储的数据如下图所示，每个字节中存储其所在字节地址
+
+![](assets/存储器.jpg)
+
+假如运行`ld.w`，访存地址为`00B`，则得到的数据为`03020100H`。（Loongarch采用小尾端的存储方式）
+
+假如运行`ld.h`，存储器返回数据为`03020100H`
+
+- 访存地址末尾为`00B`，最终得到`00000100H`。
+- 访存地址末尾为`10B`，最终得到`00000302H`。
+
+假如运行`ld.b`，存储器返回数据为`03020100H`
+
+- 访存地址末尾为`00B`，最终得到`00000000H`。
+- 访存地址末尾为`01B`，最终得到`00000001H`。
+- 访存地址末尾为`10B`，最终得到`00000002H`。
+- 访存地址末尾为`11B`，最终得到`00000003H`。
+
+**你应该会想问，剩下的情况呢？剩下的情况是不被允许的！**剩下的情况被称为访存地址**非自然对齐**。
+
+假如从地址`01H`处读取一个字（32bit），由于存储器的特性，我们需要先读取`00H`处的一个字，再读取`04H`处的一个字，再将它们的`01H`~`04H`处的数据拼接起来作为最终数据。实际上，读取一个字的数据对于CPU来说是非常费时间的（可能是上千个周期），更不用说读两个字了，所以我们在定义的时候就不允许这种跨字的数据读写（编译器分配地址空间时也会按照自然对齐地址分配）。
+
+#### 字节写使能
+
+> 如果你不知道字节写使能是哪根线的话请重新看exp7的实践任务第2条
+
+字节写使能即以字节为单位控制存储器写入的数据。
+
+例如字节写使能为`0011B`，则地址为`00B`、`01B`处会写入新的数据，地址为`10B`、`11B`处数据**不会被修改**。
+
+接下来让我们针对`00H`处的一个字的存储单元运行一段指令序列吧~
+
+| 指令序号 | 指令  | 访存地址（B） | 数据（H）    | 存储器数据（H） |
+| -------- | ----- | ------------- | ------------ | --------------- |
+| 1        | st.w  | 00            | 1234ABCD     | **1234ABCD**    |
+| 2        | ld.b  | 01            | **FFFFFFAB** | 1234ABCD        |
+| 3        | st.h  | 10            | 00009876     | **9876ABCD**    |
+| 4        | ld.hu | 00            | **0000ABCD** | 9876ABCD        |
+| 5        | st.b  | 11            | 12345678     | **7876ABCD**    |
+| 6        | ld.w  | 01            | *ERROR*      | 7876ABCD        |
+
+### 调试Tips
+
+1. 顶层信号中地址线`addr`在接入存储器时将末两位截去，所以`00B`~`11B`的访存地址均会取出`00H`开始的一个字，详见`soc_lite_top.v`文件
+2. 大部分分支跳转指令本身的执行错误不会引发trace比对的ERROR，其后一条指令才会引发
+3. 当功能点越来越多，你可以尝试编译只有新指令的func程序来跳过前面已经pass的指令以提高仿真速度，但请最后跑一遍完整的func程序
+
+## exp12：添加系统调用异常支持
+
+目标：
+
+- [ ] 理解CPU中断例外的概念
+- [ ] 学习精确异常处理的过程
+- [ ] 在CPU中添加系统调用异常的支持
+- [x] 完全掌握exp11及以前的内容
+
+### 特权指令
+
+在计算机系统层次结构中，应用层在操作系统层之上，只能看到和使用指令系统的一个子集，即指令系统的用户态部分。每个应用程序都有自己的寄存器、内存空间以及可执行的指令。现代计算机的指令系统在用户态子集之外还定义了操作系统核心专用的特权态部分，我们称之为特权指令系统。
+
+特权指令系统的存在主要是为了让计算机变得更好用、更安全。操作系统通过特权指令系统管理计算机，使得应用程序形成独占CPU的假象，并使应用间相互隔离，互不干扰。应用程序只能在操作系统划定的范围内执行，一旦超出就会被CPU切换成操作系统代码运行。
+
+龙芯架构32位精简版中处理器核分为2个特权等级（PrivilegeLeVel，简称PLV），分别是PLV0和PLV3。处理器核当前处于哪个特权等级由CSR.CRMD中PLV域的值唯一确定。
+
+所有特权等级中，**PLV0是具有最高权限的特权等级**，也是**唯一可以使用特权指令并访问所有特权资源的特权等级**。PLV3这个特权等级不能执行特权指令访问特权资源。对于Linux系统来说，架构中仅PLV0级可对应核心态，PLV3级对应用户态。
+
+### 控制状态寄存器（CSR寄存器）
+
+为了控制CPU的运行状态以及处理特权指令，有一组控制状态寄存器（在龙芯架构中称为CSR寄存器），其位于一个独立的地址空间。
+
+| 名称 | 地址 | 描述 |
+| :--: | :--: | :--: |
+| CRMD | 0x0 | 当前模式信息 |
+| PRMD | 0x1 | 例外前模式信息 |
+| ESTAT | 0x5 | 例外状态 |
+| ERA | 0x6 | 例外返回地址 |
+| EENTRY | 0xc | 例外入口地址 |
+| SAVE0~SAVE3 | 0x30~0x33 | 数据保存 |
+
+完整CSR寄存器表和各个CSR寄存器的定义详见[原手册](https://www.loongson.cn/uploads/images/2023041918122813624.%E9%BE%99%E8%8A%AF%E6%9E%B6%E6%9E%8432%E4%BD%8D%E7%B2%BE%E7%AE%80%E7%89%88%E5%8F%82%E8%80%83%E6%89%8B%E5%86%8C_r1p03.pdf)第7节。
+
+CSR寄存器有其专用的读写指令`csrrd`、`csrwr`、`csrxchg`，注意这些指令仅在核心态（即PLV0）可运行。
+
+### 异常和中断
+
+计算机通常按照软件的执行流进行顺序执行和跳转，但有时会需要中断正常的执行流程去处理其他任务，可以触发这一过程的事件统称为异常。
+
+中断通常由CPU核外部事件发起，CPU核响应后暂停原先程序执行另一段程序的事件。从CPU角度看，中断也可以被视为一种特定的异常，接下来将不做区分统一以“异常”表达。
+
+顾名思义，“异常”不是常态。异常对应的情况发生的频度不高，但处理起来比较复杂。本着“好钢用在刀刃上”的设计原则，我们希望尽可能由软件程序而不是硬件逻辑来处理这些复杂的异常情况。这样做既能保证硬件的设计复杂度得到控制又能确保系统的实际运行性能没有太大的损失。
+
+异常处理绝大部分交给异常处理程序完成，但是在处理的开始和结束仍需硬件完成。
+
+#### 预备阶段
+
+- CPU核内部或外部事件置起异常信号，表示有异常事件发生，请求CPU处理。
+- 每个异常事件有其对应的异常编码，需要在申请时同时提供。编码对应详见<a href="https://library.vincent-ice.me/posts/loongarch32r%E6%8C%87%E4%BB%A4%E9%9B%86/#%E5%BC%82%E5%B8%B8">这里</a>或者[原手册](https://www.loongson.cn/uploads/images/2023041918122813624.%E9%BE%99%E8%8A%AF%E6%9E%B6%E6%9E%8432%E4%BD%8D%E7%B2%BE%E7%AE%80%E7%89%88%E5%8F%82%E8%80%83%E6%89%8B%E5%86%8C_r1p03.pdf)表7-7。
+
+#### 响应准备阶段
+
+- CPU确认自身可以响应异常处理。
+- 记录被异常打断的指令的地址到`CSR.ERA`
+- 记录当前运行状态（`CSR.CRMD`的PLV、IE）到`CSR.PRMD`的对应域。
+- 同时调整CPU的权限等级（通常调整至最高特权等级`CSR.CRMD.PLV=0`）并关闭中断响应（`CSR.CRMD.IE=0`）。
+
+#### 响应阶段
+
+- 根据例外优先级（见[原手册](https://www.loongson.cn/uploads/images/2023041918122813624.%E9%BE%99%E8%8A%AF%E6%9E%B6%E6%9E%8432%E4%BD%8D%E7%B2%BE%E7%AE%80%E7%89%88%E5%8F%82%E8%80%83%E6%89%8B%E5%86%8C_r1p03.pdf)6.2.2节）选择响应最高优先级的异常，将对应的异常编码写入`CSR.ESTAT`的Ecode和Esubcode。
+- 跳转至例外入口（来自`CSR.EENTRY`）。
+
+#### 结束阶段
+
+- 异常处理程序结束后会执行`ertn`指令，其指示CPU从例外处理状态返回。
+- 例外前运行状态（`CSR.PRMD`的PLV、IE）被写回`CSR.CRMD`的对应域。
+- 跳转到被异常打断的指令的地址`CSR.ERA`处取指。
+
+#### 精确异常
+
+走完异常处理的全部流程，如果我们从原程序流的角度“看”，那么我们会发现它根本不知道某个时刻CPU被“借走”处理了另一段程序，这就是所谓的**精确异常**。
+
+简单的来说精确异常要求在处理异常时，发生异常的指令前面的所有指令都执行完（修改了机器状态），而发生异常的指令及其后面的指令都没有执行（没有修改机器状态）。
+
+在流水线处理器中，同时会有多条指令处于不同阶段，不同阶段都有发生异常的可能，那么如何实现精确异常呢？书中给出一种可行的设计方案：
+
+1. 任何一级流水发生异常时，在流水线中记录下发生异常的事件，直到写回阶段再处理。
+2. 如果在执行阶段要修改机器状态（如状态寄存器），保存下来直到写回阶段再修改。
+3. 指令的PC值随指令流水前进到写回阶段为异常处理专用。
+4. 将外部中断作为取指的异常处理。
+5. 指定一个通用寄存器（或一个专用寄存器）为异常处理时保存PC值专用。
+6. 当发生异常的指令处在写回阶段时，保存该指令的PC及必需的其他状态，置取指的PC值为异常处理程序入口地址。
+
+### 调试Tips
+
+1. 异常处理需要复杂的控制系统支持，添加起来有一定难度。~~但它对CPU意味着可以在考试中途出去上个厕所回来接着做而非必须一口气做到底~~
+2. 如果觉得直接在流水线上改动的不熟练的话，或许可以在单周期CPU上先添加一下，然后再切分到流水线的各个级。~~如果你有做好git版本控制的话应该很好找吧~~
+3. 某些CSR寄存器和PC寄存器一样存在特定的复位值，见[原手册](https://www.loongson.cn/uploads/images/2023041918122813624.%E9%BE%99%E8%8A%AF%E6%9E%B6%E6%9E%8432%E4%BD%8D%E7%B2%BE%E7%AE%80%E7%89%88%E5%8F%82%E8%80%83%E6%89%8B%E5%86%8C_r1p03.pdf)6.3节。
+4. 对于CSR寄存器，其也和通用寄存器一样存在冒险问题等待解决。
+5. 在`CSR.ESTAT.IS`域，其第10位在有些func程序中固定为0，有些开放读写，可能需要注意下。
+6. 例外返回的地址不一定是`CSR.ERA`中的地址。在本实验中返回原地址将会重新执行`syscall`。~~是死循环捏~~
+
+## exp13：添加其它异常支持
+
+目标：
+
+- [ ] 完善`ADEF`、`ALE`、`BRK`、`INE`异常支持
+- [ ] 添加中断支持
+- [ ] 添加定时器、计时器
+
+在exp12完成了`syscall`的异常支持后，我想CPU中完整的异常处理的数据和控制通路已经搭建完成了，添加新的异常支持只需要针对新的异常进行对应的判断，发出对应的异常消息即可。
+
+### 中断
+
+中断可被视为一种特定的异常，但是其与其它异常有着一个关键的不同点。
+
+由于中断通常由CPU核外部事件触发，其相对CPU核是异步的，所以发出的中断信号需要保持到被CPU采样，否则将永远无法触发中断异常。当然这是由中断源负责维护的。
+
+在较为简单的线中断模式下，硬件仅需每拍采样各个中断源并将其状态记录于`CSR.ESTAT.IS`域中，并在认为有需要响应的中断时将中断例外标注至流水线中的某一条指令上，随后的过程与其它例外相同。
+
+### 定时器与定时器中断
+
+在龙芯32位精简版架构中定义了一个定时器，其随着时钟自减，直到为零时置起定时器中断信号。
+
+详细定义及运行控制信息见[原手册](https://www.loongson.cn/uploads/images/2023041918122813624.%E9%BE%99%E8%8A%AF%E6%9E%B6%E6%9E%8432%E4%BD%8D%E7%B2%BE%E7%AE%80%E7%89%88%E5%8F%82%E8%80%83%E6%89%8B%E5%86%8C_r1p03.pdf)的`TCFG`、`TVAL`、`TICLR`寄存器定义（7.6.2~7.6.4）。
+
+### 计时器
+
+龙芯架构 32 位精简版定义了一个恒定频率计时器，其主体是一个 64 位的计数器，称为 Stable Counter。Stable Counter 在复位后置为 0，随后每个计数时钟周期自增 1，当计数至全 1 时自动绕回至 0 继续自增。同时每个计时器都有一个软件可配置的全局唯一编号，称为 Counter ID，保存在`CSR.TID`寄存器中。
+
+### 调试Tips
+
+1. 在经过了exp12的锤炼后，本实验应该不难了吧~~\doge~~
+2. 在verilog描述中**注意多驱动问题**。如果你选择给每个CSR寄存器一个always块负责内容修改的话，请注意这个CSR寄存器中所有数据更新都必须在这个always块中，以避免多驱动问题产生。例如`CSR.ESTAT.IS[11]`的定时器中断状态位的赋值不能在`CSR.TVAL`寄存器中，当然还有其它情况，请自行注意避免。（可以在综合的警告或者Linter语法检查找到已有的多驱动）
+3. 选择你觉得舒服的CSR寄存器声明方式，可以按照名字定义32位的，也可以直接按照子域分开定义……善用宏定义将位索引转换为有意义的单词
+
+## exp14：添加类SRAM总线支持
+
+目标：
+
+- [ ] 学习总线的原理及作用
+- [ ] 在CPU中添加简单的类SRAM接口总线支持
+
+### 总线
+
+总线的本质作用是完成数据交换。总线用于将两个或两个以上的部件连接起来，使得它们之间可以进行数据交换，或者说通信。
+
+总线的具体介绍可见[《计算机体系结构》](https://foxsen.github.io/archbase/%E8%AE%A1%E7%AE%97%E6%9C%BA%E6%80%BB%E7%BA%BF%E6%8E%A5%E5%8F%A3%E6%8A%80%E6%9C%AF.html#%E6%80%BB%E7%BA%BF%E6%A6%82%E8%BF%B0)。
+
+在总线通信中，通常将读写操作发起方称为主方（master），响应方称为从方（slave）。每一次读写操作的过程可大致分为：请求发起、响应请求、请求数据传输、请求数据返回。和我们之前的实验中不同的是，由于实际情况下总线上可能不止处理一件事物、数据的读写也需要一定的时间，所以每个步骤之间是有不确定的时间间隔的。为了明确何时的数据是有效的，每次有效的数据传输都基于握手信号，只有握手成功才会传输有效数据。
+
+### 类SRAM接口
+
+我们的CPU最终需要实现AMBA AXI总线接口，但是直接上手AXI总线可能有些困难，所以我们先学习类SRAM接口，或者说在我们原先的SRAM接口上加入握手机制，其接口信号如下：
+
+| 信号名称 | 位宽 | 方向          | 功能                                         |
+| -------- | ---- | ------------- | -------------------------------------------- |
+| req      | 1    | master->slave | 读写请求信号                                 |
+| wr       | 1    | master->slave | 高电平表示写请求，低电平为读操作             |
+| size     | 2    | master->slave | 传输字节数                                   |
+| addr     | 32   | master->slave | 请求的地址                                   |
+| wstrb    | 4    | master->slave | 写请求的写字节使能                           |
+| wdata    | 32   | master->slave | 写请求的写数据                               |
+| addr_ok  | 1    | slave->master | 请求的地址传输完毕                           |
+| data_ok  | 1    | slave->master | 请求的数据传输完毕（读取的数据or数据的写入） |
+| rdata    | 32   | slave->master | 读请求返回的读数据                           |
+
+相较于原先的SRAM接口，我们只添加了`size`、`addr_ok`、`data_ok`三根信号线，接下来我们解释一下这三条线的作用。
+
+#### `size`
+
+`size`信号表示该次请求传输的字节数，根据访存指令不同选择不同的值
+
+- 0: 1字节。`ld.b`、`ld.ub`、`st.b`
+- 1: 2字节。`ld.h`、`ld.uh`、`st.h`
+- 2: 4字节。`ld.w`、`st.w`
+
+#### `addr_ok`
+
+`addr_ok`信号用于和`req`信号一起完成读写请求的握手。只有在`clk`的上升沿同时看到`req`和`addr_ok`为1的时候才是一次成功的请求握手，读写请求、读写地址和可能的写数据被发送至从方。
+
+#### `data_ok`
+
+`data_ok`信号有双重身份。对应读事务的时候它是数据返回的有效信号；对应写事务的时候，它是写入完成的有效信号。
+
+在类SRAM接口中主方对于数据响应总是可以接收，所以不再设置Master接收`data_ok`的握手信号。也就是说如果存在未返回数据响应的请求，则在`clk`的上升沿看到`data_ok`为1就可以认为是—次成功的数据响应握手。
+
+#### 读写时序
+
+![](assets/类SRAM读.jpg)
+
+![](assets/类SRAM写.jpg)
+
+需要注意的是，总线上支持多事务处理，比如说以下连续写读操作：
+
+![](assets/类SRAM写读.jpg)
+
+对于初学者来说还是先一个一个事务处理，多事务会复杂上不少，对于我们的单发射流水线也起不到很大优化效果。
+
+> 建议阅读一下《CPU设计实战》中“类SRAM总线的设计”一节，书中有详细的分析。如果没有Loongarch版的话MIPS版也是相通的。
+
+### 调试Tips
+
+1. 从总线接口开始，你就会发现何为时序逻辑比组合逻辑难了。不出意外的话你应该会开始遇到各种差一拍或者其它奇奇怪怪的情况，请记得此时你的流水级处理的事情不像之前那样只有一拍，而变成类似一个状态机一样的多周期流水级，需要对流入和流出的控制有着明确的信号逻辑。
+2. 明确需要当拍更新（组合逻辑）和下拍更新（时序逻辑）的信号及它们间的相互依赖。
+
+## exp15、16：添加AXI总线支持、完成AXI随机延迟验证
+
+CPU对外只有一个AXI接口，需在内部完成取指和数据访问的仲裁。推荐在本任务中实现一个类SRAM-AXI的2x1的转接桥，然后拼接上exp14完成的类SRAM接口的CPU，将myCPU封装为AXI接口。
+
+### AXI接口
+
+备注栏中是我们针对exp给出的—些设计建议。
+
+![](assets/AXI接口.jpg)
+
+AXI接口的设计资料比较多，《CPU设计实战》和[《计算机体系结构基础》](https://foxsen.github.io/archbase/%E8%AE%A1%E7%AE%97%E6%9C%BA%E6%80%BB%E7%BA%BF%E6%8E%A5%E5%8F%A3%E6%8A%80%E6%9C%AF.html#%E7%89%87%E4%B8%8A%E6%80%BB%E7%BA%BF)以及网络上都有十分详细的分析和教学，我就不班门弄斧了。
+
+在这里提供一个[转接桥参考](#类SRAM-AXI转接桥)。
+
+### 调试Tips
+
+1. 到这里提前恭喜你已经写出完整的CPU (◆゜∀゜）👍
+2. [在exp16实践任务中](https://bookdown.org/loongson/_book3/chapter-axi-bus.html#subsec-exp16)第6、7步比较费时间，建议各个种类各挑一个就行
+3. 到这我也没什么Tips可写了，靠各位自己STFW啦\*\(^_^)/\*
 
 ## 附录
 
@@ -672,7 +1073,7 @@ endmodule
 
 不采用任何优化算法的乘法过程，可以用我们小学就学过的列竖式乘法来说明。从乘数的低位开始，每次取一位与被乘数相乘，其乘积作为部分积暂存，乘数的全部有效位都乘完后，再将所有部分积根据对应乘数数位的权值错位累加，得到最后的乘积。
 
-<img src="assets/Shushi.jpg" alt="ShuShi" style="zoom:50%;" />
+<img src="assets/ShuShi.jpg" alt="ShuShi" style="zoom:50%;" />
 
 这样原始的乘法在设计上是可以实现的，但在工程应用上几乎不会采用，在时延与面积上都需要优化。一个N位的乘法运算，需要产生N个部分积，并对它们进行全加处理，位宽越大，部分积个数越多，需要的加法器也越多，加法器延时也越大，那么针对乘法运算的优化，主要也就集中在两个方面：**一是减少加法器带来的延时，二是减少部分积的个数**。
 
@@ -999,3 +1400,163 @@ $$
 > - [硬件除法专题-SRT除法 - devindd - 博客园](https://www.cnblogs.com/devindd/articles/17633558.html#fnref1)
 > - [SRT除法的一些理解 - 知乎](https://zhuanlan.zhihu.com/p/550913605)
 > - [除法器的实现（恢复余数、不恢复余数、级数展开、Newton-Raphson）_恢复余数除法器-CSDN博客](https://blog.csdn.net/lum250/article/details/125111667)
+
+### 类SRAM-AXI转接桥
+
+龙芯杯团队赛中曾经提供的一个转接桥参考，效率偏低，且不支持burst传输。
+
+```verilog
+module cpu_axi_interface
+(
+    input         clk,
+    input         resetn, 
+
+    //inst sram-like 
+    input         inst_req     ,
+    input         inst_wr      ,
+    input  [1 :0] inst_size    ,
+    input  [31:0] inst_addr    ,
+    input  [31:0] inst_wdata   ,
+    output [31:0] inst_rdata   ,
+    output        inst_addr_ok ,
+    output        inst_data_ok ,
+    
+    //data sram-like 
+    input         data_req     ,
+    input         data_wr      ,
+    input  [1 :0] data_size    ,
+    input  [31:0] data_addr    ,
+    input  [31:0] data_wdata   ,
+    output [31:0] data_rdata   ,
+    output        data_addr_ok ,
+    output        data_data_ok ,
+
+    //axi
+    //ar
+    output [3 :0] arid         ,
+    output [31:0] araddr       ,
+    output [7 :0] arlen        ,
+    output [2 :0] arsize       ,
+    output [1 :0] arburst      ,
+    output [1 :0] arlock        ,
+    output [3 :0] arcache      ,
+    output [2 :0] arprot       ,
+    output        arvalid      ,
+    input         arready      ,
+    //r           
+    input  [3 :0] rid          ,
+    input  [31:0] rdata        ,
+    input  [1 :0] rresp        ,
+    input         rlast        ,
+    input         rvalid       ,
+    output        rready       ,
+    //aw          
+    output [3 :0] awid         ,
+    output [31:0] awaddr       ,
+    output [7 :0] awlen        ,
+    output [2 :0] awsize       ,
+    output [1 :0] awburst      ,
+    output [1 :0] awlock       ,
+    output [3 :0] awcache      ,
+    output [2 :0] awprot       ,
+    output        awvalid      ,
+    input         awready      ,
+    //w          
+    output [3 :0] wid          ,
+    output [31:0] wdata        ,
+    output [3 :0] wstrb        ,
+    output        wlast        ,
+    output        wvalid       ,
+    input         wready       ,
+    //b           
+    input  [3 :0] bid          ,
+    input  [1 :0] bresp        ,
+    input         bvalid       ,
+    output        bready       
+);
+//addr
+reg do_req;
+reg do_req_or; //req is inst or data;1:data,0:inst
+reg        do_wr_r;
+reg [1 :0] do_size_r;
+reg [31:0] do_addr_r;
+reg [31:0] do_wdata_r;
+wire data_back;
+
+assign inst_addr_ok = !do_req&&!data_req;
+assign data_addr_ok = !do_req;
+always @(posedge clk)
+begin
+    do_req     <= !resetn                       ? 1'b0 : 
+                  (inst_req||data_req)&&!do_req ? 1'b1 :
+                  data_back                     ? 1'b0 : do_req;
+    do_req_or  <= !resetn ? 1'b0 : 
+                  !do_req ? data_req : do_req_or;
+
+    do_wr_r    <= data_req&&data_addr_ok ? data_wr :
+                  inst_req&&inst_addr_ok ? inst_wr : do_wr_r;
+    do_size_r  <= data_req&&data_addr_ok ? data_size :
+                  inst_req&&inst_addr_ok ? inst_size : do_size_r;
+    do_addr_r  <= data_req&&data_addr_ok ? data_addr :
+                  inst_req&&inst_addr_ok ? inst_addr : do_addr_r;
+    do_wdata_r <= data_req&&data_addr_ok ? data_wdata :
+                  inst_req&&inst_addr_ok ? inst_wdata :do_wdata_r;
+end
+
+//inst sram-like
+assign inst_data_ok = do_req&&!do_req_or&&data_back;
+assign data_data_ok = do_req&& do_req_or&&data_back;
+assign inst_rdata   = rdata;
+assign data_rdata   = rdata;
+
+//---axi
+reg addr_rcv;
+reg wdata_rcv;
+
+assign data_back = addr_rcv && (rvalid&&rready||bvalid&&bready);
+always @(posedge clk)
+begin
+    addr_rcv  <= !resetn          ? 1'b0 :
+                 arvalid&&arready ? 1'b1 :
+                 awvalid&&awready ? 1'b1 :
+                 data_back        ? 1'b0 : addr_rcv;
+    wdata_rcv <= !resetn        ? 1'b0 :
+                 wvalid&&wready ? 1'b1 :
+                 data_back      ? 1'b0 : wdata_rcv;
+end
+//ar
+assign arid    = data_req?4'b0001:4'b0000;
+assign araddr  = do_addr_r;
+assign arlen   = 8'd0;
+assign arsize  = do_size_r;
+assign arburst = 2'd0;
+assign arlock  = 2'd0;
+assign arcache = 4'd0;
+assign arprot  = 3'd0;
+assign arvalid = do_req&&!do_wr_r&&!addr_rcv;
+//r
+assign rready  = 1'b1;
+
+//aw
+assign awid    = 4'd0001;
+assign awaddr  = do_addr_r;
+assign awlen   = 8'd0;
+assign awsize  = do_size_r;
+assign awburst = 2'd0;
+assign awlock  = 2'd0;
+assign awcache = 4'd0;
+assign awprot  = 3'd0;
+assign awvalid = do_req&&do_wr_r&&!addr_rcv;
+//w
+assign wid    = 4'd0001;
+assign wdata  = do_wdata_r;
+assign wstrb  = do_size_r==2'd0 ? 4'b0001<<do_addr_r[1:0] :
+                do_size_r==2'd1 ? 4'b0011<<do_addr_r[1:0] : 4'b1111;
+assign wlast  = 1'd1;
+assign wvalid = do_req&&do_wr_r&&!wdata_rcv;
+//b
+assign bready  = 1'b1;
+
+endmodule
+```
+
