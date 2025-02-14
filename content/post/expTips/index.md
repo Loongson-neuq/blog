@@ -244,7 +244,7 @@ end
 
 ### 算术逻辑运算类指令
 
-需要添加的指令有`slti`、`sltui`、`andi`、`ori`、`xori`、`sll.w`、`srl.w`、`sra.w`、`pcaddu12i`，指令具体信息可参考我的[LoongArch32r指令表]({{< ref "/posts/LoongArch32r指令集/index.md" >}})。
+需要添加的指令有`slti`、`sltui`、`andi`、`ori`、`xori`、`sll.w`、`srl.w`、`sra.w`、`pcaddu12i`，指令具体信息可参考我的[LoongArch32r指令表](https://library.vincent-ice.me/posts/loongarch32r%E6%8C%87%E4%BB%A4%E9%9B%86/)。
 
 **首先，我们来观察需要添加的指令有什么特点、和我们已有的指令有什么联系吗？**
 
@@ -262,7 +262,7 @@ end
 
 ### 乘除运算类指令
 
-需要添加的指令有`mul.w`、`mulh.w`、`mulh.wu`、`div.w`、`mod.w`、`div.wu`、`mod.wu`，指令具体信息可参考我的[LoongArch32r指令表]({{< ref "/posts/LoongArch32r指令集/index.md" >}})。
+需要添加的指令有`mul.w`、`mulh.w`、`mulh.wu`、`div.w`、`mod.w`、`div.wu`、`mod.wu`，指令具体信息可参考我的[LoongArch32r指令表](https://library.vincent-ice.me/posts/loongarch32r%E6%8C%87%E4%BB%A4%E9%9B%86/)。
 
 **首先，我们还是分析一下这些指令**
 
@@ -355,13 +355,13 @@ Vivado中的综合工具遇到上面代码中的“＊’’运算符时，会�
 
 ### 转移指令
 
-需要添加的指令有`blt`、`bge`、`bltu`、`bgeu`，指令具体信息可参考我的[LoongArch32r指令表]({{< ref "/posts/LoongArch32r指令集/index.md" >}})。
+需要添加的指令有`blt`、`bge`、`bltu`、`bgeu`，指令具体信息可参考我的[LoongArch32r指令表](https://library.vincent-ice.me/posts/loongarch32r%E6%8C%87%E4%BB%A4%E9%9B%86/)。
 
 相信经过exp10的分析，大家很快就能发现这些b指令都是换汤不换药（仅跳转条件判断不同）的一类指令，只要照着如`beq`指令的过程添加即可。
 
 ### 访存指令
 
-需要添加的指令有`ld.b`、`ld.h`、`ld.bu`、`ld.hu`、`st.b`、`st.h`，指令具体信息可参考我的[LoongArch32r指令表]({{< ref "/posts/LoongArch32r指令集/index.md" >}})。
+需要添加的指令有`ld.b`、`ld.h`、`ld.bu`、`ld.hu`、`st.b`、`st.h`，指令具体信息可参考我的[LoongArch32r指令表](https://library.vincent-ice.me/posts/loongarch32r%E6%8C%87%E4%BB%A4%E9%9B%86/)。
 
 在看完手册后，我们发现普通访存指令的**数据通路、控制逻辑都是相同的**，区别仅在**处理的数据位宽不同**。
 
