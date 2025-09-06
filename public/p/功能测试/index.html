@@ -1,0 +1,272 @@
+<!doctype html><html lang=zh-CN dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="CPU仿真测试环境"><title>功能测试</title>
+<link rel=canonical href=https://loongson-neuq.pages.dev/p/%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95/><link rel=stylesheet href=/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css><meta property='og:title' content="功能测试"><meta property='og:description' content="CPU仿真测试环境"><meta property='og:url' content='https://loongson-neuq.pages.dev/p/%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95/'><meta property='og:site_name' content='NEUQ 龙芯实验室博客'><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='Vivado'><meta property='article:tag' content='功能测试'><meta property='article:published_time' content='2024-11-28T00:00:00+00:00'><meta property='article:modified_time' content='2024-11-28T00:00:00+00:00'><meta name=twitter:title content="功能测试"><meta name=twitter:description content="CPU仿真测试环境"><link rel="shortcut icon" href=/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/img/avatar_hu27a039529b0e16f185ca51fbed76013f_26164_300x0_resize_box_3.png width=300 height=300 class=site-logo loading=lazy alt=Avatar></a></figure><div class=site-meta><h1 class=site-name><a href=/>NEUQ 龙芯实验室博客</a></h1><h2 class=site-description></h2></div></header><ol class=menu-social><li><a href=https://github.com/Loongson-neuq/blog target=_blank title=GitHub rel=me><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>Home</span></a></li><li><a href=/archives/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>Archives</span></a></li><li><a href=/search/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>Search</span></a></li><li><a href=/intro/><span>龙芯班介绍及招新宣传</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav id=TableOfContents><ol><li><a href=#基于trace比对的调试框架>基于trace比对的调试框架</a></li><li><a href=#功能测试环境使用方法>功能测试环境使用方法</a><ol><li><a href=#开发环境组织结构介绍>开发环境组织结构介绍</a></li><li><a href=#soc_lite片上系统结构介绍>SoC_Lite片上系统结构介绍</a></li><li><a href=#生成golden_trace>生成golden_trace</a><ol><li><a href=#func功能测试程序>func功能测试程序</a></li></ol></li><li><a href=#验证自己的cpu>验证自己的CPU</a><ol><li><a href=#cpu对外总线接口>CPU对外总线接口</a></li><li><a href=#打开vivado工程>打开Vivado工程</a></li><li><a href=#func测试验证结果判断>func测试验证结果判断</a></li></ol></li></ol></li><li><a href=#进阶-chiplab的difftest测试平台>进阶: chiplab的difftest测试平台</a></li></ol></nav></div></section></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/cpu/>CPU
+</a><a href=/categories/tutorial/>Tutorial</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95/>功能测试</a></h2><h3 class=article-subtitle>CPU仿真测试环境</h3></div><footer class=article-time><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published>Nov 28, 2024</time></div><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 12 分钟</time></div></footer></div></header><section class=article-content><h2 id=基于trace比对的调试框架>基于trace比对的调试框架</h2><p>在调试C程序的时候应该都使用过单步调试这种调试手段。在“慢动作”运行程序的每一行代码的情况下，能够及时看到每一行代码的运行行为是否符合预期，从而能够及时定位到出错点。在实验开发环境中提供的这套基于trace比对的调试辅助手段，借鉴的就是这种“单步调试”的策略。</p><p>其具体实现方式是：我们先用一个已知的功能上是正确的CPU运行一遍测试指令序列，将每条指令的PC和写寄存器的信息记录下，记为golden_trace；然后在验证myCPU的时候运行相同的指令序列，在myCPU每条指令写寄存器的时候，将myCPU中的PC和写寄存器的信息同之前的golden_trace进行比对，如果不一样，那么立刻报错并停止仿真。</p><p>简单的来说, golden_trace就是参考答案, 通过比对myCPU的运行结果和golden_trace的运行结果, 来判断myCPU功能的正确性。</p><h2 id=功能测试环境使用方法>功能测试环境使用方法</h2><blockquote><p><a class=link href=https://gitee.com/loongson-edu/cdp_ede_local/tree/ee7dd7e5f1d12a9f94788a279f096b25407d9d0b target=_blank rel=noopener>基于NSCSCC2024 团体赛功能测试</a>
+它是<a class=link href=https://gitee.com/loongson-edu/cdp_ede_local target=_blank rel=noopener>CPU设计实战&ndash;Loongarch版</a>的实验环境的exp16</p></blockquote><h3 id=开发环境组织结构介绍>开发环境组织结构介绍</h3><p>整个实验开发环境的基本目录结构及各部分功能简介如下所示：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=o>|--</span><span class=n>func</span><span class=o>/</span>                     <span class=n>功能验证测试程序</span>
+</span></span><span class=line><span class=cl><span class=o>|</span>  <span class=o>|--</span><span class=n>obj</span><span class=o>/</span>                   <span class=n>编译生成的二进制测试程序</span>
+</span></span><span class=line><span class=cl><span class=o>|</span>    <span class=o>|--</span><span class=n>inst_ram</span><span class=o>.</span><span class=n>coe</span>         <span class=n>测试程序对应上板用的二进制纯数据文件</span>
+</span></span><span class=line><span class=cl><span class=o>|</span>    <span class=o>|--</span><span class=n>inst_ram</span><span class=o>.</span><span class=n>mif</span>         <span class=n>测试程序对应功能仿真用的二进制纯数据文件</span>
+</span></span><span class=line><span class=cl><span class=o>|</span>    <span class=o>|--</span><span class=n>inst_ram</span><span class=o>.</span><span class=n>txt</span>         <span class=n>测试程序汇编代码说明</span>
+</span></span><span class=line><span class=cl><span class=o>|</span>
+</span></span><span class=line><span class=cl><span class=o>|--</span><span class=n>gettrace</span><span class=o>/</span>                 <span class=n>trace文件生成工程</span>
+</span></span><span class=line><span class=cl><span class=o>|</span>  <span class=o>|--</span><span class=n>gettrace</span><span class=o>.</span><span class=n>xpr</span>           <span class=n>生成golden_trace的Vivado工程文件</span>
+</span></span><span class=line><span class=cl><span class=o>|</span>  <span class=o>|--</span><span class=n>golden_trace</span><span class=o>.</span><span class=n>txt</span>       <span class=n>生成的golden_trace文件</span>
+</span></span><span class=line><span class=cl><span class=o>|</span>
+</span></span><span class=line><span class=cl><span class=o>|--</span><span class=n>myCPU</span><span class=o>/</span>                    <span class=n>待验证的CPU设计代码目录</span>
+</span></span><span class=line><span class=cl><span class=o>|</span>
+</span></span><span class=line><span class=cl><span class=o>|--</span><span class=n>soc_verify</span><span class=o>/</span><span class=n>soc_axi</span>        <span class=n>所现的CPU的SoC验证环境</span>
+</span></span><span class=line><span class=cl>   <span class=o>|--</span><span class=n>rtl</span><span class=o>/</span>                   <span class=n>验证用SoC设计代码目录</span>
+</span></span><span class=line><span class=cl>   <span class=o>|</span>  <span class=o>|--</span><span class=n>soc_lite_top</span><span class=o>.</span><span class=n>v</span>      <span class=n>SoC的顶层文件</span>
+</span></span><span class=line><span class=cl>   <span class=o>|</span>  <span class=o>|--</span><span class=n>CONFREG</span><span class=o>/</span>            <span class=n>confreg模块</span><span class=err>，</span><span class=n>用于访问实验板上的LED灯</span><span class=err>、</span><span class=n>拨码开关等外设</span>
+</span></span><span class=line><span class=cl>   <span class=o>|</span>  <span class=o>|--</span><span class=n>xilinx_ip</span><span class=o>/</span>          <span class=n>定制的Xilinx</span> <span class=n>IP</span><span class=err>，</span><span class=n>包含clk_pll</span><span class=err>、</span><span class=n>inst_ram</span>
+</span></span><span class=line><span class=cl>   <span class=o>|</span>
+</span></span><span class=line><span class=cl>   <span class=o>|--</span><span class=n>testbench</span><span class=o>/</span>             <span class=n>功能仿真验证平台</span>
+</span></span><span class=line><span class=cl>   <span class=o>|</span>  <span class=o>|--</span><span class=n>mycpu_tb</span><span class=o>.</span><span class=n>v</span>          <span class=n>功能仿真顶层</span><span class=err>，</span><span class=n>该模块会抓取debug信息与golden_trace</span><span class=o>.</span><span class=n>txt进行比对</span>
+</span></span><span class=line><span class=cl>   <span class=o>|</span>
+</span></span><span class=line><span class=cl>   <span class=o>|--</span><span class=n>run_vivado</span><span class=o>/</span>            <span class=n>Vivado工程的运行目录</span>
+</span></span><span class=line><span class=cl>      <span class=o>|--</span><span class=n>constraints</span><span class=o>/</span>        <span class=n>Vivado工程设计的约束</span>
+</span></span><span class=line><span class=cl>      <span class=o>|--</span><span class=n>create_project</span><span class=o>.</span><span class=n>tcl</span>  <span class=n>创建Vivado工程的tcl脚本</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=soc_lite片上系统结构介绍>SoC_Lite片上系统结构介绍</h3><p><img src=/p/%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95/assets/soc_lite_structure.png width=578 height=361 srcset="/p/%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95/assets/soc_lite_structure_hu1184322f6376438a13ca0fde4155d650_15429_480x0_resize_box_3.png 480w, /p/%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95/assets/soc_lite_structure_hu1184322f6376438a13ca0fde4155d650_15429_1024x0_resize_box_3.png 1024w" loading=lazy alt=soc_lite class=gallery-image data-flex-grow=160 data-flex-basis=384px></p><center>用于验证myCPU的片上系统</center><ul><li>PLL: 锁相环，用于产生时钟信号</li><li>iram: 指令内存，用于存放测试程序</li><li>dram: 数据内存，用于存放数据</li><li>confreg: 外设控制器，用于控制LED灯、拨码开关等外设</li><li>mycpu: 待验证的CPU设计</li></ul><blockquote><p>因为在LoongArch指令系统架构下，所有I/O设备的寄存器都是采用memory mapped方式访问的。我们这里实现的confreg也不例外。Memory mapped的访问方式意味I/O设备中的寄存器各自都有一个唯一内存编址，所以CPU可以通过load、store指令对其进行访问。</p></blockquote><h3 id=生成golden_trace>生成golden_trace</h3><h4 id=func功能测试程序>func功能测试程序</h4><p><strong>以下涉及Linux编译的部分不要求大家初期掌握, 包里已经提供了编译好的最终文件</strong></p><h5 id=func测试程序说明>func测试程序说明</h5><p>func程序分为func/start.S和func/inst/*.S，都是LoongArch32汇编程序:</p><ol><li>func/start.S ：主函数，执行必要的启动初始化后调用func/inst/下的各汇编程序。</li><li>func/inst/*.S ：针对每条指令或功能点有一个汇编测试程序。</li><li>func/include/*.h ：测试程序的配置信息和宏定义。</li></ol><p>主函数func/start.S中主体部分代码如下，分为三大部分，具体查看注释。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>  ......
+</span></span><span class=line><span class=cl>  #以下是设置程序开始的LED灯和数码管显示，单色LED全灭，双色LED灯一红一绿。
+</span></span><span class=line><span class=cl>      LI (a0, LED_RG1_ADDR)
+</span></span><span class=line><span class=cl>      LI (a1, LED_RG0_ADDR)
+</span></span><span class=line><span class=cl>      LI (a2, LED_ADDR)
+</span></span><span class=line><span class=cl>      LI (s1, NUM_ADDR)
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>      LI (t1, 0x0002)
+</span></span><span class=line><span class=cl>      LI (t2, 0x0001)
+</span></span><span class=line><span class=cl>      LI (t3, 0x0000ffff)
+</span></span><span class=line><span class=cl>      lu12i.w s3, 0
+</span></span><span class=line><span class=cl>      NOP4
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>      st.w t1, a0, 0
+</span></span><span class=line><span class=cl>      st.w t2, a1, 0
+</span></span><span class=line><span class=cl>      st.w t3, a2, 0
+</span></span><span class=line><span class=cl>      st.w s3, s1, 0
+</span></span><span class=line><span class=cl>  #以下是运行各功能点测试，每个测试完执行idle_1s等待一段时间，且数码管显示加1。
+</span></span><span class=line><span class=cl>  inst_test:
+</span></span><span class=line><span class=cl>      bl n1_lu12i_w_test    #lu12i.w
+</span></span><span class=line><span class=cl>      bl idle_1s
+</span></span><span class=line><span class=cl>      
+</span></span><span class=line><span class=cl>      bl n2_add_w_test   #add.w
+</span></span><span class=line><span class=cl>      bl idle_1s
+</span></span><span class=line><span class=cl>  ......
+</span></span><span class=line><span class=cl>  #以下是显示测试结果，PASS则双色LED灯亮两个绿色，单色LED不亮；
+</span></span><span class=line><span class=cl>  #Fail则双色LED灯亮两个红色，单色LED灯全亮。
+</span></span><span class=line><span class=cl>  test_end:
+</span></span><span class=line><span class=cl>      LI  (s0, TEST_NUM)
+</span></span><span class=line><span class=cl>      NOP4
+</span></span><span class=line><span class=cl>      beq s0, s3, 1f
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>      LI (a0, LED_ADDR)
+</span></span><span class=line><span class=cl>      LI (a1, LED_RG1_ADDR)
+</span></span><span class=line><span class=cl>      LI (a2, LED_RG0_ADDR)
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>      LI (t1, 0x0002)
+</span></span><span class=line><span class=cl>      NOP4
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>      st.w zero, a0, 0
+</span></span><span class=line><span class=cl>      st.w t1, a1, 0
+</span></span><span class=line><span class=cl>      st.w t1, a2, 0
+</span></span><span class=line><span class=cl>  ......
+</span></span></code></pre></td></tr></table></div></div><p>inst/ 目录下每个功能点的测试代码程序名为n#_*_test.S，其中“#”为编号，如有15个功能点测试，则从n1编号到n15。每个功能点的测试，其测试代码大致如下。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>  ......
+</span></span><span class=line><span class=cl>  LEAF(n1_lu12i_w_test)
+</span></span><span class=line><span class=cl>      addi.w   s0, s0 ,1         #加载功能点编号s0++
+</span></span><span class=line><span class=cl>      addi.w   s2, zero, 0x0
+</span></span><span class=line><span class=cl>      lu12i.w  t2, 0x1
+</span></span><span class=line><span class=cl>      ###test inst
+</span></span><span class=line><span class=cl>      addi.w   t1, zero, 0x0
+</span></span><span class=line><span class=cl>      TEST_LU12I_W(0x00000, 0x00000)
+</span></span><span class=line><span class=cl>      ......                     #测试程序，省略
+</span></span><span class=line><span class=cl>      TEST_LU12I_W(0xff0af, 0xff0a0)
+</span></span><span class=line><span class=cl>      ###detect exception
+</span></span><span class=line><span class=cl>      bne      s2, zero, inst_error
+</span></span><span class=line><span class=cl>      ###score ++                #s3存放功能测试计分，每通过一个功能点测试，则+1
+</span></span><span class=line><span class=cl>      addi.w   s3, s3, 1
+</span></span><span class=line><span class=cl>      ###output (s0&lt;&lt;24)|s3
+</span></span><span class=line><span class=cl>  inst_error:
+</span></span><span class=line><span class=cl>      slli.w   t1, s0, 24
+</span></span><span class=line><span class=cl>      NOP4
+</span></span><span class=line><span class=cl>      or       t0, t1, s3        #s0高8位为功能点编号，s3低8位为通过功能点数，
+</span></span><span class=line><span class=cl>                                 #相或结果显示到数码管上。
+</span></span><span class=line><span class=cl>      NOP4
+</span></span><span class=line><span class=cl>      st.w     t0, s1, 0         #s1存放数码管地址
+</span></span><span class=line><span class=cl>      jirl     zero, ra, 0
+</span></span><span class=line><span class=cl>  END(n1_lu12i_w_test)
+</span></span></code></pre></td></tr></table></div></div><p>从以上可以看到，测试程序的行为是：当通过第一个功能测试后，数码管会显示0x0100_0001，随后执行idle_1s；执行第二个功能点测试，再次通过数码管会显示0x0200_0002，执行idle_1s……依次类推。显示，每个功能点测试通过，应当数码管高8位和低8位永远一样。如果中途数码管显示从0x0500_0005变成了0x0600_0005，则说明运行第六个功能点测试出错。</p><p>最后来看 <code>start.S</code> 文件中 <code>idle_1s</code> 函数的代码，其使用一个循环来暂停测试程序执行的。其主体部分代码如下：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>  idle_1s:
+</span></span><span class=line><span class=cl>      ......
+</span></span><span class=line><span class=cl>      #initial t3           //读取confreg模块里的switch_interleave的值
+</span></span><span class=line><span class=cl>      ld.w    t2, t0, 0     #switch_interleave: {switch[7],1&#39;b0, switch[6],1&#39;b0...switch[0],1&#39;b0}
+</span></span><span class=line><span class=cl>      NOP4
+</span></span><span class=line><span class=cl>      xor     t2, t2, t1    //拨码开关拨上为0，故要xor来取反
+</span></span><span class=line><span class=cl>      NOP4
+</span></span><span class=line><span class=cl>      slli.w  t3, t2, 9     #t3 = switch interleave &lt;&lt; 9
+</span></span><span class=line><span class=cl>      NOP4
+</span></span><span class=line><span class=cl>      
+</span></span><span class=line><span class=cl>  sub1:
+</span></span><span class=line><span class=cl>      addi.w  t3, t3, -1    //t3累减1
+</span></span><span class=line><span class=cl>      
+</span></span><span class=line><span class=cl>      #select min{t3, switch_interleave} //获取t3和当前switch_interleave的最小值
+</span></span><span class=line><span class=cl>      ld.w    t2, t0, 0     #switch_interleave:{switch[7],1&#39;b0,switch[6],1&#39;b0...switch[0],1&#39;b0}
+</span></span><span class=line><span class=cl>      NOP4
+</span></span><span class=line><span class=cl>      xor     t2, t2, t1
+</span></span><span class=line><span class=cl>      NOP4
+</span></span><span class=line><span class=cl>      slli.w  t2, t2, 9     #switch interleave &lt;&lt; 9
+</span></span><span class=line><span class=cl>      NOP4                  //以上ld.w-xor-slli.w三条指令再次获取switch_interleave
+</span></span><span class=line><span class=cl>      sltu    t4, t3, t2    //无符号比大小，如果t3比switch_interleave 小则置t4=1
+</span></span><span class=line><span class=cl>      NOP4
+</span></span><span class=line><span class=cl>      bne     t4, zero, 1f  //t4!=0,意味着t3比switch_interleave大，则跳1f
+</span></span><span class=line><span class=cl>      nop
+</span></span><span class=line><span class=cl>      addi.w  t3, t2, 0     //否则，将t3赋值为更小的switch_interleave
+</span></span><span class=line><span class=cl>      NOP4
+</span></span><span class=line><span class=cl>  1:
+</span></span><span class=line><span class=cl>      bne     t3,zero, sub1 //如果t3没有减到0，则返回循环开头
+</span></span><span class=line><span class=cl>      jirl    zero, ra, 0   //结束idle_1s
+</span></span></code></pre></td></tr></table></div></div><p>从以上代码可以看到，idle_1s 会依据拨码开关的状态设定循环次数。在仿真环境下，我们会模拟拨码开关为全拨下的状态，以使 idle_1s 循环次数最小。之所以这样设置，是因为 FPGA 运行远远快于仿真的速度，假设CPU运行一个程序需要106个CPU周期，再假设CPU在FPGA上运行频率为10MHz，那其在FPGA上运行完一个程序只需要0.1s；同样，我们仿真运行这个程序，假设我们仿真设置的CPU运行频率也是10MHz，那我们仿真运行完这个程序也是只需要0.1s吗？显然这是不可能的，仿真是软件模拟CPU运行情况的，也就是它要模拟每个周期CPU内部的变化，运行完这一个程序，需要模拟106个CPU周期。我们在一台2016年产的主流X86台式机上进行实测发现，Vivado自带的Xsim仿真器运行SoC_Lite的仿真，每模拟一个周期大约需要600us，这意味着Xsim上模拟106个周期所花费的实际时间约10分钟。</p><p>同一程序，运行仿真测试大约需要10分钟，而在FPGA上运行只需要0.1秒（甚至更短，比如CPU运行在50MHz主频则运行完程序只需要0.02s）。所以我们如果不控制好仿真运行时的 idle_1s 函数，则我们可能会陷入到idle_1s长时间等待中；类似的，如果我们上板时设定 idle_1s 函数很短（比如拨码开关全拨下），则 idle_1s 时间太短导致我们无法看到数码管累加的效果</p><p><strong>如果大家在自实现CPU上板运行过程中，发现数码管累加跳动太慢，请调小拨码开关代表的数值；如果发现数码管累加跳动太快，请调大拨码开关代表的数值。</strong></p><h5 id=loongarch-gcc交叉编译工具的安装>LoongArch-GCC交叉编译工具的安装</h5><p>自行编译func程序需要使用LoongArch32R的GCC交叉编译工具。该工具链的安装可以从 <a class=link href=https://gitee.com/loongson-edu/la32r-toolchains target=_blank rel=noopener>https://gitee.com/loongson-edu/la32r-toolchains</a> 下载源码自行编译、安装，也可以直接从 <a class=link href=https://gitee.com/loongson-edu/la32r-toolchains/releases target=_blank rel=noopener>https://gitee.com/loongson-edu/la32r-toolchains/releases</a> 下安装包。我们这里主要介绍后一种方式的安装步骤。</p><p>下载安装包时请根据所用机器是X86还是LoongArch选择对应的版本。下载压缩包 loongarch32r-linux-gnusf-*.tar.gz 至Linux操作系统自身的文件系统中。需要特别提醒的是，目前X86版本LoongArch32R的GCC交叉编译工具只支持64位系统（在系统下运行uname -a命令显示架构为x86_64的）。接下来：</p><p>（1）打开一个terminal，进入压缩包所在目录，进行解压：</p><pre><code>$ sudo tar zxvf loongarch32r-linux-gnusf-*.tar.gz -C /opt/
+</code></pre><p>（2）确保目录/opt/loongarch32r-linux-gnusf-*/bin/存在，随后执行：</p><pre><code>$ echo “export PATH=/opt/loongarch32r-linux-gnusf-*/bin/:$PATH” &gt;&gt; ~/.bashrc
+</code></pre><p>（3）重新打开一个terminal，输入loongarch32然后敲击tab键，如果能够-linux-gnusf-之类的补全，就说明工具链已经安装成功。此时可以编写一个hello.c 然后用工具链进行编译看其是否可以工作。</p><pre><code>$ loongarch32r-linux-gnusf-gcc hello.c
+</code></pre><h5 id=func测试程序编译说明>func测试程序编译说明</h5><h6 id=编译脚本>编译脚本</h6><p>func测试程序的编译脚本为验证平台目录下的func/Makefile，对Makefile了解的可以去看下该脚本。该脚本支持以下命令：</p><ul><li>make help ：查看帮助信息</li><li>make ：编译得到仿真下使用的结果</li><li>make clean ：删除*.o，*.a和./obj/目录</li></ul><h6 id=编译结果>编译结果</h6><p>func测试程序编译结果位于func/obj/下, 主要会用到的文件及作用如下:</p><ul><li>inst_ram.coe ：定制inst_ram所需的数据文件</li><li>inst_ram.mif ：仿真时inst_ram读取的数据文件</li><li>test.s : 对main.elf反汇编得到的文件</li></ul><h5 id=golden_trace生成>golden_trace生成</h5><p>进入 gettrace/ 目录，打开gettrace.xpr工程文件，运行仿真，自动生成参考结果golden_trace.txt。
+重点关注此时inst_ram加载的确实是前一个步骤编译出的结果。
+要等仿真运行完成，golden_trace.txt才有完整的内容。</p><h3 id=验证自己的cpu>验证自己的CPU</h3><h4 id=cpu对外总线接口>CPU对外总线接口</h4><p>一般来说我们根据由易到难挨个实现SRAM接口, 带握手的SRAM接口, AXI总线接口, 这里我们以SRAM接口为例:</p><div class=table-wrapper><table><thead><tr><th style=text-align:left>名称</th><th style=text-align:center>位宽</th><th style=text-align:center>方向</th><th style=text-align:left>描述</th></tr></thead><tbody><tr><td style=text-align:left>clk</td><td style=text-align:center>1</td><td style=text-align:center>input</td><td style=text-align:left>时钟信号, 来自clk_pll的时钟输出</td></tr><tr><td style=text-align:left>resetn</td><td style=text-align:center>1</td><td style=text-align:center>input</td><td style=text-align:left>复位信号, 低电平同步复位</td></tr><tr><td style=text-align:left>int</td><td style=text-align:center>8</td><td style=text-align:center>input</td><td style=text-align:left>中断信号, 8个硬件中断信号, 高电平有效</td></tr><tr><td style=text-align:left></td><td style=text-align:center></td><td style=text-align:center></td><td style=text-align:left></td></tr><tr><td style=text-align:left>inst_sram_en</td><td style=text-align:center>1</td><td style=text-align:center>output</td><td style=text-align:left>指令内存使能信号, 高电平有效</td></tr><tr><td style=text-align:left>inst_sram_wen</td><td style=text-align:center>4</td><td style=text-align:center>output</td><td style=text-align:left>指令内存字节写使能信号, 高电平有效</td></tr><tr><td style=text-align:left>inst_sram_addr</td><td style=text-align:center>32</td><td style=text-align:center>output</td><td style=text-align:left>指令内存地址, 字节寻址</td></tr><tr><td style=text-align:left>inst_sram_wdata</td><td style=text-align:center>32</td><td style=text-align:center>output</td><td style=text-align:left>指令内存写数据</td></tr><tr><td style=text-align:left>inst_sram_rdata</td><td style=text-align:center>32</td><td style=text-align:center>input</td><td style=text-align:left>指令内存读数据</td></tr><tr><td style=text-align:left></td><td style=text-align:center></td><td style=text-align:center></td><td style=text-align:left></td></tr><tr><td style=text-align:left>data_sram_en</td><td style=text-align:center>1</td><td style=text-align:center>output</td><td style=text-align:left>数据内存使能信号, 高电平有效</td></tr><tr><td style=text-align:left>data_sram_wen</td><td style=text-align:center>4</td><td style=text-align:center>output</td><td style=text-align:left>数据内存字节写使能信号, 高电平有效</td></tr><tr><td style=text-align:left>data_sram_addr</td><td style=text-align:center>32</td><td style=text-align:center>output</td><td style=text-align:left>数据内存地址, 字节寻址</td></tr><tr><td style=text-align:left>data_sram_wdata</td><td style=text-align:center>32</td><td style=text-align:center>output</td><td style=text-align:left>数据内存写数据</td></tr><tr><td style=text-align:left>data_sram_rdata</td><td style=text-align:center>32</td><td style=text-align:center>input</td><td style=text-align:left>数据内存读数据</td></tr><tr><td style=text-align:left></td><td style=text-align:center></td><td style=text-align:center></td><td style=text-align:left></td></tr><tr><td style=text-align:left>debug_wb_pc</td><td style=text-align:center>32</td><td style=text-align:center>output</td><td style=text-align:left>写回级（多周期最后一级）的PC</td></tr><tr><td style=text-align:left>debug_wb_rf_we</td><td style=text-align:center>4</td><td style=text-align:center>output</td><td style=text-align:left>写回级写寄存器堆(regfiles)的写使能，为字节写使能</td></tr><tr><td style=text-align:left>debug_wb_rf_wnum</td><td style=text-align:center>5</td><td style=text-align:center>output</td><td style=text-align:left>写回级写寄存器堆(regfiles)的目的寄存器号</td></tr><tr><td style=text-align:left>debug_wb_rf_wdata</td><td style=text-align:center>32</td><td style=text-align:center>output</td><td style=text-align:left>写回级写寄存器堆(regfiles)的写数据</td></tr></tbody></table></div><h4 id=打开vivado工程>打开Vivado工程</h4><p>测试平台采用tcl脚本来创建工程, 方法如下:</p><ol><li>启动Vivado</li><li>点击最下方的"Tcl Console"标签</li><li>cd到 /soc_verify/soc_axi/run_vivado/ 目录下</li><li>输入 source create_project.tcl 创建Vivado工程</li><li>如果你的CPU设计代码在 /myCPU/ 目录下, 则会自动导入到工程中, 请检查是否导入成功, 如未成功请手动导入</li></ol><blockquote><p>更具体可<a class=link href=https://bookdown.org/loongson/_book3/appendix-vivado-advanced-usage.html#sec-vivado-tcl-create-project target=_blank rel=noopener>参考</a></p></blockquote><h4 id=func测试验证结果判断>func测试验证结果判断</h4><h5 id=仿真结果正确判断>仿真结果正确判断</h5><p>仿真结果正确判断有两种方法。</p><p>第一种方法，也是最简单的，就是看Vivado控制台打印<em>Error</em>还是<em>PASS</em>。正确的控制台打印信息如下图:
+<img src=/p/%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95/assets/simulation_pass_console_info.png width=729 height=381 srcset="/p/%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95/assets/simulation_pass_console_info_hu18ab18c0ae90476d981631443431c0df_145626_480x0_resize_box_3.png 480w, /p/%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95/assets/simulation_pass_console_info_hu18ab18c0ae90476d981631443431c0df_145626_1024x0_resize_box_3.png 1024w" loading=lazy alt=funcPass class=gallery-image data-flex-grow=191 data-flex-basis=459px></p><p>第二种方法，是通过波形窗口观察程序执行结果func正确的执行行为，抓取confreg模块的信号led_data、led_rg0_data、led_rg1_data、num_data：</p><ol><li>开始，单色LED写全1表示全灭，双色LED写0x1和0x2表示一红一绿，数码写全0；</li><li>执行过程中，单色LED全灭，双色LED灯一红一绿，数码管高8位和低8位同步累加；</li><li>结束时，单色LED写全1表示全灭，双色LED均写0x1表示亮两绿，数码管高8位和低8位数值（十六进制）相同，对应测试功能点数目。
+<img src=/p/%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95/assets/right_simulation_wave.png width=664 height=940 srcset="/p/%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95/assets/right_simulation_wave_huce95865f682a9f873e47f2370baa81b8_274222_480x0_resize_box_3.png 480w, /p/%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95/assets/right_simulation_wave_huce95865f682a9f873e47f2370baa81b8_274222_1024x0_resize_box_3.png 1024w" loading=lazy alt=funcWave class=gallery-image data-flex-grow=70 data-flex-basis=169px></li></ol><h5 id=上板验证结果正确判断>上板验证结果正确判断</h5><p>func正确的执行行为是：</p><ol><li>开始，单色LED全灭，双色LED灯一红一绿，数码管显示全0；</li><li>执行过程中，单色LED全灭，双色LED灯一红一绿，数码管高8位和低8位同步累加；</li><li>结束时，单色LED全灭，双色LED灯亮两绿，数码管高8位和低8位数值相同，对应测试功能点数目。</li></ol><p>如果func执行过程中出错了，则数码管高8位和低8位第一次不同处即为测试出错的功能点编号(<strong>只要不同步变化即有错误</strong>)，且最后的结果是单色LED全亮，双色LED灯亮两红，数码管高8位和低8位数值不同。</p><p>最后FPGA验证通过的效果如下图:
+<img src=/p/%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95/assets/right_fpga_result.png width=946 height=753 srcset="/p/%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95/assets/right_fpga_result_hu0dd7af1b6647ce7e7124b01ff91881eb_1489086_480x0_resize_box_3.png 480w, /p/%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95/assets/right_fpga_result_hu0dd7af1b6647ce7e7124b01ff91881eb_1489086_1024x0_resize_box_3.png 1024w" loading=lazy alt=fpgaPass class=gallery-image data-flex-grow=125 data-flex-basis=301px><br></p><h6 id=拨码开关的作用>拨码开关的作用</h6><p>1.复位后，拨码开关控制wait_1s的循环次数，也就是控制数码管累加的速度。每两个功能点之间会穿插一个wait_1s函数，wait_1s通过一段循环完成计时的功能：在上板时，wait_1s 循环次数由拨码开关控制，可设置循环次数为 （0~0xaaaa）*$2^9$ 。请在复位后，通过拨码开关选择合理的wait_1s延时。<br></p><p>2.复位期间，拨码开关控制随机种子（只对 soc_axi_func 环境有用），也就是axi_ram访问随机延迟的初始种子。
+上板时，按下复位键，会自动采样8个拨码开关的值，传为初始随机种子，且会显示初始随机种子低16位到单色 LED 灯上。
+上板时随机种子与拨码开关对应关系如下表，需要注意的时延迟类型依据拨码开关的值分为三大类：长延迟、短延迟和无延迟类型。在上板运行时都应当覆盖到这三类延迟类型。</p><div class=table-wrapper><table><thead><tr><th style=text-align:center>拨码开关状态</th><th style=text-align:center>LED显示</th><th style=text-align:center>初始种子</th></tr></thead><tbody><tr><td style=text-align:center>拨上为1</td><td style=text-align:center>每个拨码开关对应两个led</td><td style=text-align:center>长延迟:[7:0]!=8&rsquo;hff, 短延迟:[7:0]=8&rsquo;hff, 无延迟:[15:0]==16&rsquo;h00ff</td></tr><tr><td style=text-align:center></td><td style=text-align:center></td><td style=text-align:center></td></tr><tr><td style=text-align:center>8&rsquo;h00</td><td style=text-align:center>16&rsquo;h0000</td><td style=text-align:center>{7&rsquo;b1010101, 16&rsquo;h0000}</td></tr><tr><td style=text-align:center>8&rsquo;h01</td><td style=text-align:center>16&rsquo;h0003</td><td style=text-align:center>{7&rsquo;b1010101, 16&rsquo;h0003}</td></tr><tr><td style=text-align:center>8&rsquo;h02</td><td style=text-align:center>16&rsquo;h000c</td><td style=text-align:center>{7&rsquo;b1010101, 16&rsquo;h000c}</td></tr><tr><td style=text-align:center>8&rsquo;h03</td><td style=text-align:center>16&rsquo;h000f</td><td style=text-align:center>{7&rsquo;b1010101, 16&rsquo;h000f}</td></tr><tr><td style=text-align:center>&mldr;</td><td style=text-align:center>&mldr;</td><td style=text-align:center>&mldr;</td></tr><tr><td style=text-align:center>8&rsquo;hff</td><td style=text-align:center>16&rsquo;hffff</td><td style=text-align:center>{7&rsquo;b1010101, 16&rsquo;hffff}</td></tr></tbody></table></div><h2 id=进阶-chiplab的difftest测试平台>进阶: chiplab的difftest测试平台</h2><p>difftest相比于trace比对的调试平台更加强大, 它将相同的指令分别给设计核核参考核执行, 之后比对所有的通用寄存器和csr寄存器的值，如果完全相同则认为设计核执行正确。</p><p>在trace比对中, 有些转移指令和store指令不写寄存器, 此时如果发生错误并不会立即停止仿真，而是等到下一条写寄存器的指令才会发现错误。
+而在difftest中则不会有这个问题，一旦store指令中的物理地址和存储数据与参考核不同，也会立即暂停仿真，以此来尽早定位错误。</p><blockquote><p>具体使用可<a class=link href=https://chiplab.readthedocs.io/zh/latest/Simulation/difftest.html target=_blank rel=noopener>参考</a></p></blockquote></section><footer class=article-footer><section class=article-tags><a href=/tags/vivado/>Vivado</a>
+<a href=/tags/%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95/>功能测试</a></section><section class=article-copyright><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer></article><aside class=related-content--wrapper><h2 class=section-title>相关文章</h2><div class=related-content><div class="flex article-list--tile"><article><a href=/p/%E9%BE%99%E8%8A%AF%E5%AE%9E%E9%AA%8C%E6%94%BB%E7%95%A5/><div class=article-details><h2 class=article-title>龙芯实验攻略</h2></div></a></article><article><a href=/p/debug%E6%96%B9%E6%B3%95%E6%A6%82%E8%AE%BA/><div class=article-details><h2 class=article-title>Debug方法概论</h2></div></a></article><article><a href=/p/vivado-2023.2%E5%AE%89%E8%A3%85/><div class=article-details><h2 class=article-title>vivado 2023.2安装</h2></div></a></article><article><a href=/p/verilog-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/><div class=article-details><h2 class=article-title>Verilog 基础知识</h2></div></a></article><article><a href=/p/os-week2-get-started-with-rust/><div class=article-details><h2 class=article-title>[OS Week2] Get started with Rust</h2></div></a></article></div></div></aside><script src=https://giscus.app/client.js data-repo=Loongson-neuq/blog data-repo-id=R_kgDOM20epQ data-category=Giscus data-category-id=DIC_kwDOM20epc4CixXm data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-CN data-loading crossorigin=anonymous async></script><script>function setGiscusTheme(e){let t=document.querySelector("iframe.giscus-frame");t&&t.contentWindow.postMessage({giscus:{setConfig:{theme:e}}},"https://giscus.app")}(function(){addEventListener("message",t=>{if(event.origin!=="https://giscus.app")return;e()}),window.addEventListener("onColorSchemeChange",e);function e(){setGiscusTheme(document.documentElement.dataset.scheme==="light"?"preferred_color_scheme":"preferred_color_scheme")}})()</script><footer class=site-footer><section class=copyright>&copy;
+2024 -
+2025 NEUQ 龙芯实验室博客</section><section class=powerby>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=3.30.0>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><div class=pswp tabindex=-1 role=dialog aria-hidden=true><div class=pswp__bg></div><div class=pswp__scroll-wrap><div class=pswp__container><div class=pswp__item></div><div class=pswp__item></div><div class=pswp__item></div></div><div class="pswp__ui pswp__ui--hidden"><div class=pswp__top-bar><div class=pswp__counter></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+<button class="pswp__button pswp__button--share" title=Share></button>
+<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class=pswp__preloader><div class=pswp__preloader__icn><div class=pswp__preloader__cut><div class=pswp__preloader__donut></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class=pswp__share-tooltip></div></div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+</button>
+<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class=pswp__caption><div class=pswp__caption__center></div></div></div></div></div><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo=" crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU=" crossorigin=anonymous defer></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css crossorigin=anonymous><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css crossorigin=anonymous></main></div><script src=https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z+KMkF24hUW8WePSA9HM=" crossorigin=anonymous></script><script type=text/javascript src=/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js defer></script><script>(function(){const e=document.createElement("link");e.href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap",e.type="text/css",e.rel="stylesheet",document.head.appendChild(e)})()</script></body></html>
