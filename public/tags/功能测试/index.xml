@@ -1,0 +1,612 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>功能测试 on NEUQ 龙芯实验室博客</title><link>https://loongson-neuq.pages.dev/tags/%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95/</link><description>Recent content in 功能测试 on NEUQ 龙芯实验室博客</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Thu, 28 Nov 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://loongson-neuq.pages.dev/tags/%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95/index.xml" rel="self" type="application/rss+xml"/><item><title>功能测试</title><link>https://loongson-neuq.pages.dev/p/%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95/</link><pubDate>Thu, 28 Nov 2024 00:00:00 +0000</pubDate><guid>https://loongson-neuq.pages.dev/p/%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95/</guid><description>&lt;h2 id="基于trace比对的调试框架">基于trace比对的调试框架
+&lt;/h2>&lt;p>在调试C程序的时候应该都使用过单步调试这种调试手段。在“慢动作”运行程序的每一行代码的情况下，能够及时看到每一行代码的运行行为是否符合预期，从而能够及时定位到出错点。在实验开发环境中提供的这套基于trace比对的调试辅助手段，借鉴的就是这种“单步调试”的策略。&lt;/p>
+&lt;p>其具体实现方式是：我们先用一个已知的功能上是正确的CPU运行一遍测试指令序列，将每条指令的PC和写寄存器的信息记录下，记为golden_trace；然后在验证myCPU的时候运行相同的指令序列，在myCPU每条指令写寄存器的时候，将myCPU中的PC和写寄存器的信息同之前的golden_trace进行比对，如果不一样，那么立刻报错并停止仿真。&lt;/p>
+&lt;p>简单的来说, golden_trace就是参考答案, 通过比对myCPU的运行结果和golden_trace的运行结果, 来判断myCPU功能的正确性。&lt;/p>
+&lt;h2 id="功能测试环境使用方法">功能测试环境使用方法
+&lt;/h2>&lt;blockquote>
+&lt;p>&lt;a class="link" href="https://gitee.com/loongson-edu/cdp_ede_local/tree/ee7dd7e5f1d12a9f94788a279f096b25407d9d0b" target="_blank" rel="noopener"
+>基于NSCSCC2024 团体赛功能测试&lt;/a>
+它是&lt;a class="link" href="https://gitee.com/loongson-edu/cdp_ede_local" target="_blank" rel="noopener"
+>CPU设计实战&amp;ndash;Loongarch版&lt;/a>的实验环境的exp16&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="开发环境组织结构介绍">开发环境组织结构介绍
+&lt;/h3>&lt;p>整个实验开发环境的基本目录结构及各部分功能简介如下所示：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;span class="lnt">23
+&lt;/span>&lt;span class="lnt">24
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="line">&lt;span class="cl">&lt;span class="o">|--&lt;/span>&lt;span class="n">func&lt;/span>&lt;span class="o">/&lt;/span> &lt;span class="n">功能验证测试程序&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">|&lt;/span> &lt;span class="o">|--&lt;/span>&lt;span class="n">obj&lt;/span>&lt;span class="o">/&lt;/span> &lt;span class="n">编译生成的二进制测试程序&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">|&lt;/span> &lt;span class="o">|--&lt;/span>&lt;span class="n">inst_ram&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">coe&lt;/span> &lt;span class="n">测试程序对应上板用的二进制纯数据文件&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">|&lt;/span> &lt;span class="o">|--&lt;/span>&lt;span class="n">inst_ram&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">mif&lt;/span> &lt;span class="n">测试程序对应功能仿真用的二进制纯数据文件&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">|&lt;/span> &lt;span class="o">|--&lt;/span>&lt;span class="n">inst_ram&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">txt&lt;/span> &lt;span class="n">测试程序汇编代码说明&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">|&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">|--&lt;/span>&lt;span class="n">gettrace&lt;/span>&lt;span class="o">/&lt;/span> &lt;span class="n">trace文件生成工程&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">|&lt;/span> &lt;span class="o">|--&lt;/span>&lt;span class="n">gettrace&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">xpr&lt;/span> &lt;span class="n">生成golden_trace的Vivado工程文件&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">|&lt;/span> &lt;span class="o">|--&lt;/span>&lt;span class="n">golden_trace&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">txt&lt;/span> &lt;span class="n">生成的golden_trace文件&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">|&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">|--&lt;/span>&lt;span class="n">myCPU&lt;/span>&lt;span class="o">/&lt;/span> &lt;span class="n">待验证的CPU设计代码目录&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">|&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">|--&lt;/span>&lt;span class="n">soc_verify&lt;/span>&lt;span class="o">/&lt;/span>&lt;span class="n">soc_axi&lt;/span> &lt;span class="n">所现的CPU的SoC验证环境&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">|--&lt;/span>&lt;span class="n">rtl&lt;/span>&lt;span class="o">/&lt;/span> &lt;span class="n">验证用SoC设计代码目录&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">|&lt;/span> &lt;span class="o">|--&lt;/span>&lt;span class="n">soc_lite_top&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">v&lt;/span> &lt;span class="n">SoC的顶层文件&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">|&lt;/span> &lt;span class="o">|--&lt;/span>&lt;span class="n">CONFREG&lt;/span>&lt;span class="o">/&lt;/span> &lt;span class="n">confreg模块&lt;/span>&lt;span class="err">，&lt;/span>&lt;span class="n">用于访问实验板上的LED灯&lt;/span>&lt;span class="err">、&lt;/span>&lt;span class="n">拨码开关等外设&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">|&lt;/span> &lt;span class="o">|--&lt;/span>&lt;span class="n">xilinx_ip&lt;/span>&lt;span class="o">/&lt;/span> &lt;span class="n">定制的Xilinx&lt;/span> &lt;span class="n">IP&lt;/span>&lt;span class="err">，&lt;/span>&lt;span class="n">包含clk_pll&lt;/span>&lt;span class="err">、&lt;/span>&lt;span class="n">inst_ram&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">|&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">|--&lt;/span>&lt;span class="n">testbench&lt;/span>&lt;span class="o">/&lt;/span> &lt;span class="n">功能仿真验证平台&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">|&lt;/span> &lt;span class="o">|--&lt;/span>&lt;span class="n">mycpu_tb&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">v&lt;/span> &lt;span class="n">功能仿真顶层&lt;/span>&lt;span class="err">，&lt;/span>&lt;span class="n">该模块会抓取debug信息与golden_trace&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">txt进行比对&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">|&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">|--&lt;/span>&lt;span class="n">run_vivado&lt;/span>&lt;span class="o">/&lt;/span> &lt;span class="n">Vivado工程的运行目录&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">|--&lt;/span>&lt;span class="n">constraints&lt;/span>&lt;span class="o">/&lt;/span> &lt;span class="n">Vivado工程设计的约束&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">|--&lt;/span>&lt;span class="n">create_project&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">tcl&lt;/span> &lt;span class="n">创建Vivado工程的tcl脚本&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="soc_lite片上系统结构介绍">SoC_Lite片上系统结构介绍
+&lt;/h3>&lt;p>&lt;img src="https://loongson-neuq.pages.dev/p/%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95/assets/soc_lite_structure.png"
+width="578"
+height="361"
+srcset="https://loongson-neuq.pages.dev/p/%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95/assets/soc_lite_structure_hu1184322f6376438a13ca0fde4155d650_15429_480x0_resize_box_3.png 480w, https://loongson-neuq.pages.dev/p/%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95/assets/soc_lite_structure_hu1184322f6376438a13ca0fde4155d650_15429_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="soc_lite"
+class="gallery-image"
+data-flex-grow="160"
+data-flex-basis="384px"
+>&lt;/p>
+&lt;center>用于验证myCPU的片上系统&lt;/center>
+&lt;ul>
+&lt;li>PLL: 锁相环，用于产生时钟信号&lt;/li>
+&lt;li>iram: 指令内存，用于存放测试程序&lt;/li>
+&lt;li>dram: 数据内存，用于存放数据&lt;/li>
+&lt;li>confreg: 外设控制器，用于控制LED灯、拨码开关等外设&lt;/li>
+&lt;li>mycpu: 待验证的CPU设计&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>因为在LoongArch指令系统架构下，所有I/O设备的寄存器都是采用memory mapped方式访问的。我们这里实现的confreg也不例外。Memory mapped的访问方式意味I/O设备中的寄存器各自都有一个唯一内存编址，所以CPU可以通过load、store指令对其进行访问。&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="生成golden_trace">生成golden_trace
+&lt;/h3>&lt;h4 id="func功能测试程序">func功能测试程序
+&lt;/h4>&lt;p>&lt;strong>以下涉及Linux编译的部分不要求大家初期掌握, 包里已经提供了编译好的最终文件&lt;/strong>&lt;/p>
+&lt;h5 id="func测试程序说明">func测试程序说明
+&lt;/h5>&lt;p>func程序分为func/start.S和func/inst/*.S，都是LoongArch32汇编程序:&lt;/p>
+&lt;ol>
+&lt;li>func/start.S ：主函数，执行必要的启动初始化后调用func/inst/下的各汇编程序。&lt;/li>
+&lt;li>func/inst/*.S ：针对每条指令或功能点有一个汇编测试程序。&lt;/li>
+&lt;li>func/include/*.h ：测试程序的配置信息和宏定义。&lt;/li>
+&lt;/ol>
+&lt;p>主函数func/start.S中主体部分代码如下，分为三大部分，具体查看注释。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;span class="lnt">23
+&lt;/span>&lt;span class="lnt">24
+&lt;/span>&lt;span class="lnt">25
+&lt;/span>&lt;span class="lnt">26
+&lt;/span>&lt;span class="lnt">27
+&lt;/span>&lt;span class="lnt">28
+&lt;/span>&lt;span class="lnt">29
+&lt;/span>&lt;span class="lnt">30
+&lt;/span>&lt;span class="lnt">31
+&lt;/span>&lt;span class="lnt">32
+&lt;/span>&lt;span class="lnt">33
+&lt;/span>&lt;span class="lnt">34
+&lt;/span>&lt;span class="lnt">35
+&lt;/span>&lt;span class="lnt">36
+&lt;/span>&lt;span class="lnt">37
+&lt;/span>&lt;span class="lnt">38
+&lt;/span>&lt;span class="lnt">39
+&lt;/span>&lt;span class="lnt">40
+&lt;/span>&lt;span class="lnt">41
+&lt;/span>&lt;span class="lnt">42
+&lt;/span>&lt;span class="lnt">43
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl"> ......
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> #以下是设置程序开始的LED灯和数码管显示，单色LED全灭，双色LED灯一红一绿。
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> LI (a0, LED_RG1_ADDR)
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> LI (a1, LED_RG0_ADDR)
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> LI (a2, LED_ADDR)
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> LI (s1, NUM_ADDR)
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> LI (t1, 0x0002)
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> LI (t2, 0x0001)
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> LI (t3, 0x0000ffff)
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> lu12i.w s3, 0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> NOP4
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> st.w t1, a0, 0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> st.w t2, a1, 0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> st.w t3, a2, 0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> st.w s3, s1, 0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> #以下是运行各功能点测试，每个测试完执行idle_1s等待一段时间，且数码管显示加1。
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> inst_test:
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> bl n1_lu12i_w_test #lu12i.w
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> bl idle_1s
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> bl n2_add_w_test #add.w
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> bl idle_1s
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> ......
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> #以下是显示测试结果，PASS则双色LED灯亮两个绿色，单色LED不亮；
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> #Fail则双色LED灯亮两个红色，单色LED灯全亮。
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> test_end:
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> LI (s0, TEST_NUM)
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> NOP4
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> beq s0, s3, 1f
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> LI (a0, LED_ADDR)
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> LI (a1, LED_RG1_ADDR)
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> LI (a2, LED_RG0_ADDR)
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> LI (t1, 0x0002)
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> NOP4
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> st.w zero, a0, 0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> st.w t1, a1, 0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> st.w t1, a2, 0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> ......
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>inst/ 目录下每个功能点的测试代码程序名为n#_*_test.S，其中“#”为编号，如有15个功能点测试，则从n1编号到n15。每个功能点的测试，其测试代码大致如下。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;span class="lnt">23
+&lt;/span>&lt;span class="lnt">24
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl"> ......
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> LEAF(n1_lu12i_w_test)
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> addi.w s0, s0 ,1 #加载功能点编号s0++
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> addi.w s2, zero, 0x0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> lu12i.w t2, 0x1
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> ###test inst
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> addi.w t1, zero, 0x0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> TEST_LU12I_W(0x00000, 0x00000)
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> ...... #测试程序，省略
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> TEST_LU12I_W(0xff0af, 0xff0a0)
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> ###detect exception
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> bne s2, zero, inst_error
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> ###score ++ #s3存放功能测试计分，每通过一个功能点测试，则+1
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> addi.w s3, s3, 1
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> ###output (s0&amp;lt;&amp;lt;24)|s3
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> inst_error:
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> slli.w t1, s0, 24
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> NOP4
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> or t0, t1, s3 #s0高8位为功能点编号，s3低8位为通过功能点数，
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> #相或结果显示到数码管上。
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> NOP4
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> st.w t0, s1, 0 #s1存放数码管地址
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> jirl zero, ra, 0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> END(n1_lu12i_w_test)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>从以上可以看到，测试程序的行为是：当通过第一个功能测试后，数码管会显示0x0100_0001，随后执行idle_1s；执行第二个功能点测试，再次通过数码管会显示0x0200_0002，执行idle_1s……依次类推。显示，每个功能点测试通过，应当数码管高8位和低8位永远一样。如果中途数码管显示从0x0500_0005变成了0x0600_0005，则说明运行第六个功能点测试出错。&lt;/p>
+&lt;p>最后来看 &lt;code>start.S&lt;/code> 文件中 &lt;code>idle_1s&lt;/code> 函数的代码，其使用一个循环来暂停测试程序执行的。其主体部分代码如下：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;span class="lnt">23
+&lt;/span>&lt;span class="lnt">24
+&lt;/span>&lt;span class="lnt">25
+&lt;/span>&lt;span class="lnt">26
+&lt;/span>&lt;span class="lnt">27
+&lt;/span>&lt;span class="lnt">28
+&lt;/span>&lt;span class="lnt">29
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl"> idle_1s:
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> ......
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> #initial t3 //读取confreg模块里的switch_interleave的值
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> ld.w t2, t0, 0 #switch_interleave: {switch[7],1&amp;#39;b0, switch[6],1&amp;#39;b0...switch[0],1&amp;#39;b0}
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> NOP4
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> xor t2, t2, t1 //拨码开关拨上为0，故要xor来取反
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> NOP4
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> slli.w t3, t2, 9 #t3 = switch interleave &amp;lt;&amp;lt; 9
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> NOP4
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> sub1:
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> addi.w t3, t3, -1 //t3累减1
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> #select min{t3, switch_interleave} //获取t3和当前switch_interleave的最小值
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> ld.w t2, t0, 0 #switch_interleave:{switch[7],1&amp;#39;b0,switch[6],1&amp;#39;b0...switch[0],1&amp;#39;b0}
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> NOP4
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> xor t2, t2, t1
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> NOP4
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> slli.w t2, t2, 9 #switch interleave &amp;lt;&amp;lt; 9
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> NOP4 //以上ld.w-xor-slli.w三条指令再次获取switch_interleave
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> sltu t4, t3, t2 //无符号比大小，如果t3比switch_interleave 小则置t4=1
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> NOP4
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> bne t4, zero, 1f //t4!=0,意味着t3比switch_interleave大，则跳1f
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> nop
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> addi.w t3, t2, 0 //否则，将t3赋值为更小的switch_interleave
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> NOP4
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> 1:
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> bne t3,zero, sub1 //如果t3没有减到0，则返回循环开头
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> jirl zero, ra, 0 //结束idle_1s
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>从以上代码可以看到，idle_1s 会依据拨码开关的状态设定循环次数。在仿真环境下，我们会模拟拨码开关为全拨下的状态，以使 idle_1s 循环次数最小。之所以这样设置，是因为 FPGA 运行远远快于仿真的速度，假设CPU运行一个程序需要106个CPU周期，再假设CPU在FPGA上运行频率为10MHz，那其在FPGA上运行完一个程序只需要0.1s；同样，我们仿真运行这个程序，假设我们仿真设置的CPU运行频率也是10MHz，那我们仿真运行完这个程序也是只需要0.1s吗？显然这是不可能的，仿真是软件模拟CPU运行情况的，也就是它要模拟每个周期CPU内部的变化，运行完这一个程序，需要模拟106个CPU周期。我们在一台2016年产的主流X86台式机上进行实测发现，Vivado自带的Xsim仿真器运行SoC_Lite的仿真，每模拟一个周期大约需要600us，这意味着Xsim上模拟106个周期所花费的实际时间约10分钟。&lt;/p>
+&lt;p>同一程序，运行仿真测试大约需要10分钟，而在FPGA上运行只需要0.1秒（甚至更短，比如CPU运行在50MHz主频则运行完程序只需要0.02s）。所以我们如果不控制好仿真运行时的 idle_1s 函数，则我们可能会陷入到idle_1s长时间等待中；类似的，如果我们上板时设定 idle_1s 函数很短（比如拨码开关全拨下），则 idle_1s 时间太短导致我们无法看到数码管累加的效果&lt;/p>
+&lt;p>&lt;strong>如果大家在自实现CPU上板运行过程中，发现数码管累加跳动太慢，请调小拨码开关代表的数值；如果发现数码管累加跳动太快，请调大拨码开关代表的数值。&lt;/strong>&lt;/p>
+&lt;h5 id="loongarch-gcc交叉编译工具的安装">LoongArch-GCC交叉编译工具的安装
+&lt;/h5>&lt;p>自行编译func程序需要使用LoongArch32R的GCC交叉编译工具。该工具链的安装可以从 &lt;a class="link" href="https://gitee.com/loongson-edu/la32r-toolchains" target="_blank" rel="noopener"
+>https://gitee.com/loongson-edu/la32r-toolchains&lt;/a> 下载源码自行编译、安装，也可以直接从 &lt;a class="link" href="https://gitee.com/loongson-edu/la32r-toolchains/releases" target="_blank" rel="noopener"
+>https://gitee.com/loongson-edu/la32r-toolchains/releases&lt;/a> 下安装包。我们这里主要介绍后一种方式的安装步骤。&lt;/p>
+&lt;p>下载安装包时请根据所用机器是X86还是LoongArch选择对应的版本。下载压缩包 loongarch32r-linux-gnusf-*.tar.gz 至Linux操作系统自身的文件系统中。需要特别提醒的是，目前X86版本LoongArch32R的GCC交叉编译工具只支持64位系统（在系统下运行uname -a命令显示架构为x86_64的）。接下来：&lt;/p>
+&lt;p>（1）打开一个terminal，进入压缩包所在目录，进行解压：&lt;/p>
+&lt;pre>&lt;code>$ sudo tar zxvf loongarch32r-linux-gnusf-*.tar.gz -C /opt/
+&lt;/code>&lt;/pre>
+&lt;p>（2）确保目录/opt/loongarch32r-linux-gnusf-*/bin/存在，随后执行：&lt;/p>
+&lt;pre>&lt;code>$ echo “export PATH=/opt/loongarch32r-linux-gnusf-*/bin/:$PATH” &amp;gt;&amp;gt; ~/.bashrc
+&lt;/code>&lt;/pre>
+&lt;p>（3）重新打开一个terminal，输入loongarch32然后敲击tab键，如果能够-linux-gnusf-之类的补全，就说明工具链已经安装成功。此时可以编写一个hello.c 然后用工具链进行编译看其是否可以工作。&lt;/p>
+&lt;pre>&lt;code>$ loongarch32r-linux-gnusf-gcc hello.c
+&lt;/code>&lt;/pre>
+&lt;h5 id="func测试程序编译说明">func测试程序编译说明
+&lt;/h5>&lt;h6 id="编译脚本">编译脚本
+&lt;/h6>&lt;p>func测试程序的编译脚本为验证平台目录下的func/Makefile，对Makefile了解的可以去看下该脚本。该脚本支持以下命令：&lt;/p>
+&lt;ul>
+&lt;li>make help ：查看帮助信息&lt;/li>
+&lt;li>make ：编译得到仿真下使用的结果&lt;/li>
+&lt;li>make clean ：删除*.o，*.a和./obj/目录&lt;/li>
+&lt;/ul>
+&lt;h6 id="编译结果">编译结果
+&lt;/h6>&lt;p>func测试程序编译结果位于func/obj/下, 主要会用到的文件及作用如下:&lt;/p>
+&lt;ul>
+&lt;li>inst_ram.coe ：定制inst_ram所需的数据文件&lt;/li>
+&lt;li>inst_ram.mif ：仿真时inst_ram读取的数据文件&lt;/li>
+&lt;li>test.s : 对main.elf反汇编得到的文件&lt;/li>
+&lt;/ul>
+&lt;h5 id="golden_trace生成">golden_trace生成
+&lt;/h5>&lt;p>进入 gettrace/ 目录，打开gettrace.xpr工程文件，运行仿真，自动生成参考结果golden_trace.txt。
+重点关注此时inst_ram加载的确实是前一个步骤编译出的结果。
+要等仿真运行完成，golden_trace.txt才有完整的内容。&lt;/p>
+&lt;h3 id="验证自己的cpu">验证自己的CPU
+&lt;/h3>&lt;h4 id="cpu对外总线接口">CPU对外总线接口
+&lt;/h4>&lt;p>一般来说我们根据由易到难挨个实现SRAM接口, 带握手的SRAM接口, AXI总线接口, 这里我们以SRAM接口为例:&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th style="text-align:left">名称&lt;/th>
+&lt;th style="text-align:center">位宽&lt;/th>
+&lt;th style="text-align:center">方向&lt;/th>
+&lt;th style="text-align:left">描述&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td style="text-align:left">clk&lt;/td>
+&lt;td style="text-align:center">1&lt;/td>
+&lt;td style="text-align:center">input&lt;/td>
+&lt;td style="text-align:left">时钟信号, 来自clk_pll的时钟输出&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">resetn&lt;/td>
+&lt;td style="text-align:center">1&lt;/td>
+&lt;td style="text-align:center">input&lt;/td>
+&lt;td style="text-align:left">复位信号, 低电平同步复位&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">int&lt;/td>
+&lt;td style="text-align:center">8&lt;/td>
+&lt;td style="text-align:center">input&lt;/td>
+&lt;td style="text-align:left">中断信号, 8个硬件中断信号, 高电平有效&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">&lt;/td>
+&lt;td style="text-align:center">&lt;/td>
+&lt;td style="text-align:center">&lt;/td>
+&lt;td style="text-align:left">&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">inst_sram_en&lt;/td>
+&lt;td style="text-align:center">1&lt;/td>
+&lt;td style="text-align:center">output&lt;/td>
+&lt;td style="text-align:left">指令内存使能信号, 高电平有效&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">inst_sram_wen&lt;/td>
+&lt;td style="text-align:center">4&lt;/td>
+&lt;td style="text-align:center">output&lt;/td>
+&lt;td style="text-align:left">指令内存字节写使能信号, 高电平有效&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">inst_sram_addr&lt;/td>
+&lt;td style="text-align:center">32&lt;/td>
+&lt;td style="text-align:center">output&lt;/td>
+&lt;td style="text-align:left">指令内存地址, 字节寻址&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">inst_sram_wdata&lt;/td>
+&lt;td style="text-align:center">32&lt;/td>
+&lt;td style="text-align:center">output&lt;/td>
+&lt;td style="text-align:left">指令内存写数据&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">inst_sram_rdata&lt;/td>
+&lt;td style="text-align:center">32&lt;/td>
+&lt;td style="text-align:center">input&lt;/td>
+&lt;td style="text-align:left">指令内存读数据&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">&lt;/td>
+&lt;td style="text-align:center">&lt;/td>
+&lt;td style="text-align:center">&lt;/td>
+&lt;td style="text-align:left">&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">data_sram_en&lt;/td>
+&lt;td style="text-align:center">1&lt;/td>
+&lt;td style="text-align:center">output&lt;/td>
+&lt;td style="text-align:left">数据内存使能信号, 高电平有效&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">data_sram_wen&lt;/td>
+&lt;td style="text-align:center">4&lt;/td>
+&lt;td style="text-align:center">output&lt;/td>
+&lt;td style="text-align:left">数据内存字节写使能信号, 高电平有效&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">data_sram_addr&lt;/td>
+&lt;td style="text-align:center">32&lt;/td>
+&lt;td style="text-align:center">output&lt;/td>
+&lt;td style="text-align:left">数据内存地址, 字节寻址&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">data_sram_wdata&lt;/td>
+&lt;td style="text-align:center">32&lt;/td>
+&lt;td style="text-align:center">output&lt;/td>
+&lt;td style="text-align:left">数据内存写数据&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">data_sram_rdata&lt;/td>
+&lt;td style="text-align:center">32&lt;/td>
+&lt;td style="text-align:center">input&lt;/td>
+&lt;td style="text-align:left">数据内存读数据&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">&lt;/td>
+&lt;td style="text-align:center">&lt;/td>
+&lt;td style="text-align:center">&lt;/td>
+&lt;td style="text-align:left">&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">debug_wb_pc&lt;/td>
+&lt;td style="text-align:center">32&lt;/td>
+&lt;td style="text-align:center">output&lt;/td>
+&lt;td style="text-align:left">写回级（多周期最后一级）的PC&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">debug_wb_rf_we&lt;/td>
+&lt;td style="text-align:center">4&lt;/td>
+&lt;td style="text-align:center">output&lt;/td>
+&lt;td style="text-align:left">写回级写寄存器堆(regfiles)的写使能，为字节写使能&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">debug_wb_rf_wnum&lt;/td>
+&lt;td style="text-align:center">5&lt;/td>
+&lt;td style="text-align:center">output&lt;/td>
+&lt;td style="text-align:left">写回级写寄存器堆(regfiles)的目的寄存器号&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">debug_wb_rf_wdata&lt;/td>
+&lt;td style="text-align:center">32&lt;/td>
+&lt;td style="text-align:center">output&lt;/td>
+&lt;td style="text-align:left">写回级写寄存器堆(regfiles)的写数据&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h4 id="打开vivado工程">打开Vivado工程
+&lt;/h4>&lt;p>测试平台采用tcl脚本来创建工程, 方法如下:&lt;/p>
+&lt;ol>
+&lt;li>启动Vivado&lt;/li>
+&lt;li>点击最下方的&amp;quot;Tcl Console&amp;quot;标签&lt;/li>
+&lt;li>cd到 /soc_verify/soc_axi/run_vivado/ 目录下&lt;/li>
+&lt;li>输入 source create_project.tcl 创建Vivado工程&lt;/li>
+&lt;li>如果你的CPU设计代码在 /myCPU/ 目录下, 则会自动导入到工程中, 请检查是否导入成功, 如未成功请手动导入&lt;/li>
+&lt;/ol>
+&lt;blockquote>
+&lt;p>更具体可&lt;a class="link" href="https://bookdown.org/loongson/_book3/appendix-vivado-advanced-usage.html#sec-vivado-tcl-create-project" target="_blank" rel="noopener"
+>参考&lt;/a>&lt;/p>
+&lt;/blockquote>
+&lt;h4 id="func测试验证结果判断">func测试验证结果判断
+&lt;/h4>&lt;h5 id="仿真结果正确判断">仿真结果正确判断
+&lt;/h5>&lt;p>仿真结果正确判断有两种方法。&lt;/p>
+&lt;p>第一种方法，也是最简单的，就是看Vivado控制台打印&lt;em>Error&lt;/em>还是&lt;em>PASS&lt;/em>。正确的控制台打印信息如下图:
+&lt;img src="https://loongson-neuq.pages.dev/p/%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95/assets/simulation_pass_console_info.png"
+width="729"
+height="381"
+srcset="https://loongson-neuq.pages.dev/p/%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95/assets/simulation_pass_console_info_hu18ab18c0ae90476d981631443431c0df_145626_480x0_resize_box_3.png 480w, https://loongson-neuq.pages.dev/p/%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95/assets/simulation_pass_console_info_hu18ab18c0ae90476d981631443431c0df_145626_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="funcPass"
+class="gallery-image"
+data-flex-grow="191"
+data-flex-basis="459px"
+>&lt;/p>
+&lt;p>第二种方法，是通过波形窗口观察程序执行结果func正确的执行行为，抓取confreg模块的信号led_data、led_rg0_data、led_rg1_data、num_data：&lt;/p>
+&lt;ol>
+&lt;li>开始，单色LED写全1表示全灭，双色LED写0x1和0x2表示一红一绿，数码写全0；&lt;/li>
+&lt;li>执行过程中，单色LED全灭，双色LED灯一红一绿，数码管高8位和低8位同步累加；&lt;/li>
+&lt;li>结束时，单色LED写全1表示全灭，双色LED均写0x1表示亮两绿，数码管高8位和低8位数值（十六进制）相同，对应测试功能点数目。
+&lt;img src="https://loongson-neuq.pages.dev/p/%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95/assets/right_simulation_wave.png"
+width="664"
+height="940"
+srcset="https://loongson-neuq.pages.dev/p/%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95/assets/right_simulation_wave_huce95865f682a9f873e47f2370baa81b8_274222_480x0_resize_box_3.png 480w, https://loongson-neuq.pages.dev/p/%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95/assets/right_simulation_wave_huce95865f682a9f873e47f2370baa81b8_274222_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="funcWave"
+class="gallery-image"
+data-flex-grow="70"
+data-flex-basis="169px"
+>&lt;/li>
+&lt;/ol>
+&lt;h5 id="上板验证结果正确判断">上板验证结果正确判断
+&lt;/h5>&lt;p>func正确的执行行为是：&lt;/p>
+&lt;ol>
+&lt;li>开始，单色LED全灭，双色LED灯一红一绿，数码管显示全0；&lt;/li>
+&lt;li>执行过程中，单色LED全灭，双色LED灯一红一绿，数码管高8位和低8位同步累加；&lt;/li>
+&lt;li>结束时，单色LED全灭，双色LED灯亮两绿，数码管高8位和低8位数值相同，对应测试功能点数目。&lt;/li>
+&lt;/ol>
+&lt;p>如果func执行过程中出错了，则数码管高8位和低8位第一次不同处即为测试出错的功能点编号(&lt;strong>只要不同步变化即有错误&lt;/strong>)，且最后的结果是单色LED全亮，双色LED灯亮两红，数码管高8位和低8位数值不同。&lt;/p>
+&lt;p>最后FPGA验证通过的效果如下图:
+&lt;img src="https://loongson-neuq.pages.dev/p/%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95/assets/right_fpga_result.png"
+width="946"
+height="753"
+srcset="https://loongson-neuq.pages.dev/p/%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95/assets/right_fpga_result_hu0dd7af1b6647ce7e7124b01ff91881eb_1489086_480x0_resize_box_3.png 480w, https://loongson-neuq.pages.dev/p/%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95/assets/right_fpga_result_hu0dd7af1b6647ce7e7124b01ff91881eb_1489086_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="fpgaPass"
+class="gallery-image"
+data-flex-grow="125"
+data-flex-basis="301px"
+>
+&lt;br/>&lt;/p>
+&lt;h6 id="拨码开关的作用">拨码开关的作用
+&lt;/h6>&lt;p>1.复位后，拨码开关控制wait_1s的循环次数，也就是控制数码管累加的速度。每两个功能点之间会穿插一个wait_1s函数，wait_1s通过一段循环完成计时的功能：在上板时，wait_1s 循环次数由拨码开关控制，可设置循环次数为 （0~0xaaaa）*$2^9$ 。请在复位后，通过拨码开关选择合理的wait_1s延时。
+&lt;br/>&lt;/p>
+&lt;p>2.复位期间，拨码开关控制随机种子（只对 soc_axi_func 环境有用），也就是axi_ram访问随机延迟的初始种子。
+上板时，按下复位键，会自动采样8个拨码开关的值，传为初始随机种子，且会显示初始随机种子低16位到单色 LED 灯上。
+上板时随机种子与拨码开关对应关系如下表，需要注意的时延迟类型依据拨码开关的值分为三大类：长延迟、短延迟和无延迟类型。在上板运行时都应当覆盖到这三类延迟类型。&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th style="text-align:center">拨码开关状态&lt;/th>
+&lt;th style="text-align:center">LED显示&lt;/th>
+&lt;th style="text-align:center">初始种子&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td style="text-align:center">拨上为1&lt;/td>
+&lt;td style="text-align:center">每个拨码开关对应两个led&lt;/td>
+&lt;td style="text-align:center">长延迟:[7:0]!=8&amp;rsquo;hff, 短延迟:[7:0]=8&amp;rsquo;hff, 无延迟:[15:0]==16&amp;rsquo;h00ff&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:center">&lt;/td>
+&lt;td style="text-align:center">&lt;/td>
+&lt;td style="text-align:center">&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:center">8&amp;rsquo;h00&lt;/td>
+&lt;td style="text-align:center">16&amp;rsquo;h0000&lt;/td>
+&lt;td style="text-align:center">{7&amp;rsquo;b1010101, 16&amp;rsquo;h0000}&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:center">8&amp;rsquo;h01&lt;/td>
+&lt;td style="text-align:center">16&amp;rsquo;h0003&lt;/td>
+&lt;td style="text-align:center">{7&amp;rsquo;b1010101, 16&amp;rsquo;h0003}&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:center">8&amp;rsquo;h02&lt;/td>
+&lt;td style="text-align:center">16&amp;rsquo;h000c&lt;/td>
+&lt;td style="text-align:center">{7&amp;rsquo;b1010101, 16&amp;rsquo;h000c}&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:center">8&amp;rsquo;h03&lt;/td>
+&lt;td style="text-align:center">16&amp;rsquo;h000f&lt;/td>
+&lt;td style="text-align:center">{7&amp;rsquo;b1010101, 16&amp;rsquo;h000f}&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:center">&amp;hellip;&lt;/td>
+&lt;td style="text-align:center">&amp;hellip;&lt;/td>
+&lt;td style="text-align:center">&amp;hellip;&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:center">8&amp;rsquo;hff&lt;/td>
+&lt;td style="text-align:center">16&amp;rsquo;hffff&lt;/td>
+&lt;td style="text-align:center">{7&amp;rsquo;b1010101, 16&amp;rsquo;hffff}&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h2 id="进阶-chiplab的difftest测试平台">进阶: chiplab的difftest测试平台
+&lt;/h2>&lt;p>difftest相比于trace比对的调试平台更加强大, 它将相同的指令分别给设计核核参考核执行, 之后比对所有的通用寄存器和csr寄存器的值，如果完全相同则认为设计核执行正确。&lt;/p>
+&lt;p>在trace比对中, 有些转移指令和store指令不写寄存器, 此时如果发生错误并不会立即停止仿真，而是等到下一条写寄存器的指令才会发现错误。
+而在difftest中则不会有这个问题，一旦store指令中的物理地址和存储数据与参考核不同，也会立即暂停仿真，以此来尽早定位错误。&lt;/p>
+&lt;blockquote>
+&lt;p>具体使用可&lt;a class="link" href="https://chiplab.readthedocs.io/zh/latest/Simulation/difftest.html" target="_blank" rel="noopener"
+>参考&lt;/a>&lt;/p>
+&lt;/blockquote></description></item></channel></rss>
